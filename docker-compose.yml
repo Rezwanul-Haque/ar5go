@@ -1,0 +1,75 @@
+version: '3.7'
+
+services:
+  consul:
+    image: consul:latest
+    container_name: consul_dev
+    restart: always
+    ports:
+      - 8500:8500
+    networks:
+      - clean_networks
+
+  db:
+    container_name: clean_mysql
+    build:
+      context: .
+      dockerfile: Dockerfile.db
+    ports:
+      - 3309:3306
+    volumes:
+      - clean_db:/var/lib/mysql:rw
+    environment:
+      - MYSQL_USER=clean_user
+      - MYSQL_PASSWORD=12345678
+      - MYSQL_DATABASE=clean_db
+      - MYSQL_ROOT_PASSWORD=12345678
+    tty: true
+    networks:
+      - clean_networks
+
+  redis:
+    image: 'bitnami/redis:6.0.9'
+    container_name: redis_dev
+    restart: always
+    ports:
+      - 6390:6379
+    environment:
+      - DISABLE_COMMANDS=FLUSHDB,FLUSHALL,CONFIG
+      - REDIS_PASSWORD=password123
+    volumes:
+      - clean_cache:/bitnami/redis/data:rw
+    networks:
+      - clean_networks
+
+  clean:
+    container_name: clean
+    build:
+      context: .
+    ports:
+      - 8080:8080
+    command: serve
+    volumes:
+      - ./:/project
+    environment:
+      - CONSUL_URL=consul_dev:8500
+      - CONSUL_PATH=clean
+    tty: true
+    depends_on:
+      - consul
+      - db
+      - redis
+    networks:
+      - clean_networks
+    restart: on-failure:3
+
+networks:
+  clean_networks:
+    name: clean_networks
+    driver: bridge
+
+volumes:
+  clean_db:
+    name: db-data
+  clean_cache:
+    name: redis-persistence

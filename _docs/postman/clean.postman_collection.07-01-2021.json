@@ -1,0 +1,996 @@
+{
+	"info": {
+		"_postman_id": "3bdafbc0-d9de-42af-918e-ae9730995cee",
+		"name": "D2D",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "token",
+					"item": [
+						{
+							"name": "refresh token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (responseCode.code === 200) {",
+											"    var jsonData = JSON.parse(responseBody);",
+											"postman.setEnvironmentVariable(\"access_token\", jsonData.access_token);",
+											"postman.setEnvironmentVariable(\"refresh_token\", jsonData.refresh_token);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"refresh_token\": \"{{refresh_token}}\"\n}"
+								},
+								"url": {
+									"raw": "{{schema}}://{{url}}/v1/token/refresh",
+									"protocol": "{{schema}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"token",
+										"refresh"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "verify token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{schema}}://{{url}}/v1/token/verify",
+									"protocol": "{{schema}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"token",
+										"verify"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "login/logout",
+					"item": [
+						{
+							"name": "login admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (responseCode.code === 200) {",
+											"    var jsonData = JSON.parse(responseBody);",
+											"    postman.setEnvironmentVariable(\"access_token\", jsonData.access_token);",
+											"    postman.setEnvironmentVariable(\"refresh_token\", jsonData.refresh_token);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"email\": \"admin@vivasoftltd.com\",\n\t\"password\": \"12345678\",\n    \"admin\": true\n}"
+								},
+								"url": {
+									"raw": "{{schema}}://{{url}}/login",
+									"protocol": "{{schema}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "login sales",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (responseCode.code === 200) {",
+											"    var jsonData = JSON.parse(responseBody);",
+											"postman.setEnvironmentVariable(\"access_token\", jsonData.access_token);",
+											"postman.setEnvironmentVariable(\"refresh_token\", jsonData.refresh_token);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"email\": \"shahanbhai@vivasoftltd.com\",\n\t\"password\": \"sha!han\",\n    \"admin\": false\n}"
+								},
+								"url": {
+									"raw": "{{schema}}://{{url}}/login",
+									"protocol": "{{schema}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "logout",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": []
+								},
+								"url": {
+									"raw": "{{schema}}://{{url}}/logout",
+									"protocol": "{{schema}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"logout"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "permission",
+					"item": [
+						{
+							"name": "create",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"permission\": \"create.user\",\n\t\"description\": \"Permission to create User\"\n}"
+								},
+								"url": {
+									"raw": "{{schema}}://{{url}}/v1/permission",
+									"protocol": "{{schema}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"permission"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"permission\": \"fetch.branch.test\"\n}"
+								},
+								"url": {
+									"raw": "{{schema}}://{{url}}/v1/permission",
+									"protocol": "{{schema}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"permission"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get all",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{schema}}://{{url}}/v1/permission",
+									"protocol": "{{schema}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"permission"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{schema}}://{{url}}/v1/permission/25",
+									"protocol": "{{schema}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"permission",
+										"25"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "role",
+					"item": [
+						{
+							"name": "create",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"role\": \"testrole\",\n\t\"display_role\": \"testrole\"\n}"
+								},
+								"url": {
+									"raw": "{{schema}}://{{url}}/v1/role",
+									"protocol": "{{schema}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"role"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"role\": \"admin\",\n\t\"display_role\": \"Admin\"\n}"
+								},
+								"url": {
+									"raw": "{{schema}}://{{url}}/v1/role/1",
+									"protocol": "{{schema}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"role",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "set permissions",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"permissions\": [13, 14]\n}"
+								},
+								"url": {
+									"raw": "{{schema}}://{{url}}/v1/role/1/permissions",
+									"protocol": "{{schema}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"role",
+										"1",
+										"permissions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get permissions",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{schema}}://{{url}}/v1/role/1/permissions",
+									"protocol": "{{schema}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"role",
+										"1",
+										"permissions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get all",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{schema}}://{{url}}/v1/role",
+									"protocol": "{{schema}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"role"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{schema}}://{{url}}/v1/role/6",
+									"protocol": "{{schema}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"role",
+										"6"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "password",
+					"item": [
+						{
+							"name": "change",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"old_password\": \"shadowchef\",\n\t\"new_password\": \"shadowchef\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{schema}}://{{url}}/v1/password/change",
+									"protocol": "{{schema}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"password",
+										"change"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "forgot",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"email\": \"admin@shadowchef.co\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{schema}}://{{url}}/v1/password/forgot",
+									"protocol": "{{schema}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"password",
+										"forgot"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "verify reset",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"id\": 16,\n\t\"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFiZHVsLm11a2l0QHZpdmFjb21zb2x1dGlvbnMuY29tIn0.cLZIBTSiqq_H8TCbKchovheDosh9SZdx3jUI766oTaA\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{schema}}://{{url}}/v1/password/verifyreset",
+									"protocol": "{{schema}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"password",
+										"verifyreset"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "16",
+											"disabled": true
+										},
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFiZHVsLm11a2l0QHZpdmFjb21zb2x1dGlvbnMuY29tIn0.cLZIBTSiqq_H8TCbKchovheDosh9SZdx3jUI766oTaA",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "reset",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"id\": 17,\n\t\"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFiZHVsLm11a2l0QHZpdmFjb21zb2x1dGlvbnMuY29tIn0.idG-uCSj3aFsF-lnvXVegWC7uT_S8ngTdDxvQUtax_A\",\n\t\"password\": \"mukit027\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{schema}}://{{url}}/v1/password/reset",
+									"protocol": "{{schema}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"password",
+										"reset"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "16",
+											"disabled": true
+										},
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFiZHVsLm11a2l0QHZpdmFjb21zb2x1dGlvbnMuY29tIn0.cLZIBTSiqq_H8TCbKchovheDosh9SZdx3jUI766oTaA",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Company",
+			"item": [
+				{
+					"name": "Comany signup",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "SecretKey",
+								"value": "dHepoR82!e#",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Vivasoft\",\n    \"logo\": \"vivasoftltd.png\",\n    \"address\": \"dohs,mirpur\",\n    \"password\": \"12345678\",\n    \"business_id\": 1,\n    \"num_of_employee\": 50,\n    \"email\": \"admin@vivasoftltd.com\",\n    \"sns_link\": \"www.vivasoftltd.com\",\n    \"phone\": \"123123123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{schema}}://{{url}}/company/signup",
+							"protocol": "{{schema}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"company",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "User signup",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "AppKey",
+								"value": "65672ef5-b6f3-4c2a-8f86-7cb85734a4a0",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"first_name\": \"shahan\",\n    \"last_name\": \"khan\",\n    \"email\": \"shahanbhai@vivasoftltd.com\",\n    \"password\": \"sha!han\",\n    \"phone\": \"1234453\"\n}"
+						},
+						"url": {
+							"raw": "{{schema}}://{{url}}/user/signup",
+							"protocol": "{{schema}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"user",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Resolve User by API Key",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "AppKey",
+								"value": "075ea9e05865e64c9f1f06422b8cb379"
+							}
+						],
+						"url": {
+							"raw": "{{schema}}://{{url}}/user/resolve",
+							"protocol": "{{schema}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"user",
+								"resolve"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{schema}}://{{url}}/ping",
+					"protocol": "{{schema}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"ping"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
