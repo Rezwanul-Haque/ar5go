@@ -10,3 +10,17 @@
 
 ### Removed
 - write a log for the feature has been removed or will be removed.
+
+***
+## [Unreleased]
+- None
+
+## [1.0.0] - 28-02-2021
+### Added
+- changelog example
+
+### Changed
+- refactored project structure
+
+### Removed
+- None
