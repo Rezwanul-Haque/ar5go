@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-type CompanyPayload struct {
+type CompanyReq struct {
 	Name          string  `json:"name"`
 	Logo          string  `json:"logo"`
 	Address       string  `json:"address"`
@@ -17,7 +17,7 @@ type CompanyPayload struct {
 	Phone         string  `json:"phone"`
 }
 
-type CompanyResponse struct {
+type CompanyResp struct {
 	Name          string      `json:"name"`
 	Logo          string      `json:"logo"`
 	Address       string      `json:"address"`
@@ -29,7 +29,7 @@ type CompanyResponse struct {
 	Admin         domain.User `json:"admin"`
 }
 
-func (r *CompanyPayload) TrimRequestBody() {
+func (r *CompanyReq) TrimRequestBody() {
 	r.Email = strings.TrimSpace(r.Email)
 	r.Name = strings.TrimSpace(r.Name)
 }

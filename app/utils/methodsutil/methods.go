@@ -1,9 +1,7 @@
 package methodsutil
 
 import (
-	"clean/infrastructure/errors"
 	"encoding/json"
-	"github.com/dgrijalva/jwt-go"
 	"reflect"
 )
 
@@ -39,13 +37,4 @@ func MapToStruct(input map[string]interface{}, output interface{}) error {
 	} else {
 		return err
 	}
-}
-
-func ParseJwtToken(token, secret string) (*jwt.Token, error) {
-	return jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.ErrInvalidJwtSigningMethod
-		}
-		return []byte(secret), nil
-	})
 }

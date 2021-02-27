@@ -1,7 +1,7 @@
 package config
 
 import (
-	"clean/infrastructure/logger"
+	"clean/infra/logger"
 	"encoding/json"
 	"fmt"
 	"log"

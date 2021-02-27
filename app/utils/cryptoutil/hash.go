@@ -1,4 +1,4 @@
-package hash
+package cryptoutil
 
 import (
 	"crypto/md5"

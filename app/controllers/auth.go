@@ -3,8 +3,8 @@ package controllers
 import (
 	"clean/app/serializers"
 	"clean/app/svc"
-	"clean/infrastructure/errors"
-	"clean/infrastructure/logger"
+	"clean/infra/errors"
+	"clean/infra/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )

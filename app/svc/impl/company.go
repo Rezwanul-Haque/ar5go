@@ -6,7 +6,7 @@ import (
 	"clean/app/serializers"
 	"clean/app/svc"
 	"clean/app/utils/consts"
-	"clean/infrastructure/errors"
+	"clean/infra/errors"
 	"encoding/json"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -24,7 +24,7 @@ func NewCompanyService(crepo repository.ICompany, urepo repository.IUsers) svc.I
 	}
 }
 
-func (c *company) CreateCompanyWithAdminUser(cp serializers.CompanyPayload) (*serializers.CompanyResponse, *errors.RestErr) {
+func (c *company) CreateCompanyWithAdminUser(cp serializers.CompanyReq) (*serializers.CompanyResp, *errors.RestErr) {
 	cp.TrimRequestBody()
 
 	var companyObj domain.Company
@@ -54,7 +54,7 @@ func (c *company) CreateCompanyWithAdminUser(cp serializers.CompanyPayload) (*se
 		return nil, createErr
 	}
 
-	var resp serializers.CompanyResponse
+	var resp serializers.CompanyResp
 	jsonData, _ = json.Marshal(companyResult)
 	_ = json.Unmarshal(jsonData, &resp)
 	resp.Admin = *userResult

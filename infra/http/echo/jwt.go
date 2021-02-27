@@ -1,12 +1,12 @@
-package middlewares
+package echo
 
 import (
 	"clean/app/serializers"
-	conf "clean/infrastructure/config"
-	"clean/infrastructure/conn"
-	"clean/infrastructure/errors"
-	"clean/infrastructure/methodsutil"
-	"clean/infrastructure/logger"
+	"clean/app/utils/methodsutil"
+	conf "clean/infra/config"
+	"clean/infra/conn"
+	"clean/infra/errors"
+	"clean/infra/logger"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -313,4 +313,13 @@ func jwtFromCookie(name string) jwtExtractor {
 		}
 		return cookie.Value, nil
 	}
+}
+
+func ParseJwtToken(token, secret string) (*jwt.Token, error) {
+	return jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.ErrInvalidJwtSigningMethod
+		}
+		return []byte(secret), nil
+	})
 }

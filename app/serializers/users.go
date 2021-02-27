@@ -3,11 +3,11 @@ package serializers
 import (
 	"clean/app/domain"
 	"clean/app/utils/consts"
-	"clean/infrastructure/methodsutil"
+	"clean/app/utils/methodsutil"
 	"time"
 )
 
-type ResolveResponse struct {
+type ResolveResp struct {
 	CompanyName  string       `json:"company_name"`
 	CompanyID    uint         `json:"company_id"`
 	Subordinates domain.Users `json:"subordinates"`

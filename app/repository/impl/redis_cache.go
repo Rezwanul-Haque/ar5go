@@ -2,8 +2,8 @@ package impl
 
 import (
 	"clean/app/repository"
-	"clean/infrastructure/errors"
-	"clean/infrastructure/methodsutil"
+	"clean/app/utils/methodsutil"
+	"clean/infra/errors"
 	"encoding/json"
 	"github.com/go-redis/redis"
 	"strconv"

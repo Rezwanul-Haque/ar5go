@@ -6,14 +6,14 @@ import (
 	"clean/app/serializers"
 	"clean/app/svc"
 	"clean/app/utils/consts"
-	"clean/infrastructure/config"
-	"clean/infrastructure/errors"
-	"clean/infrastructure/methodsutil"
-	"clean/infrastructure/logger"
+	"clean/app/utils/methodsutil"
+	"clean/infra/config"
+	"clean/infra/errors"
+	"clean/infra/http/echo"
+	"clean/infra/logger"
 	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/go-redis/redis"
 	"golang.org/x/crypto/bcrypt"
 	"strconv"
 )
@@ -211,7 +211,7 @@ func (as *auth) parseTokenClaim(token, tokenType string) (jwt.MapClaims, error) 
 		secret = config.Jwt().RefreshTokenSecret
 	}
 
-	parsedToken, err := methodsutil.ParseJwtToken(token, secret)
+	parsedToken, err := echo.ParseJwtToken(token, secret)
 	if err != nil {
 		logger.Error(err.Error(), err)
 		return nil, errors.ErrParseJwt
@@ -268,7 +268,7 @@ func (as *auth) userBelongsToTokenUuid(userID int, uuid, uuidType string) bool {
 	redisUserId, err := as.rrepo.GetInt(redisKey)
 	if err != nil {
 		switch err {
-		case redis.Nil:
+		case errors.NewError("redis: nil"):
 			logger.Error(redisKey, errors.NewError(" not found in redis"))
 		default:
 			logger.Error(err.Error(), err)

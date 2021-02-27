@@ -4,7 +4,7 @@ import (
 	"clean/app/controllers"
 	repoImpl "clean/app/repository/impl"
 	svcImpl "clean/app/svc/impl"
-	"clean/infrastructure/conn"
+	"clean/infra/conn"
 	"github.com/labstack/echo/v4"
 )
 
@@ -25,4 +25,5 @@ func Init(g *echo.Group) {
 	controllers.NewAuthController(g, aSvc, uSvc)
 	controllers.NewCompanyController(g, cSvc)
 	controllers.NewUsersController(g, cSvc, uSvc)
+	controllers.NewPingController(g)
 }

@@ -2,7 +2,7 @@ package svc
 
 import (
 	"clean/app/serializers"
-	"clean/infrastructure/errors"
+	"clean/infra/errors"
 )
 
 type IHistory interface {

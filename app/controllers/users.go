@@ -5,8 +5,8 @@ import (
 	"clean/app/serializers"
 	"clean/app/svc"
 	"clean/app/utils/consts"
-	"clean/infrastructure/errors"
-	"clean/infrastructure/methodsutil"
+	"clean/app/utils/methodsutil"
+	"clean/infra/errors"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
@@ -82,7 +82,7 @@ func (ctr *users) GetAll(c echo.Context) error {
 		return c.JSON(keyErr.Status, keyErr)
 	}
 
-	var result serializers.ResolveResponse
+	var result serializers.ResolveResp
 
 	company, getErr := ctr.cSvc.GetCompany(foundUser.CompanyID)
 	if getErr != nil {

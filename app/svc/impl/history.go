@@ -5,7 +5,7 @@ import (
 	"clean/app/repository"
 	"clean/app/serializers"
 	"clean/app/svc"
-	"clean/infrastructure/errors"
+	"clean/infra/errors"
 	"encoding/json"
 )
 

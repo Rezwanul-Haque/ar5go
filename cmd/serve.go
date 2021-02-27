@@ -2,9 +2,9 @@ package cmd
 
 import (
 	container "clean/app"
-	"clean/infrastructure/config"
-	"clean/infrastructure/logger"
-	"clean/infrastructure/middlewares"
+	"clean/infra/config"
+	"clean/infra/http/echo/middlewares"
+	"clean/infra/logger"
 	"context"
 
 	"github.com/labstack/echo/v4"

@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"clean/infrastructure/config"
-	"clean/infrastructure/conn"
-	"clean/infrastructure/logger"
+	"clean/infra/config"
+	"clean/infra/conn"
+	"clean/infra/logger"
 	"fmt"
 	"os"
 

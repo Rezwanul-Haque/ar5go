@@ -3,8 +3,8 @@ package impl
 import (
 	"clean/app/domain"
 	"clean/app/repository"
-	"clean/infrastructure/errors"
-	"clean/infrastructure/logger"
+	"clean/infra/errors"
+	"clean/infra/logger"
 	"gorm.io/gorm"
 	"time"
 )

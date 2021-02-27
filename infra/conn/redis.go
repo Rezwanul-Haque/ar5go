@@ -1,8 +1,8 @@
 package conn
 
 import (
-	"clean/infrastructure/config"
-	"clean/infrastructure/logger"
+	"clean/infra/config"
+	"clean/infra/logger"
 	"github.com/go-redis/redis"
 )
 

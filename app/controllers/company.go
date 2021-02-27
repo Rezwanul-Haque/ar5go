@@ -3,7 +3,7 @@ package controllers
 import (
 	"clean/app/serializers"
 	"clean/app/svc"
-	"clean/infrastructure/errors"
+	"clean/infra/errors"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -22,7 +22,7 @@ func NewCompanyController(g *echo.Group, cSvc svc.ICompany) {
 }
 
 func (ctr *company) CreateWithAdminUser(c echo.Context) error {
-	var cp serializers.CompanyPayload
+	var cp serializers.CompanyReq
 
 	if err := c.Bind(&cp); err != nil {
 		restErr := errors.NewBadRequestError("invalid json body")

@@ -2,7 +2,7 @@ package repository
 
 import (
 	"clean/app/domain"
-	"clean/infrastructure/errors"
+	"clean/infra/errors"
 )
 
 type IUsers interface {

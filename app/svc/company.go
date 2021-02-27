@@ -3,10 +3,10 @@ package svc
 import (
 	"clean/app/domain"
 	"clean/app/serializers"
-	"clean/infrastructure/errors"
+	"clean/infra/errors"
 )
 
 type ICompany interface {
-	CreateCompanyWithAdminUser(serializers.CompanyPayload) (*serializers.CompanyResponse, *errors.RestErr)
+	CreateCompanyWithAdminUser(serializers.CompanyReq) (*serializers.CompanyResp, *errors.RestErr)
 	GetCompany(companyID uint) (*domain.Company, *errors.RestErr)
 }

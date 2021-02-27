@@ -4,7 +4,7 @@ import (
 	"clean/app/domain"
 	"clean/app/repository"
 	"clean/app/svc"
-	"clean/infrastructure/errors"
+	"clean/infra/errors"
 )
 
 type users struct {

@@ -2,8 +2,8 @@ package conn
 
 import (
 	"clean/app/domain"
-	"clean/infrastructure/config"
-	"clean/infrastructure/logger"
+	"clean/infra/config"
+	"clean/infra/logger"
 	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
