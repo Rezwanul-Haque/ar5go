@@ -2,6 +2,8 @@
 
 ## Local
 ```terminal
+go mod vendor
+
 go run main.go serve
 ```
 
