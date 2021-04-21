@@ -6,7 +6,7 @@
   "db": {
     "host": "clean_mysql",
     "port": "3306",
-    "user": "clean_user",
+    "user": "root",
     "pass": "12345678",
     "schema": "clean_db",
     "maxIdleConn": 1,
