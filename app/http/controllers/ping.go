@@ -14,7 +14,7 @@ func NewPingController(grp interface{}) {
 
 	g := grp.(*echo.Group)
 
-	g.GET("/v1/ping", pc.Ping)
+	g.GET("/v1/h34l7h", pc.Ping)
 }
 
 func (clr *ping) Ping(c echo.Context) error {
