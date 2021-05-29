@@ -5,8 +5,9 @@ import (
 	"clean/app/svc"
 	"clean/infra/errors"
 	"clean/infra/logger"
-	"github.com/labstack/echo/v4"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
 type auth struct {
@@ -15,16 +16,18 @@ type auth struct {
 }
 
 // NewAuthController will initialize the controllers
-func NewAuthController(g *echo.Group, authSvc svc.IAuth, userSvc svc.IUsers) {
+func NewAuthController(grp interface{}, authSvc svc.IAuth, userSvc svc.IUsers) {
 	ac := &auth{
 		authSvc: authSvc,
 		userSvc: userSvc,
 	}
 
-	g.POST("/login", ac.Login)
-	g.POST("/logout", ac.Logout)
-	g.POST("/token/refresh", ac.RefreshToken)
-	g.GET("/token/verify", ac.VerifyToken)
+	g := grp.(*echo.Group)
+
+	g.POST("/v1/login", ac.Login)
+	g.POST("/v1/logout", ac.Logout)
+	g.POST("/v1/token/refresh", ac.RefreshToken)
+	g.GET("/v1/token/verify", ac.VerifyToken)
 }
 
 func (ctr *auth) Login(c echo.Context) error {
@@ -50,7 +53,7 @@ func (ctr *auth) Login(c echo.Context) error {
 			serverErr := errors.NewInternalServerError("failed to store jwt token uuid")
 			return c.JSON(serverErr.Status, serverErr)
 		default:
-			serverErr := errors.NewInternalServerError("something went wrong")
+			serverErr := errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 			return c.JSON(serverErr.Status, serverErr)
 		}
 	}
@@ -99,7 +102,7 @@ func (ctr *auth) RefreshToken(c echo.Context) error {
 			serverErr := errors.NewInternalServerError("failed to create new jwt token")
 			return c.JSON(serverErr.Status, serverErr)
 		default:
-			serverErr := errors.NewInternalServerError("something went wrong")
+			serverErr := errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 			return c.JSON(serverErr.Status, serverErr)
 		}
 	}
@@ -124,7 +127,7 @@ func (ctr *auth) VerifyToken(c echo.Context) error {
 			unAuthErr := errors.NewUnauthorizedError("invalid access_token")
 			return c.JSON(unAuthErr.Status, unAuthErr)
 		default:
-			serverErr := errors.NewInternalServerError("something went wrong")
+			serverErr := errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 			return c.JSON(serverErr.Status, serverErr)
 		}
 	}

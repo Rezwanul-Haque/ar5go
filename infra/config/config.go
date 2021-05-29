@@ -12,8 +12,11 @@ import (
 )
 
 type AppConfig struct {
-	Name string
-	Port string
+	Name  string
+	Port  string
+	Page  int64
+	Limit int64
+	Sort  string
 }
 
 type DbConfig struct {
@@ -108,8 +111,11 @@ func LoadConfig() {
 
 func setDefaultConfig() {
 	config.App = &AppConfig{
-		Name: "CLEAN",
-		Port: "8080",
+		Name:  "CLEAN",
+		Port:  "8080",
+		Page:  1,
+		Limit: 10,
+		Sort:  "created_at desc",
 	}
 
 	config.Db = &DbConfig{

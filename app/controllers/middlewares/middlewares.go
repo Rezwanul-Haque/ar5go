@@ -2,7 +2,6 @@ package middlewares
 
 import (
 	"clean/infra/config"
-	echo2 "clean/infra/http/echo"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -26,10 +25,11 @@ func Attach(e *echo.Echo) error {
 		Level: 5,
 	}))
 
-	e.Use(echo2.JWTWithConfig(echo2.JWTConfig{
+	e.Use(JWTWithConfig(JWTConfig{
 		Skipper: func(context echo.Context) bool {
 			switch context.Request().URL.Path {
 			case "/api/metrics",
+				"/api/v1/ping",
 				"/api/v1/login",
 				"/api/v1/token/verify",
 				"/api/v1/token/refresh",

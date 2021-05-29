@@ -1,8 +1,11 @@
 package methodsutil
 
 import (
+	"clean/infra/errors"
 	"encoding/json"
 	"reflect"
+
+	"github.com/dgrijalva/jwt-go"
 )
 
 func IsInvalid(value string) bool {
@@ -37,4 +40,21 @@ func MapToStruct(input map[string]interface{}, output interface{}) error {
 	} else {
 		return err
 	}
+}
+
+func StructToStruct(input interface{}, output interface{}) error {
+	if b, err := json.Marshal(input); err == nil {
+		return json.Unmarshal(b, &output)
+	} else {
+		return err
+	}
+}
+
+func ParseJwtToken(token, secret string) (*jwt.Token, error) {
+	return jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.ErrInvalidJwtSigningMethod
+		}
+		return []byte(secret), nil
+	})
 }

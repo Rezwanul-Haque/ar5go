@@ -23,10 +23,13 @@ var (
 	ErrInvalidJwtSigningMethod   = NewError("invalid signing method while parsing jwt")
 	ErrParseJwt                  = NewError("failed to parse JWT token")
 	ErrDeleteOldTokenUuid        = NewError("failed to delete old token uuids")
-	ErrRecordNotFound            = NewError("record not found")
 	ErrSendingEmail              = NewError("failed to send email")
 	ErrNotAdmin                  = NewError("not admin")
+	ErrNotSuperAdmin             = NewError("not super admin")
 	ErrEmptyRedisKeyValue        = NewError("empty redis key or value")
+	ErrSomethingWentWrong        = "something went wrong"
+	ErrRecordNotFound            = "record not found"
+	ErrCheckParamBodyHeader      = "check header, params, body"
 )
 
 type RestErr struct {

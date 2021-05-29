@@ -5,6 +5,7 @@ import (
 	"clean/app/repository"
 	"clean/infra/errors"
 	"clean/infra/logger"
+
 	"gorm.io/gorm"
 )
 
@@ -24,7 +25,7 @@ func (db *company) Save(com *domain.Company) (*domain.Company, *errors.RestErr) 
 
 	if res.Error != nil {
 		logger.Error("error occurred when create company", res.Error)
-		return nil, errors.NewInternalServerError("db error")
+		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
 	return com, nil

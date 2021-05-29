@@ -4,8 +4,9 @@ import (
 	"clean/app/serializers"
 	"clean/app/svc"
 	"clean/infra/errors"
-	"github.com/labstack/echo/v4"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
 type company struct {
@@ -13,12 +14,14 @@ type company struct {
 }
 
 // NewCompanyController will initialize the controllers
-func NewCompanyController(g *echo.Group, cSvc svc.ICompany) {
+func NewCompanyController(grp interface{}, cSvc svc.ICompany) {
 	cc := &company{
 		cSvc: cSvc,
 	}
 
-	g.POST("/company/signup", cc.CreateWithAdminUser)
+	g := grp.(*echo.Group)
+
+	g.POST("/v1/company/signup", cc.CreateWithAdminUser)
 }
 
 func (ctr *company) CreateWithAdminUser(c echo.Context) error {

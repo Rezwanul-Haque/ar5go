@@ -1,19 +1,22 @@
 package controllers
 
 import (
-	"github.com/labstack/echo/v4"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
-type ping struct {}
+type ping struct{}
 
 // NewPingController will initialize the controllers
-func NewPingController(g *echo.Group) {
+func NewPingController(grp interface{}) {
 	pc := &ping{}
 
-	g.GET("/ping", pc.Ping)
+	g := grp.(*echo.Group)
+
+	g.GET("/v1/ping", pc.Ping)
 }
 
 func (clr *ping) Ping(c echo.Context) error {
-	return c.String(http.StatusOK, "Pong")
+	return c.JSON(http.StatusOK, map[string]interface{}{"message": "pong"})
 }

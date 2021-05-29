@@ -2,28 +2,38 @@ package container
 
 import (
 	"clean/app/controllers"
+	"clean/app/controllers/middlewares"
 	repoImpl "clean/app/repository/impl"
 	svcImpl "clean/app/svc/impl"
 	"clean/infra/conn"
-	"github.com/labstack/echo/v4"
 )
 
-func Init(g *echo.Group) {
+func Init(g interface{}) {
 	db := conn.Db()
 	redis := conn.Redis()
+	acl := middlewares.ACL
 
 	// register all repos impl, services impl, controllers
-	cRepo := repoImpl.NewMySqlCompanyRepository(db)
-	uRepo := repoImpl.NewMySqlUsersRepository(db)
-	rRepo := repoImpl.NewRedisRepository(redis)
+	companyRepo := repoImpl.NewMySqlCompanyRepository(db)
+	userRepo := repoImpl.NewMySqlUsersRepository(db)
+	locationRepo := repoImpl.NewMySqlLocationRepository(db)
+	roleRepo := repoImpl.NewMySqlRolesRepository(db)
+	permissionRepo := repoImpl.NewMySqlPermissionsRepository(db)
 
-	cSvc := svcImpl.NewCompanyService(cRepo, uRepo)
-	uSvc := svcImpl.NewUsersService(uRepo)
-	tSvc := svcImpl.NewTokenService(uRepo, rRepo)
-	aSvc := svcImpl.NewAuthService(uRepo, rRepo, tSvc)
+	cacheSvc := svcImpl.NewRedisService(redis)
+	companySvc := svcImpl.NewCompanyService(companyRepo, userRepo)
+	userSvc := svcImpl.NewUsersService(userRepo, cacheSvc)
+	tokenSvc := svcImpl.NewTokenService(userRepo, cacheSvc)
+	authSvc := svcImpl.NewAuthService(userRepo, cacheSvc, tokenSvc)
+	locationSvc := svcImpl.NewLocationService(locationRepo)
+	roleSvc := svcImpl.NewRolesService(roleRepo)
+	permissionSvc := svcImpl.NewPermissionsService(permissionRepo)
 
-	controllers.NewAuthController(g, aSvc, uSvc)
-	controllers.NewCompanyController(g, cSvc)
-	controllers.NewUsersController(g, cSvc, uSvc)
 	controllers.NewPingController(g)
+	controllers.NewAuthController(g, authSvc, userSvc)
+	controllers.NewCompanyController(g, companySvc)
+	controllers.NewUsersController(g, acl, companySvc, userSvc, locationSvc)
+	controllers.NewLocationController(g, locationSvc)
+	controllers.NewRolesController(g, acl, roleSvc)
+	controllers.NewPermissionsController(g, acl, permissionSvc)
 }

@@ -6,9 +6,10 @@ import (
 )
 
 type LoginReq struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Admin    bool   `json:"admin"`
+	Email      string `json:"email"`
+	Password   string `json:"password"`
+	Admin      bool   `json:"admin"`
+	SuperAdmin bool   `json:"super_admin"`
 }
 
 type TokenRefreshReq struct {
@@ -16,13 +17,14 @@ type TokenRefreshReq struct {
 }
 
 type LoginResp struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-	User         *UserResp `json:"user"`
+	AccessToken  string              `json:"access_token"`
+	RefreshToken string              `json:"refresh_token"`
+	User         *UserWithParamsResp `json:"user"`
 }
 
 type JwtToken struct {
 	UserID        uint   `json:"uid"`
+	CompanyID     uint   `json:"cid"`
 	AccessToken   string `json:"act"`
 	RefreshToken  string `json:"rft"`
 	AccessUuid    string `json:"aid"`
@@ -39,7 +41,7 @@ type ChangePasswordReq struct {
 func (c ChangePasswordReq) Validate() error {
 	return v.ValidateStruct(&c,
 		v.Field(&c.OldPassword, v.Required),
-		v.Field(&c.NewPassword, v.Required, v.Length(8, 0)),
+		v.Field(&c.NewPassword, v.Required, v.Length(7, 0)),
 	)
 }
 

@@ -1,4 +1,4 @@
-package echo
+package middlewares
 
 import (
 	"clean/app/serializers"
@@ -233,22 +233,25 @@ func JWTWithConfig(config JWTConfig) echo.MiddlewareFunc {
 			var redisUserId int
 			var redisUser string
 			var redisUserDetail string
-			user := &serializers.UserResp{}
+			user := &serializers.UserWithParamsResp{}
 
 			// Check if access_uuid corresponds to user_id in Redis
 			if !methodsutil.IsEmpty(conf.Redis().AccessUuidPrefix + tokenDetails.AccessUuid) {
-				redisUser, err = conn.Redis().Get(conf.Redis().AccessUuidPrefix + tokenDetails.AccessUuid).Result()
+				redisUser, _ = conn.Redis().Get(conf.Redis().AccessUuidPrefix + tokenDetails.AccessUuid).Result()
 				redisUserId, err = strconv.Atoi(redisUser)
-				if err != nil || redisUserId != int(tokenDetails.UserID) {
-					logger.Error(fmt.Sprintf("redis user: %v | token user: %v | error: ", redisUserId, tokenDetails.UserID) , err)
+				cuID, _ := strconv.Atoi((strconv.Itoa(int(tokenDetails.UserID)) + strconv.Itoa(int(tokenDetails.CompanyID))))
+				if err != nil || redisUserId != cuID {
+					logger.Error(fmt.Sprintf("redis user: %v | token user: %v | error: ", redisUserId, tokenDetails.UserID), err)
 					return ErrJWTMissing
 				}
 			} else {
 				return errors.ErrEmptyRedisKeyValue
 			}
 
-			if !methodsutil.IsEmpty(conf.Redis().UserPrefix+strconv.Itoa(int(tokenDetails.UserID))) {
-				redisUserDetail, err = conn.Redis().Get(conf.Redis().UserPrefix+strconv.Itoa(int(tokenDetails.UserID))).Result()
+			if !methodsutil.IsEmpty(conf.Redis().UserPrefix + strconv.Itoa(int(tokenDetails.UserID)) + strconv.Itoa(int(tokenDetails.CompanyID))) {
+				key := conf.Redis().UserPrefix + strconv.Itoa(int(tokenDetails.UserID)) + strconv.Itoa(int(tokenDetails.CompanyID))
+				redisUserDetail, _ = conn.Redis().Get(key).Result()
+
 				if err = json.Unmarshal([]byte(redisUserDetail), &user); err != nil {
 					logger.Error(err.Error(), err)
 					return ErrJWTMissing
@@ -257,12 +260,14 @@ func JWTWithConfig(config JWTConfig) echo.MiddlewareFunc {
 				return errors.ErrEmptyRedisKeyValue
 			}
 
-
 			// Store user information from token into context.
 			c.Set(config.ContextKey, &serializers.LoggedInUser{
 				ID:          user.ID,
+				CompanyID:   user.CompanyID,
 				AccessUuid:  tokenDetails.AccessUuid,
 				RefreshUuid: tokenDetails.RefreshUuid,
+				Role:        user.RoleName,
+				Permissions: user.Permissions,
 			})
 
 			return next(c)
@@ -313,13 +318,4 @@ func jwtFromCookie(name string) jwtExtractor {
 		}
 		return cookie.Value, nil
 	}
-}
-
-func ParseJwtToken(token, secret string) (*jwt.Token, error) {
-	return jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.ErrInvalidJwtSigningMethod
-		}
-		return []byte(secret), nil
-	})
 }

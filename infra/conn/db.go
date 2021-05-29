@@ -5,10 +5,11 @@ import (
 	"clean/infra/config"
 	"clean/infra/logger"
 	"fmt"
+	"time"
+
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	gormlogger "gorm.io/gorm/logger"
-	"time"
 )
 
 var db *gorm.DB
@@ -55,6 +56,9 @@ func ConnectDb() {
 		&domain.Company{},
 		&domain.User{},
 		&domain.LocationHistory{},
+		&domain.Role{},
+		&domain.Permission{},
+		&domain.RolePermission{},
 	)
 
 	logger.Info("mysql connection successful...")

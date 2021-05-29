@@ -2,16 +2,17 @@ package cmd
 
 import (
 	container "clean/app"
+	"clean/app/controllers/middlewares"
 	"clean/infra/config"
-	"clean/infra/http/echo/middlewares"
 	"clean/infra/logger"
 	"context"
 
-	"github.com/labstack/echo/v4"
-	"github.com/spf13/cobra"
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/labstack/echo/v4"
+	"github.com/spf13/cobra"
 )
 
 var serveCmd = &cobra.Command{
@@ -28,7 +29,7 @@ func serve(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	g := e.Group("api/v1")
+	g := e.Group("api")
 
 	container.Init(g)
 

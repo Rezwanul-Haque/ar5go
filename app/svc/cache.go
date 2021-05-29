@@ -1,4 +1,4 @@
-package repository
+package svc
 
 type ICache interface {
 	Set(key string, value interface{}, ttl int) error
