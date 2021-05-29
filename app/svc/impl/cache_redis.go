@@ -1,4 +1,4 @@
-package svc
+package impl
 
 import (
 	"clean/app/svc"

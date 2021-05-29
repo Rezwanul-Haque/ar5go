@@ -14,6 +14,7 @@ func Init(g interface{}) {
 	acl := middlewares.ACL
 
 	// register all repos impl, services impl, controllers
+	sysRepo := repoImpl.NewSystemRepository(db, redis)
 	companyRepo := repoImpl.NewMySqlCompanyRepository(db)
 	userRepo := repoImpl.NewMySqlUsersRepository(db)
 	locationRepo := repoImpl.NewMySqlLocationRepository(db)
@@ -21,6 +22,7 @@ func Init(g interface{}) {
 	permissionRepo := repoImpl.NewMySqlPermissionsRepository(db)
 
 	cacheSvc := svcImpl.NewRedisService(redis)
+	sysSvc := svcImpl.NewSystemService(sysRepo)
 	companySvc := svcImpl.NewCompanyService(companyRepo, userRepo)
 	userSvc := svcImpl.NewUsersService(userRepo, cacheSvc)
 	tokenSvc := svcImpl.NewTokenService(userRepo, cacheSvc)
@@ -29,7 +31,7 @@ func Init(g interface{}) {
 	roleSvc := svcImpl.NewRolesService(roleRepo)
 	permissionSvc := svcImpl.NewPermissionsService(permissionRepo)
 
-	controllers.NewPingController(g)
+	controllers.NewSystemController(g, sysSvc)
 	controllers.NewAuthController(g, authSvc, userSvc)
 	controllers.NewCompanyController(g, companySvc)
 	controllers.NewUsersController(g, acl, companySvc, userSvc, locationSvc)

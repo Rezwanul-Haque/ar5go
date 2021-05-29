@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"clean/infra/config"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -29,7 +30,8 @@ func Attach(e *echo.Echo) error {
 		Skipper: func(context echo.Context) bool {
 			switch context.Request().URL.Path {
 			case "/api/metrics",
-				"/api/v1/ping",
+				"/api/v1",
+				"/api/v1/h34l7h",
 				"/api/v1/login",
 				"/api/v1/token/verify",
 				"/api/v1/token/refresh",
