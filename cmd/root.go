@@ -19,6 +19,7 @@ var (
 
 func init() {
 	RootCmd.AddCommand(serveCmd)
+	RootCmd.AddCommand(seedCmd)
 }
 
 // Execute executes the root command

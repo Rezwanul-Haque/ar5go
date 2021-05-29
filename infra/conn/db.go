@@ -4,7 +4,10 @@ import (
 	"clean/app/domain"
 	"clean/infra/config"
 	"clean/infra/logger"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"os"
 	"time"
 
 	"gorm.io/driver/mysql"
@@ -66,4 +69,106 @@ func ConnectDb() {
 
 func Db() *gorm.DB {
 	return db
+}
+
+type Seed struct {
+	Name string
+	Run  func(db *gorm.DB, truncate bool) error
+}
+
+func SeedAll() []Seed {
+	return []Seed{
+		{
+			Name: "CreateRoles",
+			Run: func(db *gorm.DB, truncate bool) error {
+				if err := seedRoles(db, "/infra/seed/roles.json", truncate); err != nil {
+					return err
+				}
+				return nil
+			},
+		},
+		{
+			Name: "CreatePermissions",
+			Run: func(db *gorm.DB, truncate bool) error {
+				if err := seedPermissions(db, "/infra/seed/permissions.json", truncate); err != nil {
+					return err
+				}
+				return nil
+			},
+		},
+		{
+			Name: "CreateRolePermissions",
+			Run: func(db *gorm.DB, truncate bool) error {
+				if err := seedRolePermissions(db, "/infra/seed/role_permissions.json", truncate); err != nil {
+					return err
+				}
+				return nil
+			},
+		},
+	}
+}
+
+func seedRoles(db *gorm.DB, jsonfilPath string, truncate bool) error {
+	file, _ := readSeedFile(jsonfilPath)
+	roles := []domain.Role{}
+
+	_ = json.Unmarshal([]byte(file), &roles)
+
+	if truncate {
+		db.Exec("TRUNCATE TABLE clean_db.role_permissions;")
+		db.Exec("TRUNCATE TABLE clean_db.permissions;")
+		db.Exec("TRUNCATE TABLE clean_db.roles;")
+	}
+
+	var count int64
+
+	db.Model(&domain.Role{}).Count(&count)
+	if count == 0 {
+		db.Create(&roles)
+	}
+
+	return nil
+}
+
+func seedPermissions(db *gorm.DB, jsonfilPath string, truncate bool) error {
+	file, _ := readSeedFile(jsonfilPath)
+	perms := []domain.Permission{}
+
+	_ = json.Unmarshal([]byte(file), &perms)
+
+	var count int64
+
+	db.Model(&domain.Permission{}).Count(&count)
+	if count == 0 {
+		db.Create(&perms)
+	}
+
+	return nil
+}
+
+func seedRolePermissions(db *gorm.DB, jsonfilPath string, truncate bool) error {
+	file, _ := readSeedFile(jsonfilPath)
+	rp := []domain.RolePermission{}
+
+	_ = json.Unmarshal([]byte(file), &rp)
+
+	var count int64
+
+	db.Model(&domain.RolePermission{}).Count(&count)
+	if count == 0 {
+		db.Create(&rp)
+	}
+
+	return nil
+}
+
+func readSeedFile(jsonfilPath string) ([]byte, error) {
+	BaseDir, _ := os.Getwd()
+	seedFile := BaseDir + jsonfilPath
+	if BaseDir == "/" {
+		seedFile = jsonfilPath
+	}
+	fmt.Println("seed folder: ", seedFile)
+
+	return ioutil.ReadFile(seedFile)
 }

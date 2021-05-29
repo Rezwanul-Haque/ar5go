@@ -33,9 +33,9 @@ func Init(g interface{}) {
 
 	controllers.NewSystemController(g, sysSvc)
 	controllers.NewAuthController(g, authSvc, userSvc)
-	controllers.NewCompanyController(g, companySvc)
+	controllers.NewCompanyController(g, acl, companySvc)
 	controllers.NewUsersController(g, acl, companySvc, userSvc, locationSvc)
-	controllers.NewLocationController(g, locationSvc)
+	controllers.NewLocationController(g, acl, locationSvc)
 	controllers.NewRolesController(g, acl, roleSvc)
 	controllers.NewPermissionsController(g, acl, permissionSvc)
 }

@@ -1,0 +1,130 @@
+[
+    {
+        "name": "create.user",
+        "description": "create user"
+    },
+    {
+        "name": "update.user",
+        "description": "update user"
+    },
+    {
+        "name": "fetch.user",
+        "description": "fetch user"
+    },
+    {
+        "name": "fetch.user.all",
+        "description": "fetch all user"
+    },
+    {
+        "name": "crud.role",
+        "description": "role crud"
+    },
+    {
+        "name": "fetch.role.all",
+        "description": "fetch all role"
+    },
+    {
+        "name": "crud.permission",
+        "description": "permission crud"
+    },
+    {
+        "name": "create.client",
+        "description": "create client"
+    },
+    {
+        "name": "create.location",
+        "description": "create location"
+    },
+    {
+        "name": "create.product",
+        "description": "create product"
+    },
+    {
+        "name": "create.interest",
+        "description": "create interest"
+    },
+    {
+        "name": "update.client",
+        "description": "update client"
+    },
+    {
+        "name": "update.company",
+        "description": "update company"
+    },
+    {
+        "name": "update.location",
+        "description": "update location"
+    },
+    {
+        "name": "update.product",
+        "description": "update product"
+    },
+    {
+        "name": "update.interest",
+        "description": "update interest"
+    },
+    {
+        "name": "delete.user",
+        "description": "delete user"
+    },
+    {
+        "name": "delete.client",
+        "description": "delete client"
+    },
+    {
+        "name": "delete.location",
+        "description": "delete location"
+    },
+    {
+        "name": "delete.product",
+        "description": "delete product"
+    },
+    {
+        "name": "delete.interest",
+        "description": "delete interest"
+    },
+    {
+        "name": "fetch.client",
+        "description": "fetch client"
+    },
+    {
+        "name": "fetch.location",
+        "description": "fetch location"
+    },
+    {
+        "name": "fetch.user.location",
+        "description": "fetch user specific location"
+    },
+    {
+        "name": "fetch.product",
+        "description": "fetch product"
+    },
+    {
+        "name": "fetch.interest",
+        "description": "fetch interest"
+    },
+    {
+        "name": "fetch.images",
+        "description": "fetch images"
+    },
+    {
+        "name": "fetch.client.all",
+        "description": "fetch all client"
+    },
+    {
+        "name": "fetch.location.all",
+        "description": "fetch all locations"
+    },
+    {
+        "name": "fetch.product.all",
+        "description": "fetch all product"
+    },
+    {
+        "name": "fetch.interest.all",
+        "description": "fetch all interest"
+    },
+    {
+        "name": "upload.images",
+        "description": "upload image"
+    }
+]

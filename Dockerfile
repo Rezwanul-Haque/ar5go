@@ -1,4 +1,4 @@
-# Default to Go 1.14
+# Default to Go 1.15.6
 ARG GO_VERSION=1.15.6
 
 # Start from golang v1.15,6 base image
@@ -34,6 +34,8 @@ COPY --from=builder /user/group /user/passwd /etc/
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 # Import the compiled executable from the first stage.
 COPY --from=builder /app /app
+# importing seeder files from the first stage
+COPY --from=builder /src/infra/seed/* /infra/seed/
 
 # Perform any further action as an unprivileged user.
 USER nobody:nobody

@@ -48,7 +48,7 @@ services:
       context: .
     ports:
       - 8080:8080
-    command: serve
+    command: serve  # make `serve` into `seed` or `seed --truncate=true` if anyone want to run the seeder
     volumes:
       - ./:/project
     environment:

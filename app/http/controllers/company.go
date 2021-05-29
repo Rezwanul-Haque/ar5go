@@ -14,7 +14,7 @@ type company struct {
 }
 
 // NewCompanyController will initialize the controllers
-func NewCompanyController(grp interface{}, cSvc svc.ICompany) {
+func NewCompanyController(grp interface{}, ACL func(string) echo.MiddlewareFunc, cSvc svc.ICompany) {
 	cc := &company{
 		cSvc: cSvc,
 	}

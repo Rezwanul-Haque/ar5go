@@ -3,6 +3,7 @@ package controllers
 import (
 	"clean/app/serializers"
 	"clean/app/svc"
+	"clean/app/utils/consts"
 	"clean/infra/errors"
 	"net/http"
 
@@ -14,14 +15,14 @@ type location struct {
 }
 
 // NewLocationController will initialize the controllers
-func NewLocationController(grp interface{}, hSvc svc.ILocation) {
+func NewLocationController(grp interface{}, ACL func(string) echo.MiddlewareFunc, hSvc svc.ILocation) {
 	hc := &location{
 		hSvc: hSvc,
 	}
 
 	g := grp.(*echo.Group)
 
-	g.POST("/v1/location/history", hc.Create)
+	g.POST("/v1/location/history", hc.Create, ACL(consts.PermissionLocationCreate))
 }
 
 func (ctr *location) Create(c echo.Context) error {

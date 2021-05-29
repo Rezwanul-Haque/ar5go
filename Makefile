@@ -13,7 +13,6 @@ help: ## Display this help screen
 ########################
 ### DEVELOP and TEST ###
 ########################
-
 development:
 	# booting up dependency containers
 	@docker-compose up -d consul db redis
