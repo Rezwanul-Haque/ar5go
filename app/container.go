@@ -1,8 +1,8 @@
 package container
 
 import (
-	"clean/app/controllers"
-	"clean/app/controllers/middlewares"
+	"clean/app/http/controllers"
+	"clean/app/http/middlewares"
 	repoImpl "clean/app/repository/impl"
 	svcImpl "clean/app/svc/impl"
 	"clean/infra/conn"
