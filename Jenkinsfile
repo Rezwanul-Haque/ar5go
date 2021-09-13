@@ -7,7 +7,7 @@ pipeline {
             steps {
                 echo "building stage"
                 sh """
-                    docker build -t clean_go .
+                    sudo docker build -t clean_go .
                 """
             }
         }
@@ -15,7 +15,7 @@ pipeline {
             steps {
                 echo "running stage"
                 sh """
-                    docker run --rm clean_go
+                    sudo docker run --rm clean_go
                 """
             }
         }
