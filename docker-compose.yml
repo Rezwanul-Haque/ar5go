@@ -6,7 +6,7 @@ services:
     container_name: clean_consul
     restart: always
     ports:
-      - 8590:8500
+      - 8500:8500
     networks:
       - clean_networks
 
@@ -16,7 +16,7 @@ services:
       context: .
       dockerfile: Dockerfile.db
     ports:
-      - 3311:3306
+      - 3309:3306
     volumes:
       - clean:/var/lib/mysql:rw
     environment:

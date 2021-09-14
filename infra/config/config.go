@@ -163,7 +163,7 @@ func setDefaultConfig() {
 
 	config.Mail = &MailConfig{
 		Sender:           "clean Admin <admin@clean.xyz>",
-		PasswordResetUrl: "http://localhost:8081/password/reset",
+		PasswordResetUrl: "http://localhost:3000/password/reset",
 		Subject: MailgunSubject{
 			UserCreated:    "User Created",
 			ForgotPassword: "Forgot Password",

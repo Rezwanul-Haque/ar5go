@@ -14,7 +14,7 @@
   "db": {
     "host": "clean_mysql",
     "port": "3306",
-    "user": "clean_user",
+    "user": "root",
     "pass": "12345678",
     "schema": "clean",
     "maxIdleConn": 1,
@@ -31,7 +31,7 @@
   },
   "mail": {
     "sender": "clean Admin <admin@clean.xyz>",
-    "passwordReseturl": "http://localhost:8081/password/reset",
+    "passwordReseturl": "http://localhost:3000/password/reset",
     "welcomeMessage": "We're very excited to have you on board",
     "passwordMessage": "The password is auto generated, please change immediately",
     "mailgun": {
