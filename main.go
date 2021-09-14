@@ -1,6 +1,6 @@
 package main
 
-import "clean/cmd"
+import "boilerplate/cmd"
 
 func main() {
 	cmd.Execute()

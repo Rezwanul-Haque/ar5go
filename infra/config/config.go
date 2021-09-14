@@ -1,7 +1,7 @@
 package config
 
 import (
-	"clean/infra/logger"
+	"boilerplate/infra/logger"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -12,11 +12,16 @@ import (
 )
 
 type AppConfig struct {
-	Name  string
-	Port  string
-	Page  int64
-	Limit int64
-	Sort  string
+	Name                   string
+	Port                   string
+	Page                   int64
+	Limit                  int64
+	Sort                   string
+	UserConfirmationPrefix string
+	UserCreateAuthSkip     bool
+	MockPasswordEnabled    bool
+	MockPassword           string
+	SendEmail              bool
 }
 
 type DbConfig struct {
@@ -39,23 +44,36 @@ type JwtConfig struct {
 	ContextKey         string
 }
 
-type RedisConfig struct {
-	Host              string
-	Port              string
-	Pass              string
-	Db                int
-	AccessUuidPrefix  string
-	RefreshUuidPrefix string
-	UserPrefix        string
-	TokenPrefix       string
-	Ttl               int // seconds
+type TemplateNameConfig struct {
+	UserCreate     string
+	ForgotPassword string
+}
+
+type MailgunConfig struct {
+	ApiKey       string
+	Domain       string
+	TemplateName TemplateNameConfig
+}
+
+type MailgunSubject struct {
+	UserCreated    string
+	ForgotPassword string
+	PasswordReset  string
+}
+
+type MailConfig struct {
+	Sender              string
+	PasswordResetUrl    string
+	UserConfirmationUrl string
+	Subject             MailgunSubject
+	Mailgun             MailgunConfig
 }
 
 type Config struct {
-	App   *AppConfig
-	Db    *DbConfig
-	Jwt   *JwtConfig
-	Redis *RedisConfig
+	App  *AppConfig
+	Db   *DbConfig
+	Jwt  *JwtConfig
+	Mail *MailConfig
 }
 
 var config Config
@@ -72,8 +90,8 @@ func Jwt() *JwtConfig {
 	return config.Jwt
 }
 
-func Redis() *RedisConfig {
-	return config.Redis
+func Mail() *MailConfig {
+	return config.Mail
 }
 
 func LoadConfig() {
@@ -111,11 +129,16 @@ func LoadConfig() {
 
 func setDefaultConfig() {
 	config.App = &AppConfig{
-		Name:  "CLEAN",
-		Port:  "8080",
-		Page:  1,
-		Limit: 10,
-		Sort:  "created_at desc",
+		Name:                   "boilerplate",
+		Port:                   "8080",
+		Page:                   1,
+		Limit:                  10,
+		Sort:                   "created_at desc",
+		UserConfirmationPrefix: "user-activation_",
+		UserCreateAuthSkip:     false,
+		MockPasswordEnabled:    true,
+		MockPassword:           "12345678",
+		SendEmail:              false,
 	}
 
 	config.Db = &DbConfig{
@@ -123,7 +146,7 @@ func setDefaultConfig() {
 		Port:            "3306",
 		User:            "root",
 		Pass:            "12345678",
-		Schema:          "clean_db",
+		Schema:          "boilerplate",
 		MaxIdleConn:     1,
 		MaxOpenConn:     2,
 		MaxConnLifetime: 30,
@@ -133,20 +156,26 @@ func setDefaultConfig() {
 	config.Jwt = &JwtConfig{
 		AccessTokenSecret:  "accesstokensecret",
 		RefreshTokenSecret: "refreshtokensecret",
-		AccessTokenExpiry:  300,
+		AccessTokenExpiry:  3000,
 		RefreshTokenExpiry: 10080,
 		ContextKey:         "user",
 	}
 
-	config.Redis = &RedisConfig{
-		Host:              "127.0.0.1",
-		Port:              "6379",
-		Pass:              "",
-		Db:                0,
-		AccessUuidPrefix:  "access-uuid_",
-		RefreshUuidPrefix: "refresh-uuid_",
-		UserPrefix:        "user_",
-		TokenPrefix:       "token_",
-		Ttl:               3600,
+	config.Mail = &MailConfig{
+		Sender:              "boilerplate Admin <admin@boilerplate.xyz>",
+		PasswordResetUrl:    "http://localhost:8081/password/reset",
+		Subject: MailgunSubject{
+			UserCreated:    "User Created",
+			ForgotPassword: "Forgot Password",
+			PasswordReset:  "Password Reset",
+		},
+		Mailgun: MailgunConfig{
+			ApiKey: "mail-api-key",
+			Domain: "mail.domain.xyz",
+			TemplateName: TemplateNameConfig{
+				UserCreate:     "Welcome",
+				ForgotPassword: "password_reset",
+			},
+		},
 	}
 }

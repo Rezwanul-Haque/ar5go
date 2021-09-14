@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"clean/infra/conn"
-	"clean/infra/logger"
+	"boilerplate/infra/conn"
+	"boilerplate/infra/logger"
 	"fmt"
 
 	"github.com/spf13/cobra"

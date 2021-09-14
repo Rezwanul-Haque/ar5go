@@ -1,75 +1,58 @@
-version: '3.7'
+version: "3.8"
 
 services:
   consul:
     image: consul:latest
-    container_name: consul_dev
+    container_name: boilerplate_consul
     restart: always
     ports:
-      - 8500:8500
+      - 8590:8500
     networks:
-      - clean_networks
+      - boilerplate_networks
 
   db:
-    container_name: clean_mysql
+    container_name: boilerplate_mysql
     build:
       context: .
       dockerfile: Dockerfile.db
     ports:
-      - 3309:3306
+      - 3311:3306
     volumes:
-      - clean_db:/var/lib/mysql:rw
+      - boilerplate:/var/lib/mysql:rw
     environment:
-      - MYSQL_USER=clean_user
+      - MYSQL_USER=boilerplate_user
       - MYSQL_PASSWORD=12345678
-      - MYSQL_DATABASE=clean_db
+      - MYSQL_DATABASE=boilerplate
       - MYSQL_ROOT_PASSWORD=12345678
     tty: true
     networks:
-      - clean_networks
+      - boilerplate_networks
 
-  redis:
-    image: 'bitnami/redis:6.0.9'
-    container_name: redis_dev
-    restart: always
-    ports:
-      - 6390:6379
-    environment:
-      - DISABLE_COMMANDS=FLUSHDB,FLUSHALL,CONFIG
-      - REDIS_PASSWORD=password123
-    volumes:
-      - clean_cache:/bitnami/redis/data:rw
-    networks:
-      - clean_networks
-
-  clean:
-    container_name: clean
+  boilerplate:
+    container_name: boilerplate
     build:
       context: .
     ports:
       - 8080:8080
-    command: serve  # make `serve` into `seed` or `seed --truncate=true` if anyone want to run the seeder
-    volumes:
-      - ./:/project
+    command: seed -t=true
+   # volumes:
+      # - ./:/project  # uncomment this line if you want realtime codebase update to the container
     environment:
-      - CONSUL_URL=consul_dev:8500
-      - CONSUL_PATH=clean
+      - CONSUL_URL=boilerplate_consul:8500
+      - CONSUL_PATH=boilerplate
     tty: true
     depends_on:
       - consul
       - db
-      - redis
     networks:
-      - clean_networks
+      - boilerplate_networks
     restart: on-failure:3
 
 networks:
-  clean_networks:
-    name: clean_networks
+  boilerplate_networks:
+    name: boilerplate_networks
     driver: bridge
 
 volumes:
-  clean_db:
-    name: db-data
-  clean_cache:
-    name: redis-persistence
+  boilerplate:
+    name: boilerplate-db-data

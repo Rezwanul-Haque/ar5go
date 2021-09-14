@@ -1,5 +1,5 @@
-PROJECT_NAME := clean
-PKG_LIST := $(shell go list ${PROJECT_NAME}/... | grep -v /vendor/)
+PROJECT_NAME := boilerplate
+PKG_LIST := $(shell go list ${PROJECT_NAME}/app/tests/testing/... | grep -v /vendor/)
 
 
 .PHONY: all dep build clean test
@@ -15,19 +15,19 @@ help: ## Display this help screen
 ########################
 development:
 	# booting up dependency containers
-	@docker-compose up -d consul db redis
+	@docker-compose up -d consul db
 
 	# wait for consul container be ready
-	@while ! curl --request GET -sL --url 'http://localhost:8500/' > /dev/null 2>&1; do printf .; sleep 1; done
+	@while ! curl --request GET -sL --url 'http://localhost:8590/' > /dev/null 2>&1; do printf .; sleep 1; done
 
 	# setting KV, dependency of app
-	@curl --request PUT --data-binary @config.local.json http://localhost:8500/v1/kv/${PROJECT_NAME}
+	@curl --request PUT --data-binary @config.local.json http://localhost:8590/v1/kv/${PROJECT_NAME}
 
-	# building clean
+	# building boilerplate
 	@docker-compose up --build ${PROJECT_NAME}
 
 test: ## Run unittests
-	@go test -cover -short ${PKG_LIST}
+	@go test -cover -short ${PKG_LIST} -v
 
 coverage: ## Generate global code coverage report
 	@go tool cover -func=cov.out

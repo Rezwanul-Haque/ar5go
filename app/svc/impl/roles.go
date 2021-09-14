@@ -1,14 +1,14 @@
 package impl
 
 import (
-	"clean/app/domain"
-	"clean/app/repository"
-	"clean/app/serializers"
-	"clean/app/svc"
-	"clean/app/utils/methodsutil"
-	"clean/app/utils/msgutil"
-	"clean/infra/errors"
-	"clean/infra/logger"
+	"boilerplate/app/domain"
+	"boilerplate/app/repository"
+	"boilerplate/app/serializers"
+	"boilerplate/app/svc"
+	"boilerplate/app/utils/methodutil"
+	"boilerplate/app/utils/msgutil"
+	"boilerplate/infra/errors"
+	"boilerplate/infra/logger"
 )
 
 type roles struct {
@@ -41,7 +41,7 @@ func (r *roles) GetRule(id uint) (*serializers.RoleResp, *errors.RestErr) {
 		return nil, getErr
 	}
 
-	err := methodsutil.StructToStruct(rule, &resp)
+	err := methodutil.StructToStruct(rule, &resp)
 	if err != nil {
 		logger.Error(msgutil.EntityStructToStructFailedMsg("get role"), err)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
@@ -81,7 +81,7 @@ func (r *roles) ListRoles() ([]*serializers.RoleResp, *errors.RestErr) {
 		return nil, lstErr
 	}
 
-	err := methodsutil.StructToStruct(rules, &resp)
+	err := methodutil.StructToStruct(rules, &resp)
 	if err != nil {
 		logger.Error(msgutil.EntityStructToStructFailedMsg("get role"), err)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
@@ -93,7 +93,7 @@ func (r *roles) ListRoles() ([]*serializers.RoleResp, *errors.RestErr) {
 func (r *roles) SetRolePermissions(req *serializers.RolePermissionsReq) *errors.RestErr {
 	var rolePerms *domain.RolePermissions
 
-	err := methodsutil.StructToStruct(req, &rolePerms)
+	err := methodutil.StructToStruct(req, &rolePerms)
 	if err != nil {
 		logger.Error(msgutil.EntityStructToStructFailedMsg("set role & permissions"), err)
 		return errors.NewInternalServerError(errors.ErrSomethingWentWrong)

@@ -1,41 +1,36 @@
 package container
 
 import (
-	"clean/app/http/controllers"
-	"clean/app/http/middlewares"
-	repoImpl "clean/app/repository/impl"
-	svcImpl "clean/app/svc/impl"
-	"clean/infra/conn"
+	"boilerplate/app/http/controllers"
+	"boilerplate/app/http/middlewares"
+	repoImpl "boilerplate/app/repository/impl"
+	svcImpl "boilerplate/app/svc/impl"
+	"boilerplate/infra/conn"
 )
 
 func Init(g interface{}) {
 	db := conn.Db()
-	redis := conn.Redis()
+	mg := conn.MailGun()
 	acl := middlewares.ACL
 
 	// register all repos impl, services impl, controllers
-	sysRepo := repoImpl.NewSystemRepository(db, redis)
-	companyRepo := repoImpl.NewMySqlCompanyRepository(db)
-	userRepo := repoImpl.NewMySqlUsersRepository(db)
-	locationRepo := repoImpl.NewMySqlLocationRepository(db)
+	sysRepo := repoImpl.NewSystemRepository(db)
+	uRepo := repoImpl.NewMySqlUsersRepository(db)
 	roleRepo := repoImpl.NewMySqlRolesRepository(db)
-	permissionRepo := repoImpl.NewMySqlPermissionsRepository(db)
+	pRepo := repoImpl.NewMySqlPermissionsRepository(db)
+	mRepo := repoImpl.NewMailsRepository(mg)
 
-	cacheSvc := svcImpl.NewRedisService(redis)
 	sysSvc := svcImpl.NewSystemService(sysRepo)
-	companySvc := svcImpl.NewCompanyService(companyRepo, userRepo)
-	userSvc := svcImpl.NewUsersService(userRepo, cacheSvc)
-	tokenSvc := svcImpl.NewTokenService(userRepo, cacheSvc)
-	authSvc := svcImpl.NewAuthService(userRepo, cacheSvc, tokenSvc)
-	locationSvc := svcImpl.NewLocationService(locationRepo)
+	mailSvc := svcImpl.NewMailsService(mRepo)
+	userSvc := svcImpl.NewUsersService(uRepo, mailSvc)
+	tokenSvc := svcImpl.NewTokenService(uRepo)
+	authSvc := svcImpl.NewAuthService(uRepo, tokenSvc)
 	roleSvc := svcImpl.NewRolesService(roleRepo)
-	permissionSvc := svcImpl.NewPermissionsService(permissionRepo)
+	permissionSvc := svcImpl.NewPermissionsService(pRepo)
 
 	controllers.NewSystemController(g, sysSvc)
 	controllers.NewAuthController(g, authSvc, userSvc)
-	controllers.NewCompanyController(g, acl, companySvc)
-	controllers.NewUsersController(g, acl, companySvc, userSvc, locationSvc)
-	controllers.NewLocationController(g, acl, locationSvc)
+	controllers.NewUsersController(g, acl, userSvc)
 	controllers.NewRolesController(g, acl, roleSvc)
 	controllers.NewPermissionsController(g, acl, permissionSvc)
 }

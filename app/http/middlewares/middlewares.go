@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"clean/infra/config"
+	"boilerplate/infra/config"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -34,11 +34,14 @@ func Attach(e *echo.Echo) error {
 				"/api/v1/h34l7h",
 				"/api/v1/login",
 				"/api/v1/token/verify",
+				"/api/v1/check/valid/username",
+				"/api/v1/check/valid/phone",
+				"/api/v1/check/valid/email",
 				"/api/v1/token/refresh",
 				"/api/v1/password/forgot",
 				"/api/v1/password/verifyreset",
 				"/api/v1/password/reset",
-				"/api/v1/company/signup":
+				"/api/v1/user/signup":
 				return true
 			default:
 				return false

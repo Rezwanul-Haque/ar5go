@@ -1,9 +1,9 @@
 package controllers
 
 import (
-	"clean/app/svc"
-	"clean/infra/errors"
-	"clean/infra/logger"
+	"boilerplate/app/svc"
+	"boilerplate/infra/errors"
+	"boilerplate/infra/logger"
 	"fmt"
 	"net/http"
 

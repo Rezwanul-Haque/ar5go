@@ -1,21 +1,26 @@
 package conn
 
 import (
-	"clean/app/domain"
-	"clean/infra/config"
-	"clean/infra/logger"
+	"boilerplate/app/domain"
+	"boilerplate/infra/config"
+	"boilerplate/infra/logger"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"time"
 
+	gomysql "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	gormlogger "gorm.io/gorm/logger"
 )
 
 var db *gorm.DB
+
+type DbErrors struct {
+	*gomysql.MySQLError
+}
 
 func ConnectDb() {
 	conf := config.Db()
@@ -56,9 +61,7 @@ func ConnectDb() {
 	db = dB
 
 	db.AutoMigrate(
-		&domain.Company{},
 		&domain.User{},
-		&domain.LocationHistory{},
 		&domain.Role{},
 		&domain.Permission{},
 		&domain.RolePermission{},
@@ -90,7 +93,7 @@ func SeedAll() []Seed {
 		{
 			Name: "CreatePermissions",
 			Run: func(db *gorm.DB, truncate bool) error {
-				if err := seedPermissions(db, "/infra/seed/permissions.json", truncate); err != nil {
+				if err := seedPermissions(db, "/infra/seed/permissions.json"); err != nil {
 					return err
 				}
 				return nil
@@ -99,7 +102,7 @@ func SeedAll() []Seed {
 		{
 			Name: "CreateRolePermissions",
 			Run: func(db *gorm.DB, truncate bool) error {
-				if err := seedRolePermissions(db, "/infra/seed/role_permissions.json", truncate); err != nil {
+				if err := seedRolePermissions(db, "/infra/seed/role_permissions.json"); err != nil {
 					return err
 				}
 				return nil
@@ -115,9 +118,9 @@ func seedRoles(db *gorm.DB, jsonfilPath string, truncate bool) error {
 	_ = json.Unmarshal([]byte(file), &roles)
 
 	if truncate {
-		db.Exec("TRUNCATE TABLE clean_db.role_permissions;")
-		db.Exec("TRUNCATE TABLE clean_db.permissions;")
-		db.Exec("TRUNCATE TABLE clean_db.roles;")
+		db.Exec("TRUNCATE TABLE boilerplate.role_permissions;")
+		db.Exec("TRUNCATE TABLE boilerplate.permissions;")
+		db.Exec("TRUNCATE TABLE boilerplate.roles;")
 	}
 
 	var count int64
@@ -130,7 +133,7 @@ func seedRoles(db *gorm.DB, jsonfilPath string, truncate bool) error {
 	return nil
 }
 
-func seedPermissions(db *gorm.DB, jsonfilPath string, truncate bool) error {
+func seedPermissions(db *gorm.DB, jsonfilPath string) error {
 	file, _ := readSeedFile(jsonfilPath)
 	perms := []domain.Permission{}
 
@@ -146,7 +149,7 @@ func seedPermissions(db *gorm.DB, jsonfilPath string, truncate bool) error {
 	return nil
 }
 
-func seedRolePermissions(db *gorm.DB, jsonfilPath string, truncate bool) error {
+func seedRolePermissions(db *gorm.DB, jsonfilPath string) error {
 	file, _ := readSeedFile(jsonfilPath)
 	rp := []domain.RolePermission{}
 

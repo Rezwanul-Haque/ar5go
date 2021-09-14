@@ -45,14 +45,14 @@ func EntityBindToStructFailedMsg(entity string) string {
 }
 
 // Generic failed message
-func SomethingWentWrongMsg() string {
-	return "something went wrong"
-}
-
 func EntityGenericFailedMsg(entity string) string {
 	return fmt.Sprintf("error occur when getting %s", entity)
 }
 
 func EntityGenericInvalidMsg(entity string) string {
 	return fmt.Sprintf("invalid %s", entity)
+}
+
+func EntityGenericValidateMsg(entity string) string {
+	return fmt.Sprintf("error occur when validating %s", entity)
 }

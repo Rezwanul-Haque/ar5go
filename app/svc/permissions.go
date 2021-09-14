@@ -1,9 +1,9 @@
 package svc
 
 import (
-	"clean/app/domain"
-	"clean/app/serializers"
-	"clean/infra/errors"
+	"boilerplate/app/domain"
+	"boilerplate/app/serializers"
+	"boilerplate/infra/errors"
 )
 
 type IPermissions interface {

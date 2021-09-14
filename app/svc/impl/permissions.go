@@ -1,14 +1,14 @@
 package impl
 
 import (
-	"clean/app/domain"
-	"clean/app/repository"
-	"clean/app/serializers"
-	"clean/app/svc"
-	"clean/app/utils/methodsutil"
-	"clean/app/utils/msgutil"
-	"clean/infra/errors"
-	"clean/infra/logger"
+	"boilerplate/app/domain"
+	"boilerplate/app/repository"
+	"boilerplate/app/serializers"
+	"boilerplate/app/svc"
+	"boilerplate/app/utils/methodutil"
+	"boilerplate/app/utils/msgutil"
+	"boilerplate/infra/errors"
+	"boilerplate/infra/logger"
 )
 
 type permissions struct {
@@ -35,18 +35,18 @@ func (p *permissions) CreatePermission(req *serializers.PermissionReq) (*domain.
 }
 
 func (p *permissions) GetPermission(id uint) (*serializers.PermissionResp, *errors.RestErr) {
-	var resp serializers.RoleResp
+	var resp serializers.PermissionResp
 	rule, getErr := p.prepo.Get(id)
 	if getErr != nil {
 		return nil, getErr
 	}
 
-	err := methodsutil.StructToStruct(rule, resp)
+	err := methodutil.StructToStruct(rule, &resp)
 	if err != nil {
 		logger.Error(msgutil.EntityStructToStructFailedMsg("get permission"), err)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
-	return nil, nil
+	return &resp, nil
 }
 
 func (p *permissions) UpdatePermission(permissionID uint, req serializers.PermissionReq) *errors.RestErr {
@@ -81,7 +81,7 @@ func (p *permissions) ListPermission() ([]*serializers.PermissionResp, *errors.R
 		return nil, lstErr
 	}
 
-	err := methodsutil.StructToStruct(permissions, &resp)
+	err := methodutil.StructToStruct(permissions, &resp)
 	if err != nil {
 		logger.Error(msgutil.EntityStructToStructFailedMsg("get all permissions"), err)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)

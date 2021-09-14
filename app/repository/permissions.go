@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"clean/app/domain"
-	"clean/infra/errors"
+	"boilerplate/app/domain"
+	"boilerplate/infra/errors"
 )
 
 type IPermissions interface {

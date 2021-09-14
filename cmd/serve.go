@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	server "clean/app/http"
+	server "boilerplate/app/http"
 
 	"github.com/spf13/cobra"
 )
@@ -12,6 +12,6 @@ var serveCmd = &cobra.Command{
 }
 
 func serve(cmd *cobra.Command, args []string) {
-	// http server start
+	// http server setup
 	server.Start()
 }

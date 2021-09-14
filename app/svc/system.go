@@ -1,6 +1,8 @@
 package svc
 
-import "clean/app/serializers"
+import (
+	"boilerplate/app/serializers"
+)
 
 type ISystem interface {
 	GetHealth() (*serializers.HealthResp, error)

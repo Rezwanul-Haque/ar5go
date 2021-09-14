@@ -1,91 +1,105 @@
 package controllers
 
 import (
-	"clean/app/domain"
-	"clean/app/serializers"
-	"clean/app/svc"
-	"clean/app/utils/consts"
-	"clean/app/utils/methodsutil"
-	"clean/app/utils/msgutil"
-	"clean/infra/errors"
-	"clean/infra/logger"
+	"boilerplate/app/domain"
+	"boilerplate/app/serializers"
+	"boilerplate/app/svc"
+	"boilerplate/app/utils/consts"
+	"boilerplate/app/utils/methodutil"
+	"boilerplate/app/utils/msgutil"
+	"boilerplate/infra/errors"
+	"boilerplate/infra/logger"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type users struct {
-	cSvc svc.ICompany
 	uSvc svc.IUsers
-	lSvc svc.ILocation
 }
 
 // NewUsersController will initialize the controllers
-func NewUsersController(grp interface{}, ACL func(string) echo.MiddlewareFunc, cSvc svc.ICompany, uSvc svc.IUsers, lSvc svc.ILocation) {
+func NewUsersController(grp interface{}, ACL func(string) echo.MiddlewareFunc, uSvc svc.IUsers) {
 	uc := &users{
-		cSvc: cSvc,
 		uSvc: uSvc,
-		lSvc: lSvc,
 	}
 
 	g := grp.(*echo.Group)
 
-	g.POST("/v1/user/signup", uc.Create, ACL(consts.PermissionUserCreate))
-	g.GET("/v1/user/resolve", uc.GetAll, ACL(consts.PermissionUserFetchAll))
-	g.PATCH("/v1/user", uc.Update, ACL(consts.PermissionUserUpdate))
-	g.GET("/v1/user/:user_id/locations", uc.GetUserVisitedLocations, ACL(consts.PermissionUserLocationFetch))
+	g.GET("/v1/check/valid/username", uc.UserNameIsUnique)
+	g.GET("/v1/check/valid/email", uc.EmailIsUnique)
+	g.POST("/v1/user/signup", uc.Create)
+	g.PATCH("/v1/user", uc.Update)
 	g.POST("/v1/password/change", uc.ChangePassword)
 	g.POST("/v1/password/forgot", uc.ForgotPassword)
 	g.POST("/v1/password/verifyreset", uc.VerifyResetPassword)
 	g.POST("/v1/password/reset", uc.ResetPassword)
 }
 
-func (ctr *users) Create(c echo.Context) error {
-	foundUser, getErr := GetUserByAppKey(c, ctr.uSvc)
-	if getErr != nil {
-		return c.JSON(getErr.Status, getErr)
+func (ctr *users) UserNameIsUnique(c echo.Context) error {
+
+	req := c.QueryParam("user_name")
+	if req == "" {
+		return c.JSON(http.StatusBadRequest, "requested username should not be empty")
 	}
 
-	var user domain.User
+	logger.InfoAsJson("username payload", req)
 
-	if err := c.Bind(&user); err != nil {
+	if err := ctr.uSvc.UserNameIsUnique(req); err != nil {
+		logger.ErrorAsJson("username uniqueness", err)
+		restErr := errors.NewAlreadyExistError(errors.ErrUserNameNotUnique)
+		return c.JSON(restErr.Status, restErr)
+	}
+	return c.JSON(http.StatusOK, "Requested username is available")
+}
+
+func (ctr *users) EmailIsUnique(c echo.Context) error {
+	req := &serializers.EmailIsUnique{}
+	if err := c.Bind(&req); err != nil {
 		restErr := errors.NewBadRequestError("invalid json body")
 		return c.JSON(restErr.Status, restErr)
 	}
 
-	hashedPass, _ := bcrypt.GenerateFromPassword([]byte(*user.Password), 8)
-	*user.Password = string(hashedPass)
-	user.CompanyID = foundUser.CompanyID
-	user.RoleID = consts.RoleIDSales
+	logger.InfoAsJson("email uniquness payload", req)
+	if payloadErr := req.Validate(); payloadErr != nil {
+		return payloadErr
+	}
+	if err := ctr.uSvc.EmailIsUnique(req); err != nil {
+		logger.ErrorAsJson("email uniqueness", err)
+		restErr := errors.NewAlreadyExistError(errors.ErrEmailIsUnique)
+		return c.JSON(restErr.Status, restErr)
+	}
+	return c.JSON(http.StatusOK, "Requested email is available")
+}
 
+func (ctr *users) Create(c echo.Context) error {
+
+	var user domain.User
+
+	if err := c.Bind(&user); err != nil {
+		logger.Error("failed to parse request body", err)
+		restErr := errors.NewBadRequestError("invalid json body")
+		return c.JSON(restErr.Status, restErr)
+	}
+	user.RoleID = consts.RoleIDAdmin
+
+	if payloadErr := user.Validate(); payloadErr != nil {
+		logger.ErrorAsJson("failed to validate request body", payloadErr)
+		restErr := errors.NewBadRequestError(errors.ErrRecordNotvalid)
+		return c.JSON(restErr.Status, restErr)
+	}
+
+	logger.InfoAsJson("user payload", user)
 	result, saveErr := ctr.uSvc.CreateUser(user)
 	if saveErr != nil {
 		return c.JSON(saveErr.Status, saveErr)
 	}
 	var resp serializers.UserResp
-	respErr := methodsutil.StructToStruct(result, &resp)
+	respErr := methodutil.StructToStruct(result, &resp)
 	if respErr != nil {
 		return respErr
 	}
-
 	return c.JSON(http.StatusCreated, resp)
-}
-
-func (ctr *users) GetAll(c echo.Context) error {
-	foundUser, getErr := GetUserByAppKey(c, ctr.uSvc)
-	if getErr != nil {
-		return c.JSON(getErr.Status, getErr)
-	}
-	pagination := GeneratePaginationRequest(c)
-	resp, totalPages, getErr := ctr.uSvc.GetUserByCompanyIdAndRole(uint(foundUser.CompanyID), consts.RoleIDSales, pagination)
-
-	if getErr != nil {
-		return c.JSON(getErr.Status, getErr)
-	}
-
-	GeneratePagesPath(c, resp, totalPages)
-	return c.JSON(http.StatusOK, &resp)
 }
 
 func (ctr *users) Update(c echo.Context) error {
@@ -102,30 +116,12 @@ func (ctr *users) Update(c echo.Context) error {
 		return c.JSON(restErr.Status, restErr)
 	}
 
+	logger.InfoAsJson("user update payload", user)
 	updateErr := ctr.uSvc.UpdateUser(uint(loggedInUser.ID), user)
 	if updateErr != nil {
 		return c.JSON(updateErr.Status, updateErr)
 	}
-
 	return c.JSON(http.StatusOK, map[string]interface{}{"message": msgutil.EntityUpdateSuccessMsg("user")})
-}
-
-func (ctr *users) GetUserVisitedLocations(c echo.Context) error {
-	loggedInUser, err := GetUserFromContext(c)
-	if err != nil {
-		logger.Error(err.Error(), err)
-		restErr := errors.NewUnauthorizedError("no logged-in user found")
-		return c.JSON(restErr.Status, restErr)
-	}
-
-	pagination := GeneratePaginationRequest(c)
-	resp, totalPages, getErr := ctr.lSvc.GetLocationsByUserID(uint(loggedInUser.ID), pagination)
-	if getErr != nil {
-		return c.JSON(getErr.Status, getErr)
-	}
-
-	GeneratePagesPath(c, resp, totalPages)
-	return c.JSON(http.StatusOK, &resp)
 }
 
 func (ctr *users) ChangePassword(c echo.Context) error {
@@ -135,11 +131,14 @@ func (ctr *users) ChangePassword(c echo.Context) error {
 		restErr := errors.NewUnauthorizedError("no logged-in user found")
 		return c.JSON(restErr.Status, restErr)
 	}
+
 	body := &serializers.ChangePasswordReq{}
 	if err := c.Bind(&body); err != nil {
 		restErr := errors.NewBadRequestError("invalid json body")
 		return c.JSON(restErr.Status, restErr)
 	}
+
+	logger.InfoAsJson("change password payload", body)
 	if err = body.Validate(); err != nil {
 		restErr := errors.NewBadRequestError(err.Error())
 		return c.JSON(restErr.Status, restErr)
@@ -158,7 +157,6 @@ func (ctr *users) ChangePassword(c echo.Context) error {
 			return c.JSON(restErr.Status, restErr)
 		}
 	}
-
 	return c.JSON(http.StatusOK, map[string]interface{}{"message": msgutil.EntityChangedSuccessMsg("password")})
 }
 
@@ -170,17 +168,20 @@ func (ctr *users) ForgotPassword(c echo.Context) error {
 		return c.JSON(restErr.Status, restErr)
 	}
 
+	logger.InfoAsJson("forgot password payload", body)
+
 	if err := body.Validate(); err != nil {
 		restErr := errors.NewBadRequestError(err.Error())
 		return c.JSON(restErr.Status, restErr)
 	}
 
-	if err := ctr.uSvc.ForgotPassword(body.Email); err != nil && err == errors.ErrSendingEmail {
-		restErr := errors.NewInternalServerError("failed to send password reset email")
-		return c.JSON(restErr.Status, restErr)
+	if err := ctr.uSvc.ForgotPassword(body.Email); err != nil {
+		if err == errors.ErrSendingEmail {
+			logger.Error(msgutil.EntityGenericFailedMsg("failed to send email"), err)
+		}
+		logger.Error(msgutil.EntityGenericFailedMsg("failed to send user signup email"), err)
 	}
-
-	return c.JSON(http.StatusOK, map[string]interface{}{"message": "Password reset link sent to email"})
+	return c.JSON(http.StatusOK, map[string]interface{}{"message": "password reset link sent to email"})
 }
 
 func (ctr *users) VerifyResetPassword(c echo.Context) error {
@@ -191,6 +192,7 @@ func (ctr *users) VerifyResetPassword(c echo.Context) error {
 		return c.JSON(restErr.Status, restErr)
 	}
 
+	logger.InfoAsJson("verify password payload", req)
 	if err := req.Validate(); err != nil {
 		restErr := errors.NewBadRequestError(err.Error())
 		return c.JSON(restErr.Status, restErr)
@@ -207,8 +209,7 @@ func (ctr *users) VerifyResetPassword(c echo.Context) error {
 			return c.JSON(restErr.Status, restErr)
 		}
 	}
-
-	return c.JSON(http.StatusOK, "reset token verified")
+	return c.JSON(http.StatusOK, map[string]interface{}{"message": "reset token verified"})
 }
 
 func (ctr *users) ResetPassword(c echo.Context) error {
@@ -219,6 +220,7 @@ func (ctr *users) ResetPassword(c echo.Context) error {
 		return c.JSON(restErr.Status, restErr)
 	}
 
+	logger.InfoAsJson("reset password payload", req)
 	if err := req.Validate(); err != nil {
 		restErr := errors.NewBadRequestError(err.Error())
 		return c.JSON(restErr.Status, restErr)
@@ -228,6 +230,7 @@ func (ctr *users) ResetPassword(c echo.Context) error {
 		Token: req.Token,
 		ID:    req.ID,
 	}
+	logger.InfoAsJson("verify request for reset password", verifyReq)
 
 	if err := ctr.uSvc.VerifyResetPassword(verifyReq); err != nil {
 		switch err {
@@ -245,6 +248,5 @@ func (ctr *users) ResetPassword(c echo.Context) error {
 		restErr := errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 		return c.JSON(restErr.Status, restErr)
 	}
-
 	return c.JSON(http.StatusOK, "password reset successful")
 }

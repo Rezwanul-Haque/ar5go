@@ -1,12 +1,10 @@
 package controllers
 
 import (
-	"clean/app/domain"
-	"clean/app/serializers"
-	"clean/app/svc"
-	"clean/app/utils/methodsutil"
-	"clean/infra/config"
-	"clean/infra/errors"
+	"boilerplate/app/serializers"
+	"boilerplate/infra/config"
+	"boilerplate/infra/errors"
+	"boilerplate/infra/logger"
 	"fmt"
 	"strconv"
 	"strings"
@@ -90,30 +88,9 @@ func GeneratePagesPath(c echo.Context, resp *serializers.Pagination, totalPages 
 	resp.PreviousPage = fmt.Sprintf("%s/%s", urlPath, resp.PreviousPage)
 }
 
-func GetUserByAppKey(c echo.Context, uSvc svc.IUsers) (*domain.User, *errors.RestErr) {
-	appKey := c.Request().Header.Get("AppKey")
-
-	if methodsutil.IsInvalid(appKey) {
-		keyErr := errors.NewBadRequestError(fmt.Sprintf("Appkey: '%s' is missing", appKey))
-		return nil, keyErr
-	}
-
-	foundUser, getErr := uSvc.GetUserByAppKey(appKey)
-
-	if getErr != nil {
-		return nil, getErr
-	}
-
-	if appKey != foundUser.AppKey {
-		keyErr := errors.NewBadRequestError(fmt.Sprintf("Appkey: '%s' is invalid", appKey))
-		return nil, keyErr
-	}
-
-	return foundUser, nil
-}
-
 func GetUserFromContext(c echo.Context) (*serializers.LoggedInUser, error) {
 	user, ok := c.Get("user").(*serializers.LoggedInUser)
+	logger.Info(fmt.Sprintf("%+v", user))
 	if !ok {
 		return nil, errors.ErrNoContextUser
 	}
