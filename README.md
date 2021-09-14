@@ -5,19 +5,18 @@
 Go to the project directory
 
 ```bash
-  cd clean_backend
+cd clean_backend
 ```
 
 Install dependencies
 
 ```bash
-  go mod vendor
+go mod vendor
 ```
 ### Seedding database
 
 ```bash
-  go run main.go seed
-
+go run main.go seed
   ```
  Use the below command to truncate then seed database  
   ```
@@ -31,13 +30,13 @@ Install dependencies
 Start the server Locally
 
 ```bash
-  go run main.go serve
+go run main.go serve
 ```
 
 Start the server using Docker
 
 ```bash
-  make development
+make development
 ```
 
 
