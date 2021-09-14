@@ -1,8 +1,8 @@
 package impl
 
 import (
-	"boilerplate/app/serializers"
-	"boilerplate/app/utils/methodutil"
+	"clean/app/serializers"
+	"clean/app/utils/methodutil"
 	"fmt"
 	"math"
 	"strings"
@@ -51,7 +51,6 @@ func GenerateFilteringCondition(r *gorm.DB, tableName string, pagination *serial
 	// get data with limit, offset & order
 	find := r.Limit(int(pagination.Limit)).Offset(int(offset)).Order(sort)
 
-	
 	// generate where query
 	searches := pagination.Searches
 

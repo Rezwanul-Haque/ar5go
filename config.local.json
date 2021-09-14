@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "boilerplate",
+    "name": "clean",
     "port": 8080,
     "limit": 20,
     "page": 1,
@@ -12,11 +12,11 @@
     "SendEmail": false
   },
   "db": {
-    "host": "boilerplate_mysql",
+    "host": "clean_mysql",
     "port": "3306",
-    "user": "boilerplate_user",
+    "user": "clean_user",
     "pass": "12345678",
-    "schema": "boilerplate",
+    "schema": "clean",
     "maxIdleConn": 1,
     "maxOpenConn": 2,
     "maxConnLifetime": 30,
@@ -30,7 +30,7 @@
     "contextKey": "user"
   },
   "mail": {
-    "sender": "boilerplate Admin <admin@boilerplate.xyz>",
+    "sender": "clean Admin <admin@clean.xyz>",
     "passwordReseturl": "http://localhost:8081/password/reset",
     "welcomeMessage": "We're very excited to have you on board",
     "passwordMessage": "The password is auto generated, please change immediately",

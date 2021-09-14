@@ -1,9 +1,9 @@
 package conn
 
 import (
-	"boilerplate/app/domain"
-	"boilerplate/infra/config"
-	"boilerplate/infra/logger"
+	"clean/app/domain"
+	"clean/infra/config"
+	"clean/infra/logger"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -118,9 +118,9 @@ func seedRoles(db *gorm.DB, jsonfilPath string, truncate bool) error {
 	_ = json.Unmarshal([]byte(file), &roles)
 
 	if truncate {
-		db.Exec("TRUNCATE TABLE boilerplate.role_permissions;")
-		db.Exec("TRUNCATE TABLE boilerplate.permissions;")
-		db.Exec("TRUNCATE TABLE boilerplate.roles;")
+		db.Exec("TRUNCATE TABLE clean.role_permissions;")
+		db.Exec("TRUNCATE TABLE clean.permissions;")
+		db.Exec("TRUNCATE TABLE clean.roles;")
 	}
 
 	var count int64

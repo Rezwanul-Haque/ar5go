@@ -1,10 +1,10 @@
 package methodutil
 
 import (
-	"boilerplate/app/utils/hash"
-	"boilerplate/app/utils/msgutil"
-	"boilerplate/infra/errors"
-	"boilerplate/infra/logger"
+	"clean/app/utils/hash"
+	"clean/app/utils/msgutil"
+	"clean/infra/errors"
+	"clean/infra/logger"
 	"encoding/json"
 	"fmt"
 	"io"

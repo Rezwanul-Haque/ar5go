@@ -1,4 +1,4 @@
-PROJECT_NAME := boilerplate
+PROJECT_NAME := clean
 PKG_LIST := $(shell go list ${PROJECT_NAME}/app/tests/testing/... | grep -v /vendor/)
 
 
@@ -23,7 +23,7 @@ development:
 	# setting KV, dependency of app
 	@curl --request PUT --data-binary @config.local.json http://localhost:8590/v1/kv/${PROJECT_NAME}
 
-	# building boilerplate
+	# building clean
 	@docker-compose up --build ${PROJECT_NAME}
 
 test: ## Run unittests

@@ -1,12 +1,12 @@
 package users_test
 
 import (
+	"clean/app/domain"
+	"clean/app/svc/impl"
+	"clean/app/tests/mock/svc/users"
+	"clean/infra/config"
 	"fmt"
 	"os"
-	"boilerplate/app/domain"
-	"boilerplate/app/svc/impl"
-	"boilerplate/app/tests/mock/svc/users"
-	"boilerplate/infra/config"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

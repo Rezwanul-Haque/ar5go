@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"boilerplate/app/domain"
-	"boilerplate/infra/errors"
+	"clean/app/domain"
+	"clean/infra/errors"
 )
 
 type Mails interface {

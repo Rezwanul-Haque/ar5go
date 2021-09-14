@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"boilerplate/app/serializers"
-	"boilerplate/infra/config"
-	"boilerplate/infra/errors"
-	"boilerplate/infra/logger"
+	"clean/app/serializers"
+	"clean/infra/config"
+	"clean/infra/errors"
+	"clean/infra/logger"
 	"fmt"
 	"strconv"
 	"strings"

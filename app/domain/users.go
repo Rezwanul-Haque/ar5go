@@ -1,8 +1,8 @@
 package domain
 
 import (
-	"boilerplate/app/utils/methodutil"
-	"boilerplate/infra/errors"
+	"clean/app/utils/methodutil"
+	"clean/infra/errors"
 	"mime/multipart"
 	"strconv"
 	"time"

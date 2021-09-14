@@ -1,4 +1,4 @@
-module boilerplate
+module clean
 
 go 1.16
 

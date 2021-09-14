@@ -1,7 +1,7 @@
 package config
 
 import (
-	"boilerplate/infra/logger"
+	"clean/infra/logger"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -129,7 +129,7 @@ func LoadConfig() {
 
 func setDefaultConfig() {
 	config.App = &AppConfig{
-		Name:                   "boilerplate",
+		Name:                   "clean",
 		Port:                   "8080",
 		Page:                   1,
 		Limit:                  10,
@@ -146,7 +146,7 @@ func setDefaultConfig() {
 		Port:            "3306",
 		User:            "root",
 		Pass:            "12345678",
-		Schema:          "boilerplate",
+		Schema:          "clean",
 		MaxIdleConn:     1,
 		MaxOpenConn:     2,
 		MaxConnLifetime: 30,
@@ -162,8 +162,8 @@ func setDefaultConfig() {
 	}
 
 	config.Mail = &MailConfig{
-		Sender:              "boilerplate Admin <admin@boilerplate.xyz>",
-		PasswordResetUrl:    "http://localhost:8081/password/reset",
+		Sender:           "clean Admin <admin@clean.xyz>",
+		PasswordResetUrl: "http://localhost:8081/password/reset",
 		Subject: MailgunSubject{
 			UserCreated:    "User Created",
 			ForgotPassword: "Forgot Password",

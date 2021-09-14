@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	server "boilerplate/app/http"
+	server "clean/app/http"
 
 	"github.com/spf13/cobra"
 )

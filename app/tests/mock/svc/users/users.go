@@ -1,9 +1,9 @@
 package users
 
 import (
-	"boilerplate/app/domain"
-	"boilerplate/infra/config"
-	"boilerplate/infra/errors"
+	"clean/app/domain"
+	"clean/infra/config"
+	"clean/infra/errors"
 
 	"github.com/stretchr/testify/mock"
 )

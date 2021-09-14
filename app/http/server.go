@@ -1,10 +1,10 @@
 package http
 
 import (
-	container "boilerplate/app"
-	"boilerplate/app/http/middlewares"
-	"boilerplate/infra/config"
-	"boilerplate/infra/logger"
+	container "clean/app"
+	"clean/app/http/middlewares"
+	"clean/infra/config"
+	"clean/infra/logger"
 	"context"
 	"os"
 	"os/signal"

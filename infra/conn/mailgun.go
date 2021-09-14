@@ -1,8 +1,8 @@
 package conn
 
 import (
-	"boilerplate/infra/config"
-	"boilerplate/infra/logger"
+	"clean/infra/config"
+	"clean/infra/logger"
 
 	"github.com/mailgun/mailgun-go/v4"
 )

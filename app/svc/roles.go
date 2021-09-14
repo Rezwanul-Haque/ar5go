@@ -1,9 +1,9 @@
 package svc
 
 import (
-	"boilerplate/app/domain"
-	"boilerplate/app/serializers"
-	"boilerplate/infra/errors"
+	"clean/app/domain"
+	"clean/app/serializers"
+	"clean/infra/errors"
 )
 
 type IRoles interface {

@@ -1,11 +1,11 @@
 package impl
 
 import (
-	"boilerplate/app/domain"
-	"boilerplate/app/repository"
-	"boilerplate/app/utils/msgutil"
-	"boilerplate/infra/errors"
-	"boilerplate/infra/logger"
+	"clean/app/domain"
+	"clean/app/repository"
+	"clean/app/utils/msgutil"
+	"clean/infra/errors"
+	"clean/infra/logger"
 
 	"gorm.io/gorm"
 )

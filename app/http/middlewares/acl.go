@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"boilerplate/app/serializers"
+	"clean/app/serializers"
 	"net/http"
 
 	"github.com/labstack/echo/v4"

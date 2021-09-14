@@ -3,33 +3,33 @@ version: "3.8"
 services:
   consul:
     image: consul:latest
-    container_name: boilerplate_consul
+    container_name: clean_consul
     restart: always
     ports:
       - 8590:8500
     networks:
-      - boilerplate_networks
+      - clean_networks
 
   db:
-    container_name: boilerplate_mysql
+    container_name: clean_mysql
     build:
       context: .
       dockerfile: Dockerfile.db
     ports:
       - 3311:3306
     volumes:
-      - boilerplate:/var/lib/mysql:rw
+      - clean:/var/lib/mysql:rw
     environment:
-      - MYSQL_USER=boilerplate_user
+      - MYSQL_USER=clean_user
       - MYSQL_PASSWORD=12345678
-      - MYSQL_DATABASE=boilerplate
+      - MYSQL_DATABASE=clean
       - MYSQL_ROOT_PASSWORD=12345678
     tty: true
     networks:
-      - boilerplate_networks
+      - clean_networks
 
-  boilerplate:
-    container_name: boilerplate
+  clean:
+    container_name: clean
     build:
       context: .
     ports:
@@ -38,21 +38,21 @@ services:
    # volumes:
       # - ./:/project  # uncomment this line if you want realtime codebase update to the container
     environment:
-      - CONSUL_URL=boilerplate_consul:8500
-      - CONSUL_PATH=boilerplate
+      - CONSUL_URL=clean_consul:8500
+      - CONSUL_PATH=clean
     tty: true
     depends_on:
       - consul
       - db
     networks:
-      - boilerplate_networks
+      - clean_networks
     restart: on-failure:3
 
 networks:
-  boilerplate_networks:
-    name: boilerplate_networks
+  clean_networks:
+    name: clean_networks
     driver: bridge
 
 volumes:
-  boilerplate:
-    name: boilerplate-db-data
+  clean:
+    name: clean-db-data

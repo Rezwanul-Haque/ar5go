@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"boilerplate/app/serializers"
-	"boilerplate/app/svc"
-	"boilerplate/infra/errors"
-	"boilerplate/infra/logger"
+	"clean/app/serializers"
+	"clean/app/svc"
+	"clean/infra/errors"
+	"clean/infra/logger"
 	"net/http"
 
 	"github.com/labstack/echo/v4"

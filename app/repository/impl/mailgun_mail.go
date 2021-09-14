@@ -1,11 +1,11 @@
 package impl
 
 import (
-	"boilerplate/app/domain"
-	"boilerplate/app/repository"
-	"boilerplate/infra/config"
-	"boilerplate/infra/errors"
-	"boilerplate/infra/logger"
+	"clean/app/domain"
+	"clean/app/repository"
+	"clean/infra/config"
+	"clean/infra/errors"
+	"clean/infra/logger"
 	"context"
 	"fmt"
 	"time"
@@ -27,7 +27,7 @@ func NewMailsRepository(mg *mailgun.MailgunImpl) repository.Mails {
 func (r *mails) SendCompanyCreatedEmail(mail *domain.CompanyCreatedMailReq) *errors.RestErr {
 
 	subject := GenerateEmailSubject(mail.To, config.Mail().Subject.UserCreated)
-	ChangePass := fmt.Sprintf("Welcome to boilerplate CRM! We're very excited to have you on board.\n Email: %v \n Password: %v \nThe password is auto generated, please change immediately. ", mail.To, mail.Password)
+	ChangePass := fmt.Sprintf("Welcome to clean CRM! We're very excited to have you on board.\n Email: %v \n Password: %v \nThe password is auto generated, please change immediately. ", mail.To, mail.Password)
 	m := r.mg.NewMessage(
 		config.Mail().Sender,
 		subject,

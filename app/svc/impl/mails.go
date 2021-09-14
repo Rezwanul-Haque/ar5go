@@ -1,11 +1,11 @@
 package impl
 
 import (
-	"boilerplate/app/domain"
-	"boilerplate/app/repository"
-	"boilerplate/app/serializers"
-	"boilerplate/app/svc"
-	"boilerplate/infra/errors"
+	"clean/app/domain"
+	"clean/app/repository"
+	"clean/app/serializers"
+	"clean/app/svc"
+	"clean/infra/errors"
 )
 
 type mails struct {

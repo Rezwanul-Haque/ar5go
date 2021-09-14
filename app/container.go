@@ -1,11 +1,11 @@
 package container
 
 import (
-	"boilerplate/app/http/controllers"
-	"boilerplate/app/http/middlewares"
-	repoImpl "boilerplate/app/repository/impl"
-	svcImpl "boilerplate/app/svc/impl"
-	"boilerplate/infra/conn"
+	"clean/app/http/controllers"
+	"clean/app/http/middlewares"
+	repoImpl "clean/app/repository/impl"
+	svcImpl "clean/app/svc/impl"
+	"clean/infra/conn"
 )
 
 func Init(g interface{}) {

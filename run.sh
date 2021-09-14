@@ -1,6 +1,6 @@
 #! /bin/bash
 
-PROJECT="boilerplate"
+PROJECT="clean"
 
 # run docker compose
 docker-compose up -d consul db 

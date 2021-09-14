@@ -1,8 +1,8 @@
 package serializers
 
 import (
-	"boilerplate/app/utils/consts"
-	"boilerplate/app/utils/methodutil"
+	"clean/app/utils/consts"
+	"clean/app/utils/methodutil"
 	"time"
 
 	v "github.com/go-ozzo/ozzo-validation/v4"

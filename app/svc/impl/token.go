@@ -1,12 +1,12 @@
 package impl
 
 import (
-	"boilerplate/app/repository"
-	"boilerplate/app/serializers"
-	"boilerplate/app/svc"
-	"boilerplate/infra/config"
-	"boilerplate/infra/errors"
-	"boilerplate/infra/logger"
+	"clean/app/repository"
+	"clean/app/serializers"
+	"clean/app/svc"
+	"clean/infra/config"
+	"clean/infra/errors"
+	"clean/infra/logger"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"

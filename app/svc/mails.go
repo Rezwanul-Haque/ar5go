@@ -1,8 +1,8 @@
 package svc
 
 import (
-	"boilerplate/app/serializers"
-	"boilerplate/infra/errors"
+	"clean/app/serializers"
+	"clean/infra/errors"
 )
 
 type IMails interface {

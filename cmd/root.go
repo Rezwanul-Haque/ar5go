@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"boilerplate/infra/config"
-	"boilerplate/infra/conn"
-	"boilerplate/infra/logger"
+	"clean/infra/config"
+	"clean/infra/conn"
+	"clean/infra/logger"
 	"fmt"
 	"os"
 
@@ -12,9 +12,8 @@ import (
 
 var (
 	RootCmd = &cobra.Command{
-		Use:   "boilerplate",
-		Short: "Pi survey",
-		Long:  "A Survey Management system to track survey and survey response",
+		Use:   "clean code",
+		Short: "implementing clean architecture in golang",
 	}
 )
 

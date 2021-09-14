@@ -1,12 +1,12 @@
 package controllers
 
 import (
-	"boilerplate/app/serializers"
-	"boilerplate/app/svc"
-	"boilerplate/app/utils/consts"
-	"boilerplate/app/utils/msgutil"
-	"boilerplate/infra/errors"
-	"boilerplate/infra/logger"
+	"clean/app/serializers"
+	"clean/app/svc"
+	"clean/app/utils/consts"
+	"clean/app/utils/msgutil"
+	"clean/infra/errors"
+	"clean/infra/logger"
 	"fmt"
 	"net/http"
 	"regexp"

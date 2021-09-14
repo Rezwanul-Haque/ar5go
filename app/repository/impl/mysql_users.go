@@ -1,13 +1,13 @@
 package impl
 
 import (
-	"boilerplate/app/domain"
-	"boilerplate/app/repository"
-	"boilerplate/app/utils/methodutil"
-	"boilerplate/app/utils/msgutil"
-	"boilerplate/infra/conn"
-	"boilerplate/infra/errors"
-	"boilerplate/infra/logger"
+	"clean/app/domain"
+	"clean/app/repository"
+	"clean/app/utils/methodutil"
+	"clean/app/utils/msgutil"
+	"clean/infra/conn"
+	"clean/infra/errors"
+	"clean/infra/logger"
 	"strings"
 	"time"
 

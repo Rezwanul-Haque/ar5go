@@ -1,7 +1,7 @@
 package svc
 
 import (
-	"boilerplate/app/serializers"
+	"clean/app/serializers"
 )
 
 type ISystem interface {

@@ -1,14 +1,14 @@
 package controllers
 
 import (
-	"boilerplate/app/domain"
-	"boilerplate/app/serializers"
-	"boilerplate/app/svc"
-	"boilerplate/app/utils/consts"
-	"boilerplate/app/utils/methodutil"
-	"boilerplate/app/utils/msgutil"
-	"boilerplate/infra/errors"
-	"boilerplate/infra/logger"
+	"clean/app/domain"
+	"clean/app/serializers"
+	"clean/app/svc"
+	"clean/app/utils/consts"
+	"clean/app/utils/methodutil"
+	"clean/app/utils/msgutil"
+	"clean/infra/errors"
+	"clean/infra/logger"
 	"net/http"
 
 	"github.com/labstack/echo/v4"

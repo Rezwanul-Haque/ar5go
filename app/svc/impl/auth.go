@@ -1,16 +1,16 @@
 package impl
 
 import (
-	"boilerplate/app/domain"
-	"boilerplate/app/repository"
-	"boilerplate/app/serializers"
-	"boilerplate/app/svc"
-	"boilerplate/app/utils/consts"
-	"boilerplate/app/utils/methodutil"
-	"boilerplate/app/utils/msgutil"
-	"boilerplate/infra/config"
-	"boilerplate/infra/errors"
-	"boilerplate/infra/logger"
+	"clean/app/domain"
+	"clean/app/repository"
+	"clean/app/serializers"
+	"clean/app/svc"
+	"clean/app/utils/consts"
+	"clean/app/utils/methodutil"
+	"clean/app/utils/msgutil"
+	"clean/infra/config"
+	"clean/infra/errors"
+	"clean/infra/logger"
 	"fmt"
 
 	"github.com/dgrijalva/jwt-go"

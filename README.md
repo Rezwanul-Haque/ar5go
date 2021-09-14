@@ -1,10 +1,10 @@
-# MVP Boilerplate
+# Clean Architecture without Cache based authentication in golang
 
 ## Deployment
 
 Step 1: Go to xx.xx.xx.xx server using remote protocol (RDP) 
 
-Step 2: Go to boilerplate_backend Folder  `G:\boilerplate\boilerplate_backend`
+Step 2: Go to clean_backend Folder  `G:\clean\clean_backend`
 
 Step 3: To deploy this project run
 
@@ -20,7 +20,7 @@ Step 3: To deploy this project run
 Go to the project directory
 
 ```bash
-  cd boilerplate_backend
+  cd clean_backend
 ```
 
 Install dependencies

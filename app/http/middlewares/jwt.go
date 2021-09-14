@@ -1,9 +1,9 @@
 package middlewares
 
 import (
-	"boilerplate/app/serializers"
-	"boilerplate/app/utils/methodutil"
-	"boilerplate/infra/logger"
+	"clean/app/serializers"
+	"clean/app/utils/methodutil"
+	"clean/infra/logger"
 	"fmt"
 	"net/http"
 	"reflect"

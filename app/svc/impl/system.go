@@ -1,9 +1,9 @@
 package impl
 
 import (
-	"boilerplate/app/repository"
-	"boilerplate/app/serializers"
-	"boilerplate/app/svc"
+	"clean/app/repository"
+	"clean/app/serializers"
+	"clean/app/svc"
 )
 
 type system struct {

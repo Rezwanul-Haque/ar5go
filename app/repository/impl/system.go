@@ -1,7 +1,7 @@
 package impl
 
 import (
-	"boilerplate/app/repository"
+	"clean/app/repository"
 
 	"gorm.io/gorm"
 )
