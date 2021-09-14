@@ -5,7 +5,7 @@
 Go to the project directory
 
 ```bash
-cd clean_backend
+cd clean-architechture-golang
 ```
 
 Install dependencies
