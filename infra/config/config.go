@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/spf13/viper"
@@ -96,6 +97,10 @@ func Mail() *MailConfig {
 
 func LoadConfig() {
 	setDefaultConfig()
+	fmt.Println(MailgunConfig{
+		ApiKey: os.Getenv("MAIL_API_KEY"),
+		Domain: os.Getenv("MAIL_CLIENT_DOMAIN"),
+	})
 
 	_ = viper.BindEnv("CONSUL_URL")
 	_ = viper.BindEnv("CONSUL_PATH")
@@ -170,8 +175,8 @@ func setDefaultConfig() {
 			PasswordReset:  "Password Reset",
 		},
 		Mailgun: MailgunConfig{
-			ApiKey: "mail-api-key",
-			Domain: "mail.domain.xyz",
+			ApiKey: os.Getenv("MAIL_API_KEY"),
+			Domain: os.Getenv("MAIL_CLIENT_DOMAIN"),
 			TemplateName: TemplateNameConfig{
 				UserCreate:     "Welcome",
 				ForgotPassword: "password_reset",

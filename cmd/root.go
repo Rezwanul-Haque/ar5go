@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 )
 
@@ -24,6 +25,11 @@ func init() {
 
 // Execute executes the root command
 func Execute() {
+	err := godotenv.Load()
+	if err != nil {
+		logger.Error("Error loading .env file", err)
+	}
+
 	config.LoadConfig()
 	conn.ConnectDb()
 	conn.ConnectMailGun()

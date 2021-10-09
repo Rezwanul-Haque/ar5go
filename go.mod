@@ -7,6 +7,7 @@ require (
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/google/uuid v1.3.0
+	github.com/joho/godotenv v1.4.0
 	github.com/labstack/echo/v4 v4.5.0
 	github.com/mailgun/mailgun-go/v4 v4.5.2
 	github.com/spf13/cobra v1.2.1
