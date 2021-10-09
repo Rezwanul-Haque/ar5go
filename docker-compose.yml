@@ -34,7 +34,7 @@ services:
       context: .
     ports:
       - 8080:8080
-    command: seed -t=true
+    command: serve
    # volumes:
       # - ./:/project  # uncomment this line if you want realtime codebase update to the container
     environment:

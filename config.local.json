@@ -35,8 +35,8 @@
     "welcomeMessage": "We're very excited to have you on board",
     "passwordMessage": "The password is auto generated, please change immediately",
     "mailgun": {
-      "apiKey": "put mail-api-key",
-      "domain": "mail.domain.xyz",
+      "apiKey": "mail-api-key",
+      "domain": "mail client domain",
       "subject": {
         "userCreated": "User Created",
         "forgotPassword": "Forgot Password",
