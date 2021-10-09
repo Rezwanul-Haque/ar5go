@@ -97,10 +97,6 @@ func Mail() *MailConfig {
 
 func LoadConfig() {
 	setDefaultConfig()
-	fmt.Println(MailgunConfig{
-		ApiKey: os.Getenv("MAIL_API_KEY"),
-		Domain: os.Getenv("MAIL_CLIENT_DOMAIN"),
-	})
 
 	_ = viper.BindEnv("CONSUL_URL")
 	_ = viper.BindEnv("CONSUL_PATH")
