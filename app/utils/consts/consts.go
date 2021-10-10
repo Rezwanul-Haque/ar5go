@@ -1,11 +1,13 @@
 package consts
 
 const (
-	RoleIDAdmin uint = 1
-	RoleIDSales uint = 2
+	RoleIDAdmin      uint = 1
+	RoleIDSales      uint = 2
+	RoleIDSuperAdmin uint = 3
 
-	RoleAdmin string = "admin"
-	RoleSales string = "sales"
+	RoleAdmin      string = "admin"
+	RoleSales      string = "sales"
+	RoleSuperAdmin string = "super_admin"
 
 	AccessTokenType  = "access"
 	RefreshTokenType = "refresh"
@@ -48,4 +50,6 @@ const (
 	PermissionCompanyInterestFetchAll = "fetch.interest.all"
 
 	PermissionImagesUpload = "upload.images"
+
+	PermissionUserUpdateManually = "update.user.manually"
 )

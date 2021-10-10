@@ -7,6 +7,7 @@ import (
 	"clean/app/utils/msgutil"
 	"clean/infra/errors"
 	"clean/infra/logger"
+	"fmt"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -46,6 +47,7 @@ func (ctr *roles) CreateRole(c echo.Context) error {
 		return c.JSON(restErr.Status, restErr)
 	}
 
+	logger.Info(fmt.Sprintf("%+v", roleToCreate))
 	if err = roleToCreate.Validate(); err != nil {
 		restErr := errors.NewBadRequestError(err.Error())
 		return c.JSON(restErr.Status, restErr)
@@ -55,7 +57,6 @@ func (ctr *roles) CreateRole(c echo.Context) error {
 	if createErr != nil {
 		return c.JSON(createErr.Status, createErr)
 	}
-
 	return c.JSON(http.StatusOK, resp)
 }
 
@@ -74,6 +75,7 @@ func (ctr *roles) UpdateRole(c echo.Context) error {
 		return c.JSON(restErr.Status, restErr)
 	}
 
+	logger.Info(fmt.Sprintf("%+v", roleToUpdate))
 	if err = roleToUpdate.Validate(); err != nil {
 		restErr := errors.NewBadRequestError(err.Error())
 		return c.JSON(restErr.Status, restErr)
@@ -82,7 +84,6 @@ func (ctr *roles) UpdateRole(c echo.Context) error {
 	if upErr := ctr.rsvc.UpdateRole(uint(roleID), roleToUpdate); upErr != nil {
 		return c.JSON(upErr.Status, upErr)
 	}
-
 	return c.JSON(http.StatusOK, map[string]interface{}{"message": msgutil.EntityUpdateSuccessMsg("role")})
 }
 
@@ -100,7 +101,6 @@ func (ctr *roles) DeleteRole(c echo.Context) error {
 	if delErr := ctr.rsvc.DeleteRole(uint(roleID)); delErr != nil {
 		return c.JSON(delErr.Status, delErr)
 	}
-
 	return c.JSON(http.StatusOK, map[string]interface{}{"message": msgutil.EntityDeleteSuccessMsg("role")})
 }
 
@@ -110,7 +110,6 @@ func (ctr *roles) ListRoles(c echo.Context) error {
 	if err != nil {
 		return c.JSON(err.Status, err)
 	}
-
 	return c.JSON(http.StatusOK, res)
 }
 
@@ -127,6 +126,8 @@ func (ctr *roles) SetRolePermissions(c echo.Context) error {
 	roleID, _ := strconv.Atoi(c.Param("role_id"))
 	rp.RoleID = roleID
 
+	logger.Info(fmt.Sprintf("%+v", rp))
+
 	if err = rp.Validate(); err != nil {
 		restErr := errors.NewBadRequestError(err.Error())
 		return c.JSON(restErr.Status, restErr)
@@ -135,7 +136,6 @@ func (ctr *roles) SetRolePermissions(c echo.Context) error {
 	if setErr := ctr.rsvc.SetRolePermissions(&rp); setErr != nil {
 		return c.JSON(setErr.Status, msgutil.EntityCreationFailedMsg("roles permission"))
 	}
-
 	return c.JSON(http.StatusOK, rp)
 }
 
@@ -154,6 +154,5 @@ func (ctr *roles) GetRolePermissions(c echo.Context) error {
 	if getErr != nil {
 		return c.JSON(getErr.Status, getErr)
 	}
-
 	return c.JSON(http.StatusOK, res)
 }

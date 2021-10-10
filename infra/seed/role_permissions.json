@@ -128,6 +128,10 @@
         "permission_id": 32
     },
     {
+        "role_id": 1,
+        "permission_id": 33
+    },
+    {
         "role_id": 2,
         "permission_id": 2
     },
@@ -186,5 +190,9 @@
     {
         "role_id": 2,
         "permission_id": 30
+    },
+    {
+        "role_id": 2,
+        "permission_id": 32
     }
 ]

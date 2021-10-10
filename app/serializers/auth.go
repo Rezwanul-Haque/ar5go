@@ -24,7 +24,6 @@ type LoginResp struct {
 
 type JwtToken struct {
 	UserID        uint   `json:"uid"`
-	CompanyID     uint   `json:"cid"`
 	AccessToken   string `json:"act"`
 	RefreshToken  string `json:"rft"`
 	AccessUuid    string `json:"aid"`
@@ -55,9 +54,25 @@ func (f ForgotPasswordReq) Validate() error {
 	)
 }
 
+type VerifyConfirmationTokenReq struct {
+	Token string `json:"token"`
+	ID    int    `json:"id"`
+}
+
+type UserActivationByAdmin struct {
+	ID int `json:"id"`
+}
+
 type VerifyResetPasswordReq struct {
 	Token string `json:"token"`
 	ID    int    `json:"id"`
+}
+
+func (vr VerifyConfirmationTokenReq) Validate() error {
+	return v.ValidateStruct(&vr,
+		v.Field(&vr.Token, v.Required),
+		v.Field(&vr.ID, v.Required),
+	)
 }
 
 func (vr VerifyResetPasswordReq) Validate() error {

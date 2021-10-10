@@ -7,6 +7,7 @@ import (
 	"clean/app/utils/msgutil"
 	"clean/infra/errors"
 	"clean/infra/logger"
+	"fmt"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -43,6 +44,7 @@ func (ctr *permissions) CreatePermission(c echo.Context) error {
 		return c.JSON(restErr.Status, restErr)
 	}
 
+	logger.Info(fmt.Sprintf("%+v", permissionToCreate))
 	if err = permissionToCreate.Validate(); err != nil {
 		restErr := errors.NewBadRequestError(err.Error())
 		return c.JSON(restErr.Status, restErr)
@@ -52,7 +54,6 @@ func (ctr *permissions) CreatePermission(c echo.Context) error {
 	if createErr != nil {
 		return c.JSON(createErr.Status, createErr)
 	}
-
 	return c.JSON(http.StatusOK, resp)
 }
 
@@ -72,6 +73,7 @@ func (ctr *permissions) UpdatePermission(c echo.Context) error {
 		return c.JSON(restErr.Status, restErr)
 	}
 
+	logger.Info(fmt.Sprintf("%+v", permissionToUpdate))
 	if err = permissionToUpdate.Validate(); err != nil {
 		restErr := errors.NewBadRequestError(err.Error())
 		return c.JSON(restErr.Status, restErr)
@@ -80,7 +82,6 @@ func (ctr *permissions) UpdatePermission(c echo.Context) error {
 	if upErr := ctr.psvc.UpdatePermission(uint(permissionID), permissionToUpdate); upErr != nil {
 		return c.JSON(upErr.Status, upErr)
 	}
-
 	return c.JSON(http.StatusOK, map[string]interface{}{"message": msgutil.EntityUpdateSuccessMsg("permission")})
 }
 
@@ -98,7 +99,6 @@ func (ctr *permissions) DeletePermission(c echo.Context) error {
 	if delErr := ctr.psvc.DeletePermission(uint(roleID)); delErr != nil {
 		return c.JSON(delErr.Status, delErr)
 	}
-
 	return c.JSON(http.StatusOK, map[string]interface{}{"message": msgutil.EntityDeleteSuccessMsg("permission")})
 }
 
@@ -108,6 +108,5 @@ func (ctr *permissions) ListPermission(c echo.Context) error {
 	if err != nil {
 		return c.JSON(err.Status, err)
 	}
-
 	return c.JSON(http.StatusOK, res)
 }

@@ -26,3 +26,6 @@ bin
 
 # library
 vendor
+
+# environment variable 
+.env 

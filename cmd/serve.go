@@ -12,6 +12,6 @@ var serveCmd = &cobra.Command{
 }
 
 func serve(cmd *cobra.Command, args []string) {
-	// http server start
+	// http server setup
 	server.Start()
 }

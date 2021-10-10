@@ -2,7 +2,7 @@ package impl
 
 import (
 	"clean/app/serializers"
-	"clean/app/utils/methodsutil"
+	"clean/app/utils/methodutil"
 	"fmt"
 	"math"
 	"strings"
@@ -45,7 +45,7 @@ func GenerateFilteringCondition(r *gorm.DB, tableName string, pagination *serial
 
 	sort = pagination.Sort
 
-	if !methodsutil.IsEmpty(tableName) {
+	if !methodutil.IsEmpty(tableName) {
 		sort = tableName + "." + pagination.Sort
 	}
 	// get data with limit, offset & order
@@ -58,7 +58,7 @@ func GenerateFilteringCondition(r *gorm.DB, tableName string, pagination *serial
 		for _, value := range searches {
 			var column string
 			column = value.Column
-			if !methodsutil.IsEmpty(tableName) {
+			if !methodutil.IsEmpty(tableName) {
 				column = tableName + "." + value.Column
 			}
 			action := value.Action

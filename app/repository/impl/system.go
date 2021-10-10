@@ -2,23 +2,18 @@ package impl
 
 import (
 	"clean/app/repository"
-	"clean/infra/logger"
-	"fmt"
 
-	"github.com/go-redis/redis"
 	"gorm.io/gorm"
 )
 
 type system struct {
 	*gorm.DB
-	*redis.Client
 }
 
 // NewSystemRepository will create an object that represent the System.Repository implementations
-func NewSystemRepository(db *gorm.DB, redis *redis.Client) repository.ISystem {
+func NewSystemRepository(db *gorm.DB) repository.ISystem {
 	return &system{
-		DB:     db,
-		Client: redis,
+		DB: db,
 	}
 }
 
@@ -29,16 +24,4 @@ func (sys *system) DBCheck() (bool, error) {
 	}
 
 	return true, nil
-}
-
-func (sys *system) CacheCheck() bool {
-	client := sys.Client
-	pong, err := client.Ping().Result()
-	if err != nil {
-		return false
-	}
-
-	logger.Info(fmt.Sprintf("%v from cache", pong))
-
-	return true
 }

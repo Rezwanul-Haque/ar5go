@@ -1,24 +1,42 @@
-# Clean Architecture with JWT & Cache based authentication in golang
+# Clean Architecture without Cache based authentication in golang
 
-## Run Seeder
-```terminal
-go mod vendor
+## Run Locally
 
-go run main.go seed
+Go to the project directory
 
-or
-
-go run main.go seed --truncate=true or -t=true
+```bash
+cd clean-architechture-golang
 ```
 
-## Local
-```terminal
-go mod vendor
+Install dependencies
 
+```bash
+go mod vendor
+```
+### Seedding database
+
+```bash
+go run main.go seed
+  ```
+ Use the below command to truncate then seed database  
+  ```
+  go run main.go seed --truncate=true
+
+  or
+
+  go run main.go seed -t=true
+```
+
+Start the server Locally
+
+```bash
 go run main.go serve
 ```
 
-## Docker
-```terminal
+Start the server using Docker
+
+```bash
 make development
 ```
+
+

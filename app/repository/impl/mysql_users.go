@@ -3,13 +3,15 @@ package impl
 import (
 	"clean/app/domain"
 	"clean/app/repository"
-	"clean/app/serializers"
-	"clean/app/utils/methodsutil"
+	"clean/app/utils/methodutil"
 	"clean/app/utils/msgutil"
+	"clean/infra/conn"
 	"clean/infra/errors"
 	"clean/infra/logger"
 	"strings"
 	"time"
+
+	stdErrors "errors"
 
 	"gorm.io/gorm"
 )
@@ -26,10 +28,16 @@ func NewMySqlUsersRepository(db *gorm.DB) repository.IUsers {
 }
 
 func (r *users) Save(user *domain.User) (*domain.User, *errors.RestErr) {
-	res := r.DB.Model(&domain.User{}).Create(&user)
+	err := r.DB.Model(&domain.User{}).Create(&user).Error
 
-	if res.Error != nil {
-		logger.Error("error occurred when create user", res.Error)
+	if err != nil {
+		var mysqlErr conn.DbErrors
+
+		if stdErrors.As(err, &mysqlErr.MySQLError) && mysqlErr.MySQLError.Number == errors.ErrDuplicateEntry {
+			logger.Error("error occurred when create user with duplicate data", err)
+			return nil, errors.NewAlreadyExistError(errors.ErrPhoneOrEmailExists)
+		}
+		logger.Error("error occurred when create user", err)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -37,7 +45,6 @@ func (r *users) Save(user *domain.User) (*domain.User, *errors.RestErr) {
 }
 
 func (r *users) GetUser(userID uint, withPermission bool) (*domain.UserWithPerms, *errors.RestErr) {
-	//var resp domain.User
 	var intUser domain.IntermediateUserWithPermissions
 	var userWithParams domain.UserWithPerms
 
@@ -69,7 +76,7 @@ func (r *users) GetUser(userID uint, withPermission bool) (*domain.UserWithPerms
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
-	err := methodsutil.StructToStruct(intUser, &userWithParams.User)
+	err := methodutil.StructToStruct(intUser, &userWithParams.User)
 	if err != nil {
 		logger.Error(msgutil.EntityStructToStructFailedMsg("set intermediate user & permissions"), err)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
@@ -103,18 +110,65 @@ func (r *users) GetUserByID(userID uint) (*domain.User, *errors.RestErr) {
 }
 
 func (r *users) Update(user *domain.User) *errors.RestErr {
-	res := r.DB.Model(&domain.User{}).Omit("company_id", "password", "app_key").Where("id = ? AND company_id = ?", user.ID, user.CompanyID).Updates(&user)
+	err := r.DB.Model(&domain.User{}).Omit("password").Where("id = ?", user.ID).Updates(&user).Error
+
+	if err != nil {
+		var mysqlErr conn.DbErrors
+
+		if stdErrors.As(err, &mysqlErr.MySQLError) && mysqlErr.MySQLError.Number == errors.ErrDuplicateEntry {
+			logger.Error("error occurred when update user with duplicate data", err)
+			return errors.NewAlreadyExistError(errors.ErrPhoneOrEmailExists)
+		}
+		logger.Error("error occurred when update user", err)
+		return errors.NewInternalServerError(errors.ErrSomethingWentWrong)
+	}
+	return nil
+}
+
+func (r *users) UpdateUserActivation(id uint, activated bool) *errors.RestErr {
+
+	res := r.DB.Model(&domain.User{}).Where("id = ?", id).Update("activated", !activated)
 
 	if res.Error != nil {
-		logger.Error("error occurred when updating user by user id", res.Error)
+		logger.Error("error occurred when updating activation of user by user id", res.Error)
 		return errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
 	return nil
 }
 
-func (r *users) UpdatePassword(userID uint, companyID uint, updateValues map[string]interface{}) *errors.RestErr {
-	res := r.DB.Model(&domain.User{}).Where("id = ? AND company_id = ?", userID, companyID).Updates(&updateValues)
+func (r *users) UserNameIsUnique(username string) error {
+	user := &domain.User{}
+
+	res := r.DB.Model(&domain.User{}).Where("user_name = ?", username).Find(&user)
+	if res.RowsAffected != 0 {
+		logger.Error("user found by this username", res.Error)
+		return errors.NewError(errors.ErrUserNameNotUnique)
+	}
+	if res.Error != nil {
+		logger.Error("error occurred when trying to get user by username", res.Error)
+		return errors.NewError(errors.ErrSomethingWentWrong)
+	}
+	return nil
+}
+
+func (r *users) EmailIsUnique(email string) error {
+	user := &domain.User{}
+
+	res := r.DB.Model(&domain.User{}).Where("email = ?", email).Find(&user)
+	if res.RowsAffected != 0 {
+		logger.Error("user found by this email", res.Error)
+		return errors.NewError(errors.ErrEmailIsUnique)
+	}
+	if res.Error != nil {
+		logger.Error("error occurred when trying to get user by email", res.Error)
+		return errors.NewError(errors.ErrSomethingWentWrong)
+	}
+	return nil
+}
+
+func (r *users) UpdatePassword(userID uint, updateValues map[string]interface{}) *errors.RestErr {
+	res := r.DB.Model(&domain.User{}).Where("id = ? ", userID).Updates(&updateValues)
 
 	if res.Error != nil {
 		logger.Error(msgutil.EntityGenericFailedMsg("updating user by user id"), res.Error)
@@ -122,23 +176,6 @@ func (r *users) UpdatePassword(userID uint, companyID uint, updateValues map[str
 	}
 
 	return nil
-}
-
-func (r *users) GetUserByAppKey(appKey string) (*domain.User, *errors.RestErr) {
-	var resp domain.User
-
-	res := r.DB.Model(&domain.User{}).Where("app_key = ?", appKey).First(&resp)
-
-	if res.RowsAffected == 0 {
-		return nil, errors.NewNotFoundError("no user found")
-	}
-
-	if res.Error != nil {
-		logger.Error("error occurred when getting user by app key", res.Error)
-		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
-	}
-
-	return &resp, nil
 }
 
 func (r *users) GetUserByEmail(email string) (*domain.User, error) {
@@ -151,58 +188,10 @@ func (r *users) GetUserByEmail(email string) (*domain.User, error) {
 	}
 	if res.Error != nil {
 		logger.Error("error occurred when trying to get user by email", res.Error)
-		return nil, errors.NewError(errors.ErrSomethingWentWrong)
+		return nil, errors.NewError("error occurred when trying to get user by email")
 	}
 
 	return user, nil
-}
-
-func (r *users) GetUsersByCompanyIdAndRole(companyID, roleID uint,
-	pagination *serializers.Pagination) ([]*domain.IntermediateUserResp, int64, *errors.RestErr) {
-	var resp []*domain.IntermediateUserResp
-
-	var totalRows int64 = 0
-	tableName := "users"
-
-	stmt := GenerateFilteringCondition(r.DB, tableName, pagination)
-
-	stmt = stmt.Model(&domain.Users{}).
-		Select("companies.id company_id, companies.name company_name,"+
-			"users.id, users.user_name, users.first_name, users.last_name, users.email, users.phone, users.profile_pic, "+
-			"users.role_id, users.created_at, users.updated_at, users.last_login_at, users.first_login").
-		Joins("LEFT JOIN companies ON users.company_id = companies.id").
-		Where("company_id = ? AND role_id = ?", companyID, roleID).
-		Find(&resp)
-
-	if len(pagination.QueryString) > 0 {
-		searchStmt := "users.user_name LIKE ? OR users.first_name LIKE ? OR users.last_name LIKE ? OR users.email LIKE ? OR users.phone LIKE ?"
-		searchTerm := "%" + pagination.QueryString + "%"
-		stmt.Where(searchStmt, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm)
-	}
-	res := stmt.Find(&resp)
-	if res.RowsAffected == 0 {
-		return nil, 0, errors.NewNotFoundError("no users found")
-	}
-
-	if res.Error != nil {
-		logger.Error("error occurred when getting users by company_id and role id", res.Error)
-		return nil, 0, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
-	}
-
-	pagination.Rows = resp
-
-	errCount := r.DB.Model(&domain.Users{}).
-		Joins("LEFT JOIN companies ON users.company_id = companies.id").
-		Where("company_id = ? AND role_id = ?", companyID, roleID).
-		Count(&totalRows).Error
-
-	if errCount != nil {
-		logger.Error("error occurred when getting total users by company_id and role id", res.Error)
-		return nil, 0, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
-	}
-	pagination.TotalRows = totalRows
-	totalPages := CalculateTotalPageAndRows(pagination, totalRows)
-	return resp, totalPages, nil
 }
 
 func (r *users) SetLastLoginAt(user *domain.User) error {
@@ -256,7 +245,7 @@ func (r *users) GetTokenUser(id uint) (*domain.VerifyTokenResp, *errors.RestErr)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
-	err := methodsutil.StructToStruct(tempUser, &vtUser.BaseVerifyTokenResp)
+	err := methodutil.StructToStruct(tempUser, &vtUser.BaseVerifyTokenResp)
 	if err != nil {
 		logger.Error(msgutil.EntityStructToStructFailedMsg("set intermediate user & permissions"), err)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
@@ -299,7 +288,7 @@ func (r *users) GetUserWithPermissions(userID uint, withPermission bool) (*domai
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
-	err := methodsutil.StructToStruct(intUser, &userWithParams.User)
+	err := methodutil.StructToStruct(intUser, &userWithParams.User)
 	if err != nil {
 		logger.Error(msgutil.EntityStructToStructFailedMsg("set intermediate user & permissions"), err)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)

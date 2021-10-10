@@ -2,15 +2,11 @@ package serializers
 
 import (
 	"clean/app/utils/consts"
-	"clean/app/utils/methodsutil"
+	"clean/app/utils/methodutil"
 	"time"
-)
 
-type ResolveUserResponse struct {
-	CompanyName  string             `json:"company_name"`
-	CompanyID    uint               `json:"company_id"`
-	Subordinates []*ResolveUserResp `json:"subordinates"`
-}
+	v "github.com/go-ozzo/ozzo-validation/v4"
+)
 
 type UserReq struct {
 	UserName   string  `json:"user_name,omitempty"`
@@ -25,7 +21,6 @@ type UserReq struct {
 
 type LoggedInUser struct {
 	ID          int      `json:"user_id"`
-	CompanyID   uint     `json:"company_id"`
 	AccessUuid  string   `json:"access_uuid"`
 	RefreshUuid string   `json:"refresh_uuid"`
 	Role        string   `json:"role"`
@@ -37,9 +32,7 @@ type UserResp struct {
 	UserName    string     `json:"user_name"`
 	FirstName   string     `json:"first_name"`
 	LastName    string     `json:"last_name"`
-	CompanyID   uint       `json:"company_id"`
 	Email       string     `json:"email"`
-	Phone       *string    `json:"phone"`
 	ProfilePic  *string    `json:"profile_pic"`
 	AppKey      string     `json:"app_key,omitempty"`
 	RoleID      uint       `json:"role_id"`
@@ -72,38 +65,46 @@ type UserWithParamsResp struct {
 }
 
 type VerifyTokenResp struct {
-	ID           int      `json:"id"`
-	FirstName    string   `json:"first_name"`
-	LastName     string   `json:"last_name"`
-	Email        string   `json:"email"`
-	Phone        *string  `json:"phone"`
-	ProfilePic   *string  `json:"profile_pic"`
-	BusinessID   *int     `json:"business_id"`
-	BusinessName string   `json:"business_name"`
-	CompanyID    *int     `json:"company_id"`
-	CompanyName  string   `json:"company_name"`
-	Permissions  []string `json:"permissions"`
-	Admin        bool     `json:"admin"`
+	ID          int      `json:"id"`
+	FirstName   string   `json:"first_name"`
+	LastName    string   `json:"last_name"`
+	Email       string   `json:"email"`
+	Phone       *string  `json:"phone"`
+	ProfilePic  *string  `json:"profile_pic"`
+	Permissions []string `json:"permissions"`
+	Admin       bool     `json:"admin"`
 }
 
-type UserWithLocations struct {
-	UserID    uint                   `json:"user_id"`
-	UserName  string                 `json:"user_name"`
-	Locations []*BaseLocationHistory `json:"locations"`
+type UserNameIsUnique struct {
+	UserName string `json:"user_name"`
 }
 
-// func (lu LoggedInUser) IsSuperAdmin() bool {
-// 	return consts.RoleSuperAdmin == lu.Role
-// }
+type EmailIsUnique struct {
+	Email string `json:"email"`
+}
 
 func (lu LoggedInUser) IsAdmin() bool {
 	return consts.RoleAdmin == lu.Role
 }
 
-func (lu LoggedInUser) IsSales() bool {
-	return consts.RoleSales == lu.Role
+type UserImagesResp struct {
+	Message string `json:"message"`
+	UserID  uint   `json:"user_id"`
+	Path    string `json:"path"`
 }
 
 func (lu LoggedInUser) HasPermission(perm string) bool {
-	return methodsutil.InArray(perm, lu.Permissions)
+	return methodutil.InArray(perm, lu.Permissions)
+}
+
+func (vr UserNameIsUnique) Validate() error {
+	return v.ValidateStruct(&vr,
+		v.Field(&vr.UserName, v.Required),
+	)
+}
+
+func (vr EmailIsUnique) Validate() error {
+	return v.ValidateStruct(&vr,
+		v.Field(&vr.Email, v.Required),
+	)
 }

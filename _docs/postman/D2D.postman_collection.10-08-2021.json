@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "f14852f7-b39b-41d4-96bd-2d11196154de",
-		"name": "Clean",
+		"_postman_id": "0c923608-d7ea-47d0-be87-4e33bd51e4eb",
+		"name": "Pi Survey",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -44,13 +44,12 @@
 									"raw": "{\n\t\"refresh_token\": \"{{refresh_token}}\"\n}"
 								},
 								"url": {
-									"raw": "{{schema}}://{{url}}/v1/token/refresh",
+									"raw": "{{schema}}://{{url}}/token/refresh",
 									"protocol": "{{schema}}",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
-										"v1",
 										"token",
 										"refresh"
 									]
@@ -97,13 +96,12 @@
 									"raw": ""
 								},
 								"url": {
-									"raw": "{{schema}}://{{url}}/v1/token/verify",
+									"raw": "{{schema}}://{{url}}/token/verify",
 									"protocol": "{{schema}}",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
-										"v1",
 										"token",
 										"verify"
 									]
@@ -127,6 +125,7 @@
 											"    var jsonData = JSON.parse(responseBody);",
 											"    postman.setEnvironmentVariable(\"access_token\", jsonData.access_token);",
 											"    postman.setEnvironmentVariable(\"refresh_token\", jsonData.refresh_token);",
+											"    postman.setEnvironmentVariable(\"app_key\", jsonData.user.app_key);",
 											"}"
 										],
 										"type": "text/javascript"
@@ -143,7 +142,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"email\": \"admin@vivasoftltd.com\",\n\t\"password\": \"12345678\",\n    \"admin\": true\n}"
+									"raw": "{\n\t\"email\": \"farhad@gmail.com\",\n\t\"password\": \"12345678\",\n    \"admin\": true\n}\n"
 								},
 								"url": {
 									"raw": "{{schema}}://{{url}}/login",
@@ -153,80 +152,6 @@
 									],
 									"path": [
 										"login"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "login sales",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"if (responseCode.code === 200) {",
-											"    var jsonData = JSON.parse(responseBody);",
-											"postman.setEnvironmentVariable(\"access_token\", jsonData.access_token);",
-											"postman.setEnvironmentVariable(\"refresh_token\", jsonData.refresh_token);",
-											"}"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n\t\"email\": \"shahanbhai@vivasoftltd.com\",\n\t\"password\": \"sha!han\",\n    \"admin\": false\n}"
-								},
-								"url": {
-									"raw": "{{schema}}://{{url}}/login",
-									"protocol": "{{schema}}",
-									"host": [
-										"{{url}}"
-									],
-									"path": [
-										"login"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "logout",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "formdata",
-									"formdata": []
-								},
-								"url": {
-									"raw": "{{schema}}://{{url}}/logout",
-									"protocol": "{{schema}}",
-									"host": [
-										"{{url}}"
-									],
-									"path": [
-										"logout"
 									]
 								}
 							},
@@ -290,16 +215,15 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"permission\": \"create.user\",\n\t\"description\": \"Permission to create User\"\n}"
+									"raw": "{\n\t\"name\": \"update.user\",\n\t\"description\": \"Permission to update User\"\n}"
 								},
 								"url": {
-									"raw": "{{schema}}://{{url}}/v1/permission",
+									"raw": "{{schema}}://{{url}}/permission",
 									"protocol": "{{schema}}",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
-										"v1",
 										"permission"
 									]
 								}
@@ -330,7 +254,7 @@
 										}
 									]
 								},
-								"method": "POST",
+								"method": "PATCH",
 								"header": [
 									{
 										"key": "Content-Type",
@@ -339,17 +263,17 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"permission\": \"fetch.branch.test\"\n}"
+									"raw": "{\n\t\"name\": \"create.user\"\n}"
 								},
 								"url": {
-									"raw": "{{schema}}://{{url}}/v1/permission",
+									"raw": "{{schema}}://{{url}}/permission/1",
 									"protocol": "{{schema}}",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
-										"v1",
-										"permission"
+										"permission",
+										"1"
 									]
 								}
 							},
@@ -377,13 +301,12 @@
 									}
 								],
 								"url": {
-									"raw": "{{schema}}://{{url}}/v1/permission",
+									"raw": "{{schema}}://{{url}}/permission",
 									"protocol": "{{schema}}",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
-										"v1",
 										"permission"
 									]
 								}
@@ -412,15 +335,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{schema}}://{{url}}/v1/permission/25",
+									"raw": "{{schema}}://{{url}}/permission/1",
 									"protocol": "{{schema}}",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
-										"v1",
 										"permission",
-										"25"
+										"1"
 									]
 								}
 							},
@@ -464,16 +386,15 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"role\": \"testrole\",\n\t\"display_role\": \"testrole\"\n}"
+									"raw": "{\n\t\"name\": \"sales\",\n\t\"display_name\": \"sales\"\n}"
 								},
 								"url": {
-									"raw": "{{schema}}://{{url}}/v1/role",
+									"raw": "{{schema}}://{{url}}/role",
 									"protocol": "{{schema}}",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
-										"v1",
 										"role"
 									]
 								}
@@ -513,16 +434,15 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"role\": \"admin\",\n\t\"display_role\": \"Admin\"\n}"
+									"raw": "{\n\t\"name\": \"admin\",\n\t\"display_name\": \"Admin\"\n}"
 								},
 								"url": {
-									"raw": "{{schema}}://{{url}}/v1/role/1",
+									"raw": "{{schema}}://{{url}}/role/1",
 									"protocol": "{{schema}}",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
-										"v1",
 										"role",
 										"1"
 									]
@@ -563,18 +483,17 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"permissions\": [13, 14]\n}"
+									"raw": "{\n\t\"permissions\": [2,3,8,9,11,12,14,16,23,24,25,26,27,32]\n}"
 								},
 								"url": {
-									"raw": "{{schema}}://{{url}}/v1/role/1/permissions",
+									"raw": "{{schema}}://{{url}}/role/2/permissions",
 									"protocol": "{{schema}}",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
-										"v1",
 										"role",
-										"1",
+										"2",
 										"permissions"
 									]
 								}
@@ -603,15 +522,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{schema}}://{{url}}/v1/role/1/permissions",
+									"raw": "{{schema}}://{{url}}/role/2/permissions",
 									"protocol": "{{schema}}",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
-										"v1",
 										"role",
-										"1",
+										"2",
 										"permissions"
 									]
 								}
@@ -640,13 +558,12 @@
 									}
 								],
 								"url": {
-									"raw": "{{schema}}://{{url}}/v1/role",
+									"raw": "{{schema}}://{{url}}/role",
 									"protocol": "{{schema}}",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
-										"v1",
 										"role"
 									]
 								}
@@ -675,15 +592,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{schema}}://{{url}}/v1/role/6",
+									"raw": "{{schema}}://{{url}}/role/1",
 									"protocol": "{{schema}}",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
-										"v1",
 										"role",
-										"6"
+										"1"
 									]
 								}
 							},
@@ -711,7 +627,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"old_password\": \"shadowchef\",\n\t\"new_password\": \"shadowchef\"\n}",
+									"raw": "{\n\t\"old_password\": \"22345678\",\n\t\"new_password\": \"12345678\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -719,13 +635,12 @@
 									}
 								},
 								"url": {
-									"raw": "{{schema}}://{{url}}/v1/password/change",
+									"raw": "{{schema}}://{{url}}/password/change",
 									"protocol": "{{schema}}",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
-										"v1",
 										"password",
 										"change"
 									]
@@ -743,7 +658,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"email\": \"admin@shadowchef.co\"\n}",
+									"raw": "{\n\t\"email\": \"farhad@gmail.com\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -751,13 +666,12 @@
 									}
 								},
 								"url": {
-									"raw": "{{schema}}://{{url}}/v1/password/forgot",
+									"raw": "{{schema}}://{{url}}/password/forgot",
 									"protocol": "{{schema}}",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
-										"v1",
 										"password",
 										"forgot"
 									]
@@ -775,7 +689,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"id\": 16,\n\t\"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFiZHVsLm11a2l0QHZpdmFjb21zb2x1dGlvbnMuY29tIn0.cLZIBTSiqq_H8TCbKchovheDosh9SZdx3jUI766oTaA\"\n}",
+									"raw": "{\n\t\"id\": 1,\n\t\"token\": {{access_token}}\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -783,13 +697,12 @@
 									}
 								},
 								"url": {
-									"raw": "{{schema}}://{{url}}/v1/password/verifyreset",
+									"raw": "{{schema}}://{{url}}/password/verifyreset",
 									"protocol": "{{schema}}",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
-										"v1",
 										"password",
 										"verifyreset"
 									],
@@ -819,7 +732,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"id\": 17,\n\t\"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFiZHVsLm11a2l0QHZpdmFjb21zb2x1dGlvbnMuY29tIn0.idG-uCSj3aFsF-lnvXVegWC7uT_S8ngTdDxvQUtax_A\",\n\t\"password\": \"mukit027\"\n}",
+									"raw": "{\n\t\"id\": 1,\n\t\"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhaWQiOiIxMWI2MTM4Yy03NWI0LTRlNDktODM1YS00MmMxNDRkZDNiY2MiLCJleHAiOjE2Mjg3NzAxMzIsInJpZCI6IjVlZjhjZWI2LTg5YjItNGI5Ni05YTFjLWYxN2ViNmViMWIxMyIsInVpZCI6MX0.UwyTirGzWBoXIhxErRiycPIs4gTtfeVDicmLAGG-wuo\",\n    \"password\": \"12345678\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -827,13 +740,12 @@
 									}
 								},
 								"url": {
-									"raw": "{{schema}}://{{url}}/v1/password/reset",
+									"raw": "{{schema}}://{{url}}/password/reset",
 									"protocol": "{{schema}}",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
-										"v1",
 										"password",
 										"reset"
 									],
@@ -858,61 +770,7 @@
 			]
 		},
 		{
-			"name": "Company",
-			"item": [
-				{
-					"name": "Comany signup",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (responseCode.code === 200) {",
-									"    var jsonData = JSON.parse(responseBody);",
-									"    postman.setEnvironmentVariable(\"app_key\", jsonData.app_key);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "SecretKey",
-								"value": "dHepoR82!e#",
-								"type": "text",
-								"disabled": true
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Vivasoft\",\n    \"logo\": \"vivasoftltd.png\",\n    \"address\": \"dohs,mirpur\",\n    \"password\": \"12345678\",\n    \"business_id\": 1,\n    \"num_of_employee\": 50,\n    \"email\": \"admin@vivasoftltd.com\",\n    \"sns_link\": \"www.vivasoftltd.com\",\n    \"phone\": \"123123123\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{schema}}://{{url}}/company/signup",
-							"protocol": "{{schema}}",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"company",
-								"signup"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "User",
+			"name": "user",
 			"item": [
 				{
 					"name": "User signup",
@@ -936,13 +794,13 @@
 							},
 							{
 								"key": "AppKey",
-								"value": "65672ef5-b6f3-4c2a-8f86-7cb85734a4a0",
+								"value": "{{app_key}}",
 								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"first_name\": \"shahan\",\n    \"last_name\": \"khan\",\n    \"email\": \"shahanbhai@vivasoftltd.com\",\n    \"password\": \"sha!han\",\n    \"phone\": \"1234453\"\n}"
+							"raw": "{\n    \"user_name\": \"abufarhad\",\n\t\"first_name\": \"abu\",\n    \"last_name\": \"farhad\",\n    \"email\": \"farhad@gmail.com\"\n}"
 						},
 						"url": {
 							"raw": "{{schema}}://{{url}}/user/signup",
@@ -954,33 +812,109 @@
 								"user",
 								"signup"
 							]
-						}
+						},
+						"description": "We didn't accept user password here . We will auto generate a password. and send the password through email. Currently you can use `12345678`"
 					},
 					"response": []
 				},
 				{
-					"name": "Resolve User by API Key",
+					"name": "User Update",
 					"request": {
-						"method": "GET",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
 						"header": [
 							{
 								"key": "Content-Type",
+								"type": "text",
 								"value": "application/json"
-							},
-							{
-								"key": "AppKey",
-								"value": "075ea9e05865e64c9f1f06422b8cb379"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"first_name\": \"Md Abu\",\n    \"last_name\": \"Farhad\"\n}"
+						},
 						"url": {
-							"raw": "{{schema}}://{{url}}/user/resolve",
+							"raw": "{{schema}}://{{url}}/user",
 							"protocol": "{{schema}}",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
-								"user",
-								"resolve"
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "username uniqueness check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{schema}}://{{url}}/check/valid/username?user_name=Fuad",
+							"protocol": "{{schema}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"check",
+								"valid",
+								"username"
+							],
+							"query": [
+								{
+									"key": "user_name",
+									"value": "Fuad"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "email uniqueness check",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\":\"viva@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{schema}}://{{url}}/check/valid/email",
+							"protocol": "{{schema}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"check",
+								"valid",
+								"email"
+							],
+							"query": [
+								{
+									"key": "qs",
+									"value": "abufarhad15@gmail.com",
+									"disabled": true
+								}
 							]
 						}
 					},
@@ -994,17 +928,47 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{schema}}://{{url}}/ping",
+					"raw": "{{schema}}://{{url}}/h34l7h",
 					"protocol": "{{schema}}",
 					"host": [
 						"{{url}}"
 					],
 					"path": [
-						"ping"
+						"h34l7h"
 					]
 				}
 			},
 			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "schema",
+			"value": "http"
+		},
+		{
+			"key": "url",
+			"value": "localhost:8080/api/v1"
 		}
 	]
 }

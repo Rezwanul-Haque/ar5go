@@ -1,7 +1,8 @@
-package cryptoutil
+package hash
 
 import (
 	"crypto/md5"
+	"crypto/sha1"
 	"encoding/hex"
 )
 
@@ -12,4 +13,11 @@ func GetMD5Hash(key *string) *string {
 	hexResp := hex.EncodeToString(hasher.Sum(nil))
 
 	return &hexResp
+}
+
+// Get Sha 1 Hash ...
+func GetSha1Hash(key string) string {
+	hasher := sha1.New()
+	_, _ = hasher.Write([]byte(key))
+	return hex.EncodeToString(hasher.Sum(nil))
 }

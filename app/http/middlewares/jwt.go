@@ -2,16 +2,11 @@ package middlewares
 
 import (
 	"clean/app/serializers"
-	"clean/app/utils/methodsutil"
-	conf "clean/infra/config"
-	"clean/infra/conn"
-	"clean/infra/errors"
+	"clean/app/utils/methodutil"
 	"clean/infra/logger"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"reflect"
-	"strconv"
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"
@@ -225,49 +220,22 @@ func JWTWithConfig(config JWTConfig) echo.MiddlewareFunc {
 			}
 
 			tokenDetails := &serializers.JwtToken{}
-			if err := methodsutil.MapToStruct(claims, tokenDetails); err != nil {
+			if err := methodutil.MapToStruct(claims, tokenDetails); err != nil {
 				logger.Error(err.Error(), err)
 				return ErrJWTMissing
 			}
 
-			var redisUserId int
-			var redisUser string
-			var redisUserDetail string
-			user := &serializers.UserWithParamsResp{}
+			//should check id here
 
-			// Check if access_uuid corresponds to user_id in Redis
-			if !methodsutil.IsEmpty(conf.Redis().AccessUuidPrefix + tokenDetails.AccessUuid) {
-				redisUser, _ = conn.Redis().Get(conf.Redis().AccessUuidPrefix + tokenDetails.AccessUuid).Result()
-				redisUserId, err = strconv.Atoi(redisUser)
-				cuID, _ := strconv.Atoi((strconv.Itoa(int(tokenDetails.UserID)) + strconv.Itoa(int(tokenDetails.CompanyID))))
-				if err != nil || redisUserId != cuID {
-					logger.Error(fmt.Sprintf("redis user: %v | token user: %v | error: ", redisUserId, tokenDetails.UserID), err)
-					return ErrJWTMissing
-				}
-			} else {
-				return errors.ErrEmptyRedisKeyValue
-			}
-
-			if !methodsutil.IsEmpty(conf.Redis().UserPrefix + strconv.Itoa(int(tokenDetails.UserID)) + strconv.Itoa(int(tokenDetails.CompanyID))) {
-				key := conf.Redis().UserPrefix + strconv.Itoa(int(tokenDetails.UserID)) + strconv.Itoa(int(tokenDetails.CompanyID))
-				redisUserDetail, _ = conn.Redis().Get(key).Result()
-
-				if err = json.Unmarshal([]byte(redisUserDetail), &user); err != nil {
-					logger.Error(err.Error(), err)
-					return ErrJWTMissing
-				}
-			} else {
-				return errors.ErrEmptyRedisKeyValue
-			}
+			//user := &serializers.UserWithParamsResp{}
 
 			// Store user information from token into context.
 			c.Set(config.ContextKey, &serializers.LoggedInUser{
-				ID:          user.ID,
-				CompanyID:   user.CompanyID,
+				ID:          int(tokenDetails.UserID),
 				AccessUuid:  tokenDetails.AccessUuid,
 				RefreshUuid: tokenDetails.RefreshUuid,
-				Role:        user.RoleName,
-				Permissions: user.Permissions,
+				//Role:        user.RoleName,
+				//Permissions: user.Permissions,
 			})
 
 			return next(c)

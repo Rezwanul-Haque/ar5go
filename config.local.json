@@ -1,14 +1,22 @@
 {
   "app": {
     "name": "clean",
-    "port": 8080
+    "port": 8080,
+    "limit": 20,
+    "page": 1,
+    "sort": "created_at desc",
+    "userCreateAuthSkip": false,
+    "UserConfirmationPrefix": "UserActivation_",
+    "mockPasswordEnabled": true,
+    "mockPassword": "12345678",
+    "SendEmail": false
   },
   "db": {
     "host": "clean_mysql",
     "port": "3306",
     "user": "root",
     "pass": "12345678",
-    "schema": "clean_db",
+    "schema": "clean",
     "maxIdleConn": 1,
     "maxOpenConn": 2,
     "maxConnLifetime": 30,
@@ -17,19 +25,27 @@
   "jwt": {
     "accessTokenSecret": "accesstokensecret",
     "refreshTokenSecret": "refreshtokensecret",
-    "accessTokenExpiry": 30,
+    "accessTokenExpiry": 3000,
     "refreshTokenExpiry": 10080,
     "contextKey": "user"
   },
-  "redis": {
-    "host": "redis_dev",
-    "port": "6379",
-    "pass": "password123",
-    "db": 0,
-    "accessUuidPrefix": "access-uuid_",
-    "refreshUuidPrefix": "refresh-uuid_",
-    "userPrefix": "user_",
-    "tokenPrefix": "token_",
-    "ttl": 3600
+  "mail": {
+    "sender": "clean Admin <admin@clean.xyz>",
+    "passwordReseturl": "http://localhost:3000/password/reset",
+    "welcomeMessage": "We're very excited to have you on board",
+    "passwordMessage": "The password is auto generated, please change immediately",
+    "mailgun": {
+      "apiKey": "mail-api-key",
+      "domain": "mail client domain",
+      "subject": {
+        "userCreated": "User Created",
+        "forgotPassword": "Forgot Password",
+        "passwordReset": "Password Reset"
+      },
+      "templateName": {
+        "enterpriseUserCreate": "welcome",
+        "forgotPassword": "password_reset"
+      }
+    }
   }
 }

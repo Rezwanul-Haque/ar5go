@@ -19,9 +19,6 @@ func NewSystemService(sysrepo repository.ISystem) svc.ISystem {
 func (sys *system) GetHealth() (*serializers.HealthResp, error) {
 	resp := serializers.HealthResp{}
 
-	// check cache
-	cacheOnline := sys.repo.CacheCheck()
-	resp.CacheOnline = cacheOnline
 	// check db
 	dbOnline, err := sys.repo.DBCheck()
 	resp.DBOnline = dbOnline
