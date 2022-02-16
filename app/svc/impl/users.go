@@ -91,12 +91,12 @@ func (u *users) UpdateUser(userID uint, req serializers.UserReq) *errors.RestErr
 }
 
 func (u *users) GetUserByCompanyIdAndRole(companyID, roleID uint,
-	pagination *serializers.Pagination) (*serializers.Pagination, int64, *errors.RestErr) {
+	pagination *serializers.Pagination) (*serializers.Pagination, *errors.RestErr) {
 
 	var resp serializers.ResolveUserResponse
-	users, totalPages, err := u.urepo.GetUsersByCompanyIdAndRole(companyID, roleID, pagination)
+	users, err := u.urepo.GetUsersByCompanyIdAndRole(companyID, roleID, pagination)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 
 	resp.CompanyID = users[0].CompanyID
@@ -107,12 +107,12 @@ func (u *users) GetUserByCompanyIdAndRole(companyID, roleID uint,
 		err := methodsutil.StructToStruct(users, &resp.Subordinates)
 		if err != nil {
 			logger.Error(msgutil.EntityStructToStructFailedMsg("get users by company id"), err)
-			return nil, 0, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
+			return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 		}
 	}
 
 	pagination.Rows = resp
-	return pagination, totalPages, nil
+	return pagination, nil
 }
 
 func (u *users) ChangePassword(id int, data *serializers.ChangePasswordReq) error {

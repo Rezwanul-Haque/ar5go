@@ -158,13 +158,13 @@ func (r *users) GetUserByEmail(email string) (*domain.User, error) {
 }
 
 func (r *users) GetUsersByCompanyIdAndRole(companyID, roleID uint,
-	pagination *serializers.Pagination) ([]*domain.IntermediateUserResp, int64, *errors.RestErr) {
+	pagination *serializers.Pagination) ([]*domain.IntermediateUserResp, *errors.RestErr) {
 	var resp []*domain.IntermediateUserResp
 
 	var totalRows int64 = 0
 	tableName := "users"
 
-	stmt := GenerateFilteringCondition(r.DB, tableName, pagination)
+	stmt := GenerateFilteringCondition(r.DB, tableName, pagination, false)
 
 	stmt = stmt.Model(&domain.Users{}).
 		Select("companies.id company_id, companies.name company_name,"+
@@ -181,16 +181,17 @@ func (r *users) GetUsersByCompanyIdAndRole(companyID, roleID uint,
 	}
 	res := stmt.Find(&resp)
 	if res.RowsAffected == 0 {
-		return nil, 0, errors.NewNotFoundError("no users found")
+		return nil, errors.NewNotFoundError("no users found")
 	}
 
 	if res.Error != nil {
 		logger.Error("error occurred when getting users by company_id and role id", res.Error)
-		return nil, 0, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
+		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
 	pagination.Rows = resp
 
+	stmt = GenerateFilteringCondition(r.DB, tableName, pagination, true)
 	errCount := r.DB.Model(&domain.Users{}).
 		Joins("LEFT JOIN companies ON users.company_id = companies.id").
 		Where("company_id = ? AND role_id = ?", companyID, roleID).
@@ -198,11 +199,12 @@ func (r *users) GetUsersByCompanyIdAndRole(companyID, roleID uint,
 
 	if errCount != nil {
 		logger.Error("error occurred when getting total users by company_id and role id", res.Error)
-		return nil, 0, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
+		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 	pagination.TotalRows = totalRows
 	totalPages := CalculateTotalPageAndRows(pagination, totalRows)
-	return resp, totalPages, nil
+	pagination.TotalPages = totalPages
+	return resp, nil
 }
 
 func (r *users) SetLastLoginAt(user *domain.User) error {

@@ -9,5 +9,5 @@ import (
 type ILocation interface {
 	Save(company *domain.LocationHistory) *errors.RestErr
 	Update(*domain.LocationHistory) (*domain.LocationHistory, *errors.RestErr)
-	GetLocationsByUserID(userID uint, pagination *serializers.Pagination) ([]*domain.IntermediateLocationHistory, int64, *errors.RestErr)
+	GetLocationsByUserID(userID uint, pagination *serializers.Pagination) ([]*domain.IntermediateLocationHistory, *errors.RestErr)
 }

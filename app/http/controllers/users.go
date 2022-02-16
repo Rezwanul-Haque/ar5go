@@ -78,13 +78,13 @@ func (ctr *users) GetAll(c echo.Context) error {
 		return c.JSON(getErr.Status, getErr)
 	}
 	pagination := GeneratePaginationRequest(c)
-	resp, totalPages, getErr := ctr.uSvc.GetUserByCompanyIdAndRole(uint(foundUser.CompanyID), consts.RoleIDSales, pagination)
+	resp, getErr := ctr.uSvc.GetUserByCompanyIdAndRole(uint(foundUser.CompanyID), consts.RoleIDSales, pagination)
 
 	if getErr != nil {
 		return c.JSON(getErr.Status, getErr)
 	}
 
-	GeneratePagesPath(c, resp, totalPages)
+	GeneratePagesPath(c, resp)
 	return c.JSON(http.StatusOK, &resp)
 }
 
@@ -119,12 +119,12 @@ func (ctr *users) GetUserVisitedLocations(c echo.Context) error {
 	}
 
 	pagination := GeneratePaginationRequest(c)
-	resp, totalPages, getErr := ctr.lSvc.GetLocationsByUserID(uint(loggedInUser.ID), pagination)
+	resp, getErr := ctr.lSvc.GetLocationsByUserID(uint(loggedInUser.ID), pagination)
 	if getErr != nil {
 		return c.JSON(getErr.Status, getErr)
 	}
 
-	GeneratePagesPath(c, resp, totalPages)
+	GeneratePagesPath(c, resp)
 	return c.JSON(http.StatusOK, &resp)
 }
 
