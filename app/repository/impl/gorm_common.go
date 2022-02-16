@@ -14,7 +14,7 @@ func CalculateTotalPageAndRows(pagination *serializers.Pagination, totalRows int
 	var totalPages, fromRow, toRow int64 = 0, 0, 0
 
 	// calculate total pages
-	totalPages = int64(math.Ceil(float64(totalRows)/float64(pagination.Limit))) - 1
+	totalPages = int64(math.Ceil(float64(totalRows) / float64(pagination.Limit)))
 
 	if pagination.Page == 1 {
 		// set from & to row on first page
@@ -23,8 +23,8 @@ func CalculateTotalPageAndRows(pagination *serializers.Pagination, totalRows int
 	} else {
 		if pagination.Page <= totalPages {
 			// calculate from & to row
-			fromRow = pagination.Page*pagination.Limit + 1
-			toRow = (pagination.Page + 1) * pagination.Limit
+			fromRow = (pagination.Page-1)*pagination.Limit + 1
+			toRow = fromRow + pagination.Limit - 1
 		}
 	}
 
@@ -39,18 +39,23 @@ func CalculateTotalPageAndRows(pagination *serializers.Pagination, totalRows int
 	return totalPages
 }
 
-func GenerateFilteringCondition(r *gorm.DB, tableName string, pagination *serializers.Pagination) *gorm.DB {
+func GenerateFilteringCondition(r *gorm.DB, tableName string, pagination *serializers.Pagination, isCount bool) *gorm.DB {
 	offset := (pagination.Page - 1) * pagination.Limit
 	var sort string
 
 	sort = pagination.Sort
 
-	if !methodsutil.IsEmpty(tableName) {
+	if !methodutil.IsEmpty(tableName) {
 		sort = tableName + "." + pagination.Sort
 	}
-	// get data with limit, offset & order
-	find := r.Limit(int(pagination.Limit)).Offset(int(offset)).Order(sort)
+	var find *gorm.DB
 
+	if !isCount {
+		// get data with limit, offset & order
+		find = r.Limit(int(pagination.Limit)).Offset(int(offset)).Order(sort)
+	} else {
+		find = r
+	}
 	// generate where query
 	searches := pagination.Searches
 
@@ -58,7 +63,7 @@ func GenerateFilteringCondition(r *gorm.DB, tableName string, pagination *serial
 		for _, value := range searches {
 			var column string
 			column = value.Column
-			if !methodsutil.IsEmpty(tableName) {
+			if !methodutil.IsEmpty(tableName) {
 				column = tableName + "." + value.Column
 			}
 			action := value.Action

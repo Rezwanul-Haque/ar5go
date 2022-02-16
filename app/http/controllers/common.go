@@ -55,10 +55,10 @@ func GeneratePaginationRequest(c echo.Context) *serializers.Pagination {
 	return &serializers.Pagination{Limit: limit, Page: page, Sort: sort, QueryString: searchString, Searches: searches}
 }
 
-func GeneratePagesPath(c echo.Context, resp *serializers.Pagination, totalPages int64) {
+func GeneratePagesPath(c echo.Context, resp *serializers.Pagination) {
 	// search query params
 	searchQueryParams := ""
-
+	totalPages := resp.TotalPages
 	for _, search := range resp.Searches {
 		searchQueryParams += fmt.Sprintf("&%s.%s=%s", search.Column, search.Action, search.Query)
 	}

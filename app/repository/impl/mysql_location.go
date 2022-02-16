@@ -45,12 +45,12 @@ func (r *location) Update(history *domain.LocationHistory) (*domain.LocationHist
 	return history, nil
 }
 
-func (r *location) GetLocationsByUserID(userID uint, pagination *serializers.Pagination) ([]*domain.IntermediateLocationHistory, int64, *errors.RestErr) {
+func (r *location) GetLocationsByUserID(userID uint, pagination *serializers.Pagination) ([]*domain.IntermediateLocationHistory, *errors.RestErr) {
 	var resp []*domain.IntermediateLocationHistory
 
 	var totalRows int64 = 0
 	tableName := "location_histories"
-	stmt := GenerateFilteringCondition(r.DB, tableName, pagination)
+	stmt := GenerateFilteringCondition(r.DB, tableName, pagination, false)
 
 	stmt = stmt.Model(&domain.LocationHistory{}).
 		Select("location_histories.company_id, c.name as company_name, location_histories.user_id, u.user_name as name, "+
@@ -68,24 +68,26 @@ func (r *location) GetLocationsByUserID(userID uint, pagination *serializers.Pag
 	}
 	res := stmt.Find(&resp)
 	if res.RowsAffected == 0 {
-		return nil, 0, errors.NewNotFoundError("no location histories found")
+		return nil, errors.NewNotFoundError("no location histories found")
 	}
 
 	if res.Error != nil {
 		logger.Error("error occurred when getting location history by userID", res.Error)
-		return nil, 0, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
+		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
 	pagination.Rows = resp
 
+	stmt = GenerateFilteringCondition(r.DB, tableName, pagination, true)
 	// count all data
 	errCount := r.DB.Model(&domain.LocationHistory{}).Where("location_histories.user_id = ?", userID).Count(&totalRows).Error
 	if errCount != nil {
 		logger.Error("error occurred when getting total location history count by userID", res.Error)
-		return nil, 0, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
+		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
 	pagination.TotalRows = totalRows
 	totalPages := CalculateTotalPageAndRows(pagination, totalRows)
-	return resp, totalPages, nil
+	pagination.TotalPages = totalPages
+	return resp, nil
 }

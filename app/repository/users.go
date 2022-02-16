@@ -15,7 +15,7 @@ type IUsers interface {
 	UpdatePassword(userID uint, companyID uint, updateValue map[string]interface{}) *errors.RestErr
 	GetUserByAppKey(appKey string) (*domain.User, *errors.RestErr)
 	GetUsersByCompanyIdAndRole(companyID, roleID uint,
-		pagination *serializers.Pagination) ([]*domain.IntermediateUserResp, int64, *errors.RestErr)
+		pagination *serializers.Pagination) ([]*domain.IntermediateUserResp, *errors.RestErr)
 	SetLastLoginAt(user *domain.User) error
 	HasRole(userID, roleID uint) bool
 	ResetPassword(userID int, hashedPass []byte) error

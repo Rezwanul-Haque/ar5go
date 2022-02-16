@@ -50,12 +50,12 @@ func (h *location) Update(req serializers.LocationHistoryReq) (*domain.LocationH
 	return resp, nil
 }
 
-func (h *location) GetLocationsByUserID(userID uint, pagination *serializers.Pagination) (*serializers.Pagination, int64, *errors.RestErr) {
+func (h *location) GetLocationsByUserID(userID uint, pagination *serializers.Pagination) (*serializers.Pagination, *errors.RestErr) {
 	var resp serializers.LocationHistoryResp
 
-	locations, totalPages, err := h.hrepo.GetLocationsByUserID(userID, pagination)
+	locations, err := h.hrepo.GetLocationsByUserID(userID, pagination)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 
 	resp.CompanyID = locations[0].CompanyID
@@ -67,10 +67,10 @@ func (h *location) GetLocationsByUserID(userID uint, pagination *serializers.Pag
 		err := methodsutil.StructToStruct(locations, &resp.Locations)
 		if err != nil {
 			logger.Error(msgutil.EntityStructToStructFailedMsg("get locations"), err)
-			return nil, 0, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
+			return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 		}
 	}
 
 	pagination.Rows = resp
-	return pagination, totalPages, nil
+	return pagination, nil
 }
