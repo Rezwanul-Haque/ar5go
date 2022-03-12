@@ -1,18 +1,25 @@
 {
   "app": {
-    "name": "clean",
-    "port": 8080
+    "name": "ar5go",
+    "port": "8080",
+    "metricsPort": "9080",
+    "sort": "created_at desc",
+    "appKey": "appKey",
+    "defaultPageSize" : 10,
+    "logLevel":   "Info"
   },
   "db": {
-    "host": "clean_mysql",
-    "port": "3306",
-    "user": "root",
-    "pass": "12345678",
-    "schema": "clean_db",
-    "maxIdleConn": 1,
-    "maxOpenConn": 2,
-    "maxConnLifetime": 30,
-    "debug": true
+    "mysql": {
+      "host": "ar5go_mysql",
+      "port": "3306",
+      "user": "root",
+      "pass": "12345678",
+      "schema": "ar5go_db",
+      "maxIdleConn": 1,
+      "maxOpenConn": 2,
+      "maxConnLifetime": 30,
+      "debug": true
+    }
   },
   "jwt": {
     "accessTokenSecret": "accesstokensecret",
@@ -21,15 +28,17 @@
     "refreshTokenExpiry": 10080,
     "contextKey": "user"
   },
-  "redis": {
-    "host": "redis_dev",
-    "port": "6379",
-    "pass": "password123",
-    "db": 0,
-    "accessUuidPrefix": "access-uuid_",
-    "refreshUuidPrefix": "refresh-uuid_",
-    "userPrefix": "user_",
-    "tokenPrefix": "token_",
-    "ttl": 3600
+  "cache": {
+    "redis": {
+      "host": "redis_dev",
+      "port": "6379",
+      "pass": "password123",
+      "db": 0,
+      "accessUuidPrefix": "access-uuid_",
+      "refreshUuidPrefix": "refresh-uuid_",
+      "userPrefix": "user_",
+      "tokenPrefix": "token_",
+      "ttl": 3600
+    }
   }
 }

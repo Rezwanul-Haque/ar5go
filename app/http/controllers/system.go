@@ -1,9 +1,9 @@
 package controllers
 
 import (
-	"clean/app/svc"
-	"clean/infra/errors"
-	"clean/infra/logger"
+	"ar5go/app/svc"
+	"ar5go/infra/errors"
+	"ar5go/infra/logger"
 	"fmt"
 	"net/http"
 
@@ -28,7 +28,7 @@ func NewSystemController(grp interface{}, sysSvc svc.ISystem) {
 
 // Root will let you see what you can slash 🐲
 func (sh *system) Root(c echo.Context) error {
-	return c.JSON(http.StatusOK, map[string]interface{}{"message": "clean architecture backend! let's play!!"})
+	return c.JSON(http.StatusOK, map[string]interface{}{"message": "ar5go architecture backend! let's play!!"})
 }
 
 // Health will let you know the heart beats ❤️

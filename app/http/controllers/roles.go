@@ -1,12 +1,13 @@
 package controllers
 
 import (
-	"clean/app/serializers"
-	"clean/app/svc"
-	"clean/app/utils/consts"
-	"clean/app/utils/msgutil"
-	"clean/infra/errors"
-	"clean/infra/logger"
+	m "ar5go/app/http/middlewares"
+	"ar5go/app/serializers"
+	"ar5go/app/svc"
+	"ar5go/app/utils/consts"
+	"ar5go/app/utils/msgutil"
+	"ar5go/infra/errors"
+	"ar5go/infra/logger"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -20,20 +21,20 @@ type roles struct {
 }
 
 // NewRolesController will initialize the controllers
-func NewRolesController(grp interface{}, ACL func(string) echo.MiddlewareFunc, rsvc svc.IRoles) {
+func NewRolesController(grp interface{}, rsvc svc.IRoles) {
 	rc := &roles{
 		rsvc: rsvc,
 	}
 
 	g := grp.(*echo.Group)
 
-	g.POST("/v1/role", rc.CreateRole, ACL(consts.PermissionRoleCrud))
-	g.PATCH("/v1/role/:role_id", rc.UpdateRole, ACL(consts.PermissionRoleCrud))
-	g.DELETE("/v1/role/:role_id", rc.DeleteRole, ACL(consts.PermissionRoleCrud))
-	g.GET("/v1/role", rc.ListRoles, ACL(consts.PermissionRoleFetchAll))
+	g.POST("/v1/role", rc.CreateRole, m.ACL(consts.PermissionRoleCrud))
+	g.PATCH("/v1/role/:role_id", rc.UpdateRole, m.ACL(consts.PermissionRoleCrud))
+	g.DELETE("/v1/role/:role_id", rc.DeleteRole, m.ACL(consts.PermissionRoleCrud))
+	g.GET("/v1/role", rc.ListRoles, m.ACL(consts.PermissionRoleFetchAll))
 
-	g.POST("/v1/role/:role_id/permissions", rc.SetRolePermissions, ACL(consts.PermissionRoleCrud))
-	g.GET("/v1/role/:role_id/permissions", rc.GetRolePermissions, ACL(consts.PermissionRoleCrud))
+	g.POST("/v1/role/:role_id/permissions", rc.SetRolePermissions, m.ACL(consts.PermissionRoleCrud))
+	g.GET("/v1/role/:role_id/permissions", rc.GetRolePermissions, m.ACL(consts.PermissionRoleCrud))
 }
 
 func (ctr *roles) CreateRole(c echo.Context) error {

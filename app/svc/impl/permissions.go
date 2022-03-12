@@ -1,14 +1,14 @@
 package impl
 
 import (
-	"clean/app/domain"
-	"clean/app/repository"
-	"clean/app/serializers"
-	"clean/app/svc"
-	"clean/app/utils/methodsutil"
-	"clean/app/utils/msgutil"
-	"clean/infra/errors"
-	"clean/infra/logger"
+	"ar5go/app/domain"
+	"ar5go/app/repository"
+	"ar5go/app/serializers"
+	"ar5go/app/svc"
+	"ar5go/app/utils/methodsutil"
+	"ar5go/app/utils/msgutil"
+	"ar5go/infra/errors"
+	"ar5go/infra/logger"
 )
 
 type permissions struct {
@@ -27,7 +27,7 @@ func (p *permissions) CreatePermission(req *serializers.PermissionReq) (*domain.
 		Description: req.Description,
 	}
 
-	resp, err := p.prepo.Create(permission)
+	resp, err := p.prepo.CreatePermission(permission)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func (p *permissions) CreatePermission(req *serializers.PermissionReq) (*domain.
 
 func (p *permissions) GetPermission(id uint) (*serializers.PermissionResp, *errors.RestErr) {
 	var resp serializers.RoleResp
-	rule, getErr := p.prepo.Get(id)
+	rule, getErr := p.prepo.GetPermission(id)
 	if getErr != nil {
 		return nil, getErr
 	}
@@ -56,7 +56,7 @@ func (p *permissions) UpdatePermission(permissionID uint, req serializers.Permis
 		Description: req.Description,
 	}
 
-	upErr := p.prepo.Update(permission)
+	upErr := p.prepo.UpdatePermission(permission)
 	if upErr != nil {
 		return upErr
 	}
@@ -65,7 +65,7 @@ func (p *permissions) UpdatePermission(permissionID uint, req serializers.Permis
 }
 
 func (p *permissions) DeletePermission(id uint) *errors.RestErr {
-	err := p.prepo.Remove(id)
+	err := p.prepo.RemovePermission(id)
 	if err != nil {
 		return err
 	}
@@ -76,7 +76,7 @@ func (p *permissions) DeletePermission(id uint) *errors.RestErr {
 func (p *permissions) ListPermission() ([]*serializers.PermissionResp, *errors.RestErr) {
 	var resp []*serializers.PermissionResp
 
-	permissions, lstErr := p.prepo.List()
+	permissions, lstErr := p.prepo.ListPermissions()
 	if lstErr != nil {
 		return nil, lstErr
 	}

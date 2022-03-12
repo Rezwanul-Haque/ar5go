@@ -1,15 +1,17 @@
 package impl
 
 import (
-	"clean/app/domain"
-	"clean/app/repository"
-	"clean/app/serializers"
-	"clean/app/svc"
-	"clean/app/utils/methodsutil"
-	"clean/app/utils/msgutil"
-	"clean/infra/config"
-	"clean/infra/errors"
-	"clean/infra/logger"
+	"ar5go/app/domain"
+	"ar5go/app/repository"
+	"ar5go/app/serializers"
+	"ar5go/app/svc"
+	"ar5go/app/utils/methodsutil"
+	"ar5go/app/utils/msgutil"
+	"ar5go/infra/config"
+	"ar5go/infra/conn/cache"
+	"ar5go/infra/errors"
+	"ar5go/infra/logger"
+	"context"
 	"strconv"
 
 	"github.com/dgrijalva/jwt-go"
@@ -17,19 +19,19 @@ import (
 )
 
 type users struct {
+	ctx   context.Context
 	urepo repository.IUsers
-	rSvc  svc.ICache
 }
 
-func NewUsersService(urepo repository.IUsers, rSvc svc.ICache) svc.IUsers {
+func NewUsersService(ctx context.Context, urepo repository.IUsers) svc.IUsers {
 	return &users{
+		ctx:   ctx,
 		urepo: urepo,
-		rSvc:  rSvc,
 	}
 }
 
 func (u *users) CreateAdminUser(user domain.User) (*domain.User, *errors.RestErr) {
-	resp, saveErr := u.urepo.Save(&user)
+	resp, saveErr := u.urepo.SaveUser(&user)
 	if saveErr != nil {
 		return nil, saveErr
 	}
@@ -37,7 +39,7 @@ func (u *users) CreateAdminUser(user domain.User) (*domain.User, *errors.RestErr
 }
 
 func (u *users) CreateUser(user domain.User) (*domain.User, *errors.RestErr) {
-	resp, saveErr := u.urepo.Save(&user)
+	resp, saveErr := u.urepo.SaveUser(&user)
 	if saveErr != nil {
 		return nil, saveErr
 	}
@@ -79,7 +81,7 @@ func (u *users) UpdateUser(userID uint, req serializers.UserReq) *errors.RestErr
 
 	user.ID = userID
 
-	if updateErr := u.urepo.Update(&user); updateErr != nil {
+	if updateErr := u.urepo.UpdateUser(&user); updateErr != nil {
 		return updateErr
 	}
 
@@ -91,10 +93,10 @@ func (u *users) UpdateUser(userID uint, req serializers.UserReq) *errors.RestErr
 }
 
 func (u *users) GetUserByCompanyIdAndRole(companyID, roleID uint,
-	pagination *serializers.Pagination) (*serializers.Pagination, *errors.RestErr) {
+	filters *serializers.ListFilters) (*serializers.ListFilters, *errors.RestErr) {
 
 	var resp serializers.ResolveUserResponse
-	users, err := u.urepo.GetUsersByCompanyIdAndRole(companyID, roleID, pagination)
+	users, err := u.urepo.GetUsersByCompanyIdAndRole(companyID, roleID, filters)
 	if err != nil {
 		return nil, err
 	}
@@ -111,8 +113,8 @@ func (u *users) GetUserByCompanyIdAndRole(companyID, roleID uint,
 		}
 	}
 
-	pagination.Rows = resp
-	return pagination, nil
+	filters.Rows = resp
+	return filters, nil
 }
 
 func (u *users) ChangePassword(id int, data *serializers.ChangePasswordReq) error {
@@ -218,9 +220,10 @@ func (u *users) ResetPassword(req *serializers.ResetPasswordReq) error {
 }
 
 func (u *users) deleteUserCache(userID int) error {
-	if err := u.rSvc.Del(
-		config.Redis().UserPrefix+strconv.Itoa(userID),
-		config.Redis().TokenPrefix+strconv.Itoa(userID),
+	if err := cache.Client().Del(
+		u.ctx,
+		config.Cache().Redis.UserPrefix+strconv.Itoa(userID),
+		config.Cache().Redis.TokenPrefix+strconv.Itoa(userID),
 	); err != nil {
 		logger.Error("error occur when deleting cached user after user update", err)
 		return err

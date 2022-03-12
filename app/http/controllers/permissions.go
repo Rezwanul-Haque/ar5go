@@ -1,12 +1,13 @@
 package controllers
 
 import (
-	"clean/app/serializers"
-	"clean/app/svc"
-	"clean/app/utils/consts"
-	"clean/app/utils/msgutil"
-	"clean/infra/errors"
-	"clean/infra/logger"
+	m "ar5go/app/http/middlewares"
+	"ar5go/app/serializers"
+	"ar5go/app/svc"
+	"ar5go/app/utils/consts"
+	"ar5go/app/utils/msgutil"
+	"ar5go/infra/errors"
+	"ar5go/infra/logger"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -20,17 +21,17 @@ type permissions struct {
 }
 
 // NewPermissionsController will initialize the controllers
-func NewPermissionsController(grp interface{}, ACL func(string) echo.MiddlewareFunc, psvc svc.IPermissions) {
+func NewPermissionsController(grp interface{}, psvc svc.IPermissions) {
 	rc := &permissions{
 		psvc: psvc,
 	}
 
 	g := grp.(*echo.Group)
 
-	g.POST("/v1/permission", rc.CreatePermission, ACL(consts.PermissionPermissionCrud))
-	g.PATCH("/v1/permission/:permission_id", rc.UpdatePermission, ACL(consts.PermissionPermissionCrud))
-	g.DELETE("/v1/permission/:permission_id", rc.DeletePermission, ACL(consts.PermissionPermissionCrud))
-	g.GET("/v1/permission", rc.ListPermission, ACL(consts.PermissionPermissionCrud))
+	g.POST("/v1/permission", rc.CreatePermission, m.ACL(consts.PermissionPermissionCrud))
+	g.PATCH("/v1/permission/:permission_id", rc.UpdatePermission, m.ACL(consts.PermissionPermissionCrud))
+	g.DELETE("/v1/permission/:permission_id", rc.DeletePermission, m.ACL(consts.PermissionPermissionCrud))
+	g.GET("/v1/permission", rc.ListPermission, m.ACL(consts.PermissionPermissionCrud))
 }
 
 func (ctr *permissions) CreatePermission(c echo.Context) error {

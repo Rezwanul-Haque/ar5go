@@ -1,14 +1,14 @@
 package svc
 
 import (
-	"clean/app/domain"
-	"clean/app/serializers"
-	"clean/infra/errors"
+	"ar5go/app/domain"
+	"ar5go/app/serializers"
+	"ar5go/infra/errors"
 )
 
 type IRoles interface {
 	CreateRole(req *serializers.RoleReq) (*domain.Role, *errors.RestErr)
-	GetRule(id uint) (*serializers.RoleResp, *errors.RestErr)
+	GetRole(id uint) (*serializers.RoleResp, *errors.RestErr)
 	UpdateRole(roleID uint, req serializers.RoleReq) *errors.RestErr
 	DeleteRole(id uint) *errors.RestErr
 	ListRoles() ([]*serializers.RoleResp, *errors.RestErr)

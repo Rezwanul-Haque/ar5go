@@ -1,28 +1,16 @@
-package impl
+package db
 
 import (
-	"clean/app/domain"
-	"clean/app/repository"
-	"clean/app/utils/msgutil"
-	"clean/infra/errors"
-	"clean/infra/logger"
-
+	"ar5go/app/domain"
+	"ar5go/app/utils/msgutil"
+	"ar5go/infra/conn/db/models"
+	"ar5go/infra/errors"
+	"ar5go/infra/logger"
 	"gorm.io/gorm"
 )
 
-type roles struct {
-	*gorm.DB
-}
-
-// NewMySqlRolesRepository will create an object that represent the Roles.Repository implementations
-func NewMySqlRolesRepository(db *gorm.DB) repository.IRoles {
-	return &roles{
-		DB: db,
-	}
-}
-
-func (r *roles) Create(role *domain.Role) (*domain.Role, *errors.RestErr) {
-	res := r.DB.Model(&domain.Role{}).Where("name = ?", role.Name).FirstOrCreate(&role)
+func (dc DatabaseClient) CreateRole(role *domain.Role) (*domain.Role, *errors.RestErr) {
+	res := dc.DB.Model(&models.Role{}).Where("name = ?", role.Name).FirstOrCreate(&role)
 
 	if res.Error != nil {
 		logger.Error(msgutil.EntityGenericFailedMsg("create role"), res.Error)
@@ -32,10 +20,10 @@ func (r *roles) Create(role *domain.Role) (*domain.Role, *errors.RestErr) {
 	return role, nil
 }
 
-func (r *roles) Get(roleID uint) (*domain.Role, *errors.RestErr) {
+func (dc DatabaseClient) GetRole(roleID uint) (*domain.Role, *errors.RestErr) {
 	var resp domain.Role
 
-	res := r.DB.Model(&domain.Role{}).Where("id = ?", roleID).First(&resp)
+	res := dc.DB.Model(&models.Role{}).Where("id = ?", roleID).First(&resp)
 
 	if res.RowsAffected == 0 {
 		return nil, errors.NewNotFoundError(errors.ErrRecordNotFound)
@@ -49,8 +37,8 @@ func (r *roles) Get(roleID uint) (*domain.Role, *errors.RestErr) {
 	return &resp, nil
 }
 
-func (r *roles) Update(role *domain.Role) *errors.RestErr {
-	res := r.DB.Model(&domain.Role{}).Where("id = ?", role.ID).Updates(&role)
+func (dc DatabaseClient) UpdateRole(role *domain.Role) *errors.RestErr {
+	res := dc.DB.Model(&models.Role{}).Where("id = ?", role.ID).Updates(&role)
 
 	if res.Error != nil {
 		logger.Error(msgutil.EntityGenericFailedMsg("update role"), res.Error)
@@ -60,8 +48,8 @@ func (r *roles) Update(role *domain.Role) *errors.RestErr {
 	return nil
 }
 
-func (r *roles) Remove(id uint) *errors.RestErr {
-	res := r.DB.Where("id = ?", id).Delete(&domain.Role{})
+func (dc DatabaseClient) RemoveRole(id uint) *errors.RestErr {
+	res := dc.DB.Where("id = ?", id).Delete(&models.Role{})
 
 	if res.Error == gorm.ErrRecordNotFound {
 		return errors.NewNotFoundError(msgutil.EntityNotFoundMsg("role"))
@@ -75,10 +63,10 @@ func (r *roles) Remove(id uint) *errors.RestErr {
 	return nil
 }
 
-func (r *roles) List() ([]*domain.Role, *errors.RestErr) {
-	var rules []*domain.Role
+func (dc DatabaseClient) ListRoles() ([]*domain.Role, *errors.RestErr) {
+	var roles []*domain.Role
 
-	res := r.DB.Find(&rules)
+	res := dc.DB.Model(&models.Role{}).Find(&roles)
 
 	if res.Error == gorm.ErrRecordNotFound {
 		return nil, errors.NewNotFoundError(msgutil.EntityNotFoundMsg("role"))
@@ -89,11 +77,11 @@ func (r *roles) List() ([]*domain.Role, *errors.RestErr) {
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
-	return rules, nil
+	return roles, nil
 }
 
-func (r *roles) SetRolePermissions(rolePerms *domain.RolePermissions) *errors.RestErr {
-	tx := r.DB.Begin()
+func (dc DatabaseClient) SetRolePermissions(rolePerms *domain.RolePermissions) *errors.RestErr {
+	tx := dc.DB.Begin()
 
 	if err := tx.Where("role_id = ?", rolePerms.RoleID).Delete(&domain.RolePermission{}).Error; err != nil {
 		tx.Rollback()
@@ -102,7 +90,7 @@ func (r *roles) SetRolePermissions(rolePerms *domain.RolePermissions) *errors.Re
 	}
 
 	for _, permID := range rolePerms.Permissions {
-		rp := &domain.RolePermission{
+		rp := &models.RolePermission{
 			RoleID:       rolePerms.RoleID,
 			PermissionID: permID,
 		}
@@ -122,10 +110,10 @@ func (r *roles) SetRolePermissions(rolePerms *domain.RolePermissions) *errors.Re
 	return nil
 }
 
-func (r *roles) GetRolePermissions(roleID int) ([]*domain.Permission, *errors.RestErr) {
+func (dc DatabaseClient) GetRolePermissions(roleID int) ([]*domain.Permission, *errors.RestErr) {
 	var res []*domain.Permission
 
-	err := r.DB.
+	err := dc.DB.Model(&models.Permission{}).
 		Joins("JOIN role_permissions ON role_permissions.permission_id = permissions.id").
 		Where("role_permissions.role_id = ?", roleID).
 		Find(&res).Error

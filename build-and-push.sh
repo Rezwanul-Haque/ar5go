@@ -9,5 +9,5 @@ fi
 
 go build
 echo "Docker build with tag: $1"
-docker build -t <docker-registry-path>/clean:"$1" .
-docker push <docker-registry-path>/clean:"$1"
+docker build -t <docker-registry-path>/ar5go:"$1" .
+docker push <docker-registry-path>/ar5go:"$1"

@@ -1,9 +1,10 @@
 package methodsutil
 
 import (
-	"clean/infra/errors"
+	"ar5go/infra/errors"
 	"encoding/json"
 	"reflect"
+	"strconv"
 
 	"github.com/dgrijalva/jwt-go"
 )
@@ -15,7 +16,8 @@ func IsInvalid(value string) bool {
 	return false
 }
 
-func InArray(needle interface{}, haystack interface{}) bool {
+// Contains search a needle(value) in the haystack(array)
+func Contains(haystack interface{}, needle interface{}) bool {
 	switch reflect.TypeOf(haystack).Kind() {
 	case reflect.Slice:
 		s := reflect.ValueOf(haystack)
@@ -57,4 +59,16 @@ func ParseJwtToken(token, secret string) (*jwt.Token, error) {
 		}
 		return []byte(secret), nil
 	})
+}
+
+func StringToIntArray(stringArray []string) []int {
+	var res []int
+
+	for _, v := range stringArray {
+		if i, err := strconv.Atoi(v); err == nil {
+			res = append(res, i)
+		}
+	}
+
+	return res
 }

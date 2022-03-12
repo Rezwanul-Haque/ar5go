@@ -1,28 +1,16 @@
-package impl
+package db
 
 import (
-	"clean/app/domain"
-	"clean/app/repository"
-	"clean/app/utils/msgutil"
-	"clean/infra/errors"
-	"clean/infra/logger"
-
+	"ar5go/app/domain"
+	"ar5go/app/utils/msgutil"
+	"ar5go/infra/conn/db/models"
+	"ar5go/infra/errors"
+	"ar5go/infra/logger"
 	"gorm.io/gorm"
 )
 
-type permissions struct {
-	*gorm.DB
-}
-
-// NewMySqlPermissionsRepository will create an object that represent the Permission.Repository implementations
-func NewMySqlPermissionsRepository(db *gorm.DB) repository.IPermissions {
-	return &permissions{
-		DB: db,
-	}
-}
-
-func (r *permissions) Create(permission *domain.Permission) (*domain.Permission, *errors.RestErr) {
-	res := r.DB.Model(&domain.Permission{}).Where("name = ?", permission.Name).FirstOrCreate(&permission)
+func (dc DatabaseClient) CreatePermission(permission *domain.Permission) (*domain.Permission, *errors.RestErr) {
+	res := dc.DB.Model(&models.Permission{}).Where("name = ?", permission.Name).FirstOrCreate(&permission)
 
 	if res.Error != nil {
 		logger.Error(msgutil.EntityGenericFailedMsg("create permission"), res.Error)
@@ -32,10 +20,10 @@ func (r *permissions) Create(permission *domain.Permission) (*domain.Permission,
 	return permission, nil
 }
 
-func (r *permissions) Get(permissionID uint) (*domain.Permission, *errors.RestErr) {
+func (dc DatabaseClient) GetPermission(permissionID uint) (*domain.Permission, *errors.RestErr) {
 	var resp domain.Permission
 
-	res := r.DB.Model(&domain.Permission{}).Where("id = ?", permissionID).First(&resp)
+	res := dc.DB.Model(&models.Permission{}).Where("id = ?", permissionID).First(&resp)
 
 	if res.RowsAffected == 0 {
 		return nil, errors.NewNotFoundError(errors.ErrRecordNotFound)
@@ -49,8 +37,8 @@ func (r *permissions) Get(permissionID uint) (*domain.Permission, *errors.RestEr
 	return &resp, nil
 }
 
-func (r *permissions) Update(permission *domain.Permission) *errors.RestErr {
-	res := r.DB.Model(&domain.Permission{}).Where("id = ?", permission.ID).Updates(&permission)
+func (dc DatabaseClient) UpdatePermission(permission *domain.Permission) *errors.RestErr {
+	res := dc.DB.Model(&models.Permission{}).Where("id = ?", permission.ID).Updates(&permission)
 
 	if res.Error != nil {
 		logger.Error(msgutil.EntityGenericFailedMsg("update permission"), res.Error)
@@ -60,8 +48,8 @@ func (r *permissions) Update(permission *domain.Permission) *errors.RestErr {
 	return nil
 }
 
-func (r *permissions) Remove(id uint) *errors.RestErr {
-	res := r.DB.Where("id = ?", id).Delete(&domain.Permission{})
+func (dc DatabaseClient) RemovePermission(id uint) *errors.RestErr {
+	res := dc.DB.Where("id = ?", id).Delete(&models.Permission{})
 
 	if res.Error == gorm.ErrRecordNotFound {
 		return errors.NewNotFoundError(msgutil.EntityNotFoundMsg("permission"))
@@ -75,10 +63,10 @@ func (r *permissions) Remove(id uint) *errors.RestErr {
 	return nil
 }
 
-func (r *permissions) List() ([]*domain.Permission, *errors.RestErr) {
+func (dc DatabaseClient) ListPermissions() ([]*domain.Permission, *errors.RestErr) {
 	var permissions []*domain.Permission
 
-	res := r.DB.Find(&permissions)
+	res := dc.DB.Model(&models.Permission{}).Find(&permissions)
 
 	if res.Error == gorm.ErrRecordNotFound {
 		return nil, errors.NewNotFoundError(msgutil.EntityNotFoundMsg("permissions"))

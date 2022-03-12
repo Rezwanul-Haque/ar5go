@@ -1,9 +1,10 @@
 package cmd
 
 import (
-	"clean/infra/config"
-	"clean/infra/conn"
-	"clean/infra/logger"
+	"ar5go/infra/config"
+	"ar5go/infra/conn/cache"
+	"ar5go/infra/conn/db"
+	"ar5go/infra/logger"
 	"fmt"
 	"os"
 
@@ -12,7 +13,7 @@ import (
 
 var (
 	RootCmd = &cobra.Command{
-		Use:   "clean code",
+		Use:   "ar5go",
 		Short: "implementing clean architecture in golang",
 	}
 )
@@ -25,8 +26,9 @@ func init() {
 // Execute executes the root command
 func Execute() {
 	config.LoadConfig()
-	conn.ConnectDb()
-	conn.ConnectRedis()
+	logger.Init(config.App().LogLevel)
+	db.NewDbClient()
+	cache.NewCacheClient()
 
 	logger.Info("about to start the application")
 

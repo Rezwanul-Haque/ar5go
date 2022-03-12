@@ -1,9 +1,9 @@
 package controllers
 
 import (
-	"clean/app/serializers"
-	"clean/app/svc"
-	"clean/infra/errors"
+	"ar5go/app/serializers"
+	"ar5go/app/svc"
+	"ar5go/infra/errors"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -14,7 +14,7 @@ type company struct {
 }
 
 // NewCompanyController will initialize the controllers
-func NewCompanyController(grp interface{}, ACL func(string) echo.MiddlewareFunc, cSvc svc.ICompany) {
+func NewCompanyController(grp interface{}, cSvc svc.ICompany) {
 	cc := &company{
 		cSvc: cSvc,
 	}

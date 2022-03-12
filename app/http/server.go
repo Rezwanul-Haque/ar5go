@@ -1,10 +1,10 @@
 package http
 
 import (
-	container "clean/app"
-	"clean/app/http/middlewares"
-	"clean/infra/config"
-	"clean/infra/logger"
+	container "ar5go/app"
+	"ar5go/app/http/middlewares"
+	"ar5go/infra/config"
+	"ar5go/infra/logger"
 	"context"
 	"os"
 	"os/signal"
@@ -20,6 +20,18 @@ func Start() {
 		logger.Error("error occur when attaching middlewares", err)
 		os.Exit(1)
 	}
+
+	// Create Prometheus server and Middleware
+	echoProm := echo.New()
+
+	middlewares.PrometheusMonitor(echoProm)
+
+	go func() {
+		echoProm.Logger.Fatal(echoProm.Start(":" + config.App().MetricsPort))
+
+		// gracefully shutdown metrics server
+		GracefulShutdown(echoProm)
+	}()
 
 	container.Init(e.Group("api"))
 

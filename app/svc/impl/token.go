@@ -1,12 +1,14 @@
 package impl
 
 import (
-	"clean/app/repository"
-	"clean/app/serializers"
-	"clean/app/svc"
-	"clean/infra/config"
-	"clean/infra/errors"
-	"clean/infra/logger"
+	"ar5go/app/repository"
+	"ar5go/app/serializers"
+	"ar5go/app/svc"
+	"ar5go/infra/config"
+	"ar5go/infra/conn/cache"
+	"ar5go/infra/errors"
+	"ar5go/infra/logger"
+	"context"
 	"strconv"
 	"time"
 
@@ -15,14 +17,14 @@ import (
 )
 
 type token struct {
+	ctx   context.Context
 	urepo repository.IUsers
-	rSvc  svc.ICache
 }
 
-func NewTokenService(urepo repository.IUsers, rSvc svc.ICache) svc.IToken {
+func NewTokenService(ctx context.Context, urepo repository.IUsers) svc.IToken {
 	return &token{
+		ctx:   ctx,
 		urepo: urepo,
-		rSvc:  rSvc,
 	}
 }
 
@@ -77,18 +79,20 @@ func (t *token) CreateToken(userID, companyID uint) (*serializers.JwtToken, erro
 
 func (t *token) StoreTokenUuid(userID, companyID uint, token *serializers.JwtToken) error {
 	now := time.Now().Unix()
-	key, _ := strconv.Atoi((strconv.Itoa(int(userID)) + strconv.Itoa(int(companyID))))
+	key, _ := strconv.Atoi(strconv.Itoa(int(userID)) + strconv.Itoa(int(companyID)))
 
-	err := t.rSvc.Set(
-		config.Redis().AccessUuidPrefix+token.AccessUuid,
+	err := cache.Client().Set(
+		t.ctx,
+		config.Cache().Redis.AccessUuidPrefix+token.AccessUuid,
 		key, int(token.AccessExpiry-now),
 	)
 	if err != nil {
 		return err
 	}
 
-	err = t.rSvc.Set(
-		config.Redis().RefreshUuidPrefix+token.RefreshUuid,
+	err = cache.Client().Set(
+		t.ctx,
+		config.Cache().Redis.RefreshUuidPrefix+token.RefreshUuid,
 		key, int(token.RefreshExpiry-now),
 	)
 	if err != nil {
@@ -99,5 +103,5 @@ func (t *token) StoreTokenUuid(userID, companyID uint, token *serializers.JwtTok
 }
 
 func (t *token) DeleteTokenUuid(uuid ...string) error {
-	return t.rSvc.Del(uuid...)
+	return cache.Client().Del(t.ctx, uuid...)
 }

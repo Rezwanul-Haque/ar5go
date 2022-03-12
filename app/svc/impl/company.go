@@ -1,13 +1,15 @@
 package impl
 
 import (
-	"clean/app/domain"
-	"clean/app/repository"
-	"clean/app/serializers"
-	"clean/app/svc"
-	"clean/app/utils/consts"
-	"clean/infra/errors"
-	"encoding/json"
+	"ar5go/app/domain"
+	"ar5go/app/repository"
+	"ar5go/app/serializers"
+	"ar5go/app/svc"
+	"ar5go/app/utils/consts"
+	"ar5go/app/utils/methodsutil"
+	"ar5go/app/utils/msgutil"
+	"ar5go/infra/errors"
+	"ar5go/infra/logger"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -28,11 +30,12 @@ func (c *company) CreateCompanyWithAdminUser(cp serializers.CompanyReq) (*serial
 	cp.TrimRequestBody()
 
 	var companyObj domain.Company
+	if err := methodsutil.StructToStruct(cp, &companyObj); err != nil {
+		logger.Error(msgutil.EntityStructToStructFailedMsg("admin user"), err)
+		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
+	}
 
-	jsonData, _ := json.Marshal(cp)
-	_ = json.Unmarshal(jsonData, &companyObj)
-
-	companyResult, createErr := c.crepo.Save(&companyObj)
+	companyResult, createErr := c.crepo.SaveCompany(&companyObj)
 	if createErr != nil {
 		return nil, createErr
 	}
@@ -49,21 +52,28 @@ func (c *company) CreateCompanyWithAdminUser(cp serializers.CompanyReq) (*serial
 	user.Phone = companyResult.Phone
 	user.Email = companyResult.Email
 
-	userResult, createErr := c.urepo.Save(&user)
+	userResult, createErr := c.urepo.SaveUser(&user)
 	if createErr != nil {
 		return nil, createErr
 	}
 
 	var resp serializers.CompanyResp
-	jsonData, _ = json.Marshal(companyResult)
-	_ = json.Unmarshal(jsonData, &resp)
-	resp.Admin = *userResult
+
+	if err := methodsutil.StructToStruct(companyResult, &resp); err != nil {
+		logger.Error(msgutil.EntityStructToStructFailedMsg("company"), err)
+		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
+	}
+
+	if err := methodsutil.StructToStruct(userResult, &resp.Admin); err != nil {
+		logger.Error(msgutil.EntityStructToStructFailedMsg("admin user"), err)
+		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
+	}
 
 	return &resp, nil
 }
 
 func (c *company) GetCompany(companyID uint) (*domain.Company, *errors.RestErr) {
-	resp, getErr := c.crepo.Get(companyID)
+	resp, getErr := c.crepo.GetCompany(companyID)
 	if getErr != nil {
 		return nil, getErr
 	}

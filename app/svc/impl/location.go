@@ -1,14 +1,14 @@
 package impl
 
 import (
-	"clean/app/domain"
-	"clean/app/repository"
-	"clean/app/serializers"
-	"clean/app/svc"
-	"clean/app/utils/methodsutil"
-	"clean/app/utils/msgutil"
-	"clean/infra/errors"
-	"clean/infra/logger"
+	"ar5go/app/domain"
+	"ar5go/app/repository"
+	"ar5go/app/serializers"
+	"ar5go/app/svc"
+	"ar5go/app/utils/methodsutil"
+	"ar5go/app/utils/msgutil"
+	"ar5go/infra/errors"
+	"ar5go/infra/logger"
 	"encoding/json"
 )
 
@@ -22,13 +22,13 @@ func NewLocationService(hrepo repository.ILocation) svc.ILocation {
 	}
 }
 
-func (h *location) Create(req serializers.LocationHistoryReq) *errors.RestErr {
+func (h location) Create(req serializers.LocationHistoryReq) *errors.RestErr {
 	var locHistory domain.LocationHistory
 
 	jsonData, _ := json.Marshal(req)
 	_ = json.Unmarshal(jsonData, &locHistory)
 
-	err := h.hrepo.Save(&locHistory)
+	err := h.hrepo.SaveLocation(&locHistory)
 	if err != nil {
 		return err
 	}
@@ -36,13 +36,13 @@ func (h *location) Create(req serializers.LocationHistoryReq) *errors.RestErr {
 	return nil
 }
 
-func (h *location) Update(req serializers.LocationHistoryReq) (*domain.LocationHistory, *errors.RestErr) {
+func (h location) Update(req serializers.LocationHistoryReq) (*domain.LocationHistory, *errors.RestErr) {
 	var locHistory domain.LocationHistory
 
 	jsonData, _ := json.Marshal(req)
 	_ = json.Unmarshal(jsonData, &locHistory)
 
-	resp, err := h.hrepo.Update(&locHistory)
+	resp, err := h.hrepo.UpdateLocation(&locHistory)
 	if err != nil {
 		return nil, err
 	}
@@ -50,10 +50,10 @@ func (h *location) Update(req serializers.LocationHistoryReq) (*domain.LocationH
 	return resp, nil
 }
 
-func (h *location) GetLocationsByUserID(userID uint, pagination *serializers.Pagination) (*serializers.Pagination, *errors.RestErr) {
+func (h location) GetLocationsByUserID(userID uint, filters *serializers.ListFilters) (*serializers.ListFilters, *errors.RestErr) {
 	var resp serializers.LocationHistoryResp
 
-	locations, err := h.hrepo.GetLocationsByUserID(userID, pagination)
+	locations, err := h.hrepo.GetLocationsByUserID(userID, filters)
 	if err != nil {
 		return nil, err
 	}
@@ -71,6 +71,6 @@ func (h *location) GetLocationsByUserID(userID uint, pagination *serializers.Pag
 		}
 	}
 
-	pagination.Rows = resp
-	return pagination, nil
+	filters.Rows = resp
+	return filters, nil
 }

@@ -1,8 +1,11 @@
 package middlewares
 
 import (
-	"clean/infra/config"
+	"ar5go/infra/config"
+	"net/http"
 
+	openMiddleware "github.com/go-openapi/runtime/middleware"
+	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -49,4 +52,40 @@ func Attach(e *echo.Echo) error {
 	}))
 
 	return nil
+}
+
+// PrometheusMonitor will start a middleware which will be
+// exposed /metrics handler to be used by prometheus
+func PrometheusMonitor(e *echo.Echo) {
+	e.HideBanner = true
+	prom := prometheus.NewPrometheus("ar5go", nil)
+
+	// Scrape metrics from Main Server
+	e.Use(prom.HandlerFunc)
+	// Setup metrics endpoint at application server
+	prom.SetMetricsPath(e)
+}
+
+func SwaggerDocs() http.Handler {
+	opts := openMiddleware.SwaggerUIOpts{
+		Path:    "docs/swagger",
+		SpecURL: "/swagger.yaml",
+	}
+	return openMiddleware.SwaggerUI(opts, nil)
+}
+
+func ReDocDocs() http.Handler {
+	opts := openMiddleware.RedocOpts{
+		Path:    "docs/redoc",
+		SpecURL: "/swagger.yaml",
+	}
+	return openMiddleware.Redoc(opts, nil)
+}
+
+func RapiDocs() http.Handler {
+	opts := openMiddleware.RapiDocOpts{
+		Path:    "docs/rapidoc",
+		SpecURL: "/swagger.yaml",
+	}
+	return openMiddleware.RapiDoc(opts, nil)
 }

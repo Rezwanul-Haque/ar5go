@@ -1,7 +1,6 @@
 package serializers
 
 import (
-	"clean/app/domain"
 	"strings"
 )
 
@@ -18,15 +17,15 @@ type CompanyReq struct {
 }
 
 type CompanyResp struct {
-	Name          string      `json:"name"`
-	Logo          string      `json:"logo"`
-	Address       string      `json:"address"`
-	BusinessID    uint        `json:"business_id"`
-	NumOfEmployee uint        `json:"num_of_employee"`
-	Email         string      `json:"email"`
-	SnsLink       string      `json:"sns_link"`
-	Phone         string      `json:"phone"`
-	Admin         domain.User `json:"admin"`
+	Name          string `json:"name"`
+	Logo          string `json:"logo"`
+	Address       string `json:"address"`
+	BusinessID    uint   `json:"business_id"`
+	NumOfEmployee uint   `json:"num_of_employee"`
+	Email         string `json:"email"`
+	SnsLink       string `json:"sns_link"`
+	Phone         string `json:"phone"`
+	Admin         User   `json:"admin"`
 }
 
 func (r *CompanyReq) TrimRequestBody() {

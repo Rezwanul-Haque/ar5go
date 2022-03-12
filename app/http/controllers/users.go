@@ -1,14 +1,15 @@
 package controllers
 
 import (
-	"clean/app/domain"
-	"clean/app/serializers"
-	"clean/app/svc"
-	"clean/app/utils/consts"
-	"clean/app/utils/methodsutil"
-	"clean/app/utils/msgutil"
-	"clean/infra/errors"
-	"clean/infra/logger"
+	"ar5go/app/domain"
+	m "ar5go/app/http/middlewares"
+	"ar5go/app/serializers"
+	"ar5go/app/svc"
+	"ar5go/app/utils/consts"
+	"ar5go/app/utils/methodsutil"
+	"ar5go/app/utils/msgutil"
+	"ar5go/infra/errors"
+	"ar5go/infra/logger"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -22,7 +23,7 @@ type users struct {
 }
 
 // NewUsersController will initialize the controllers
-func NewUsersController(grp interface{}, ACL func(string) echo.MiddlewareFunc, cSvc svc.ICompany, uSvc svc.IUsers, lSvc svc.ILocation) {
+func NewUsersController(grp interface{}, cSvc svc.ICompany, uSvc svc.IUsers, lSvc svc.ILocation) {
 	uc := &users{
 		cSvc: cSvc,
 		uSvc: uSvc,
@@ -31,10 +32,10 @@ func NewUsersController(grp interface{}, ACL func(string) echo.MiddlewareFunc, c
 
 	g := grp.(*echo.Group)
 
-	g.POST("/v1/user/signup", uc.Create, ACL(consts.PermissionUserCreate))
-	g.GET("/v1/user/resolve", uc.GetAll, ACL(consts.PermissionUserFetchAll))
-	g.PATCH("/v1/user", uc.Update, ACL(consts.PermissionUserUpdate))
-	g.GET("/v1/user/:user_id/locations", uc.GetUserVisitedLocations, ACL(consts.PermissionUserLocationFetch))
+	g.POST("/v1/user/signup", uc.Create, m.ACL(consts.PermissionUserCreate))
+	g.GET("/v1/user/resolve", uc.GetAll, m.ACL(consts.PermissionUserFetchAll))
+	g.PATCH("/v1/user", uc.Update, m.ACL(consts.PermissionUserUpdate))
+	g.GET("/v1/user/:user_id/locations", uc.GetUserVisitedLocations, m.ACL(consts.PermissionUserLocationFetch))
 	g.POST("/v1/password/change", uc.ChangePassword)
 	g.POST("/v1/password/forgot", uc.ForgotPassword)
 	g.POST("/v1/password/verifyreset", uc.VerifyResetPassword)
@@ -77,14 +78,17 @@ func (ctr *users) GetAll(c echo.Context) error {
 	if getErr != nil {
 		return c.JSON(getErr.Status, getErr)
 	}
-	pagination := GeneratePaginationRequest(c)
-	resp, getErr := ctr.uSvc.GetUserByCompanyIdAndRole(uint(foundUser.CompanyID), consts.RoleIDSales, pagination)
+
+	listParams := &serializers.ListFilters{}
+	listParams.GenerateFilters(c.QueryParams())
+
+	resp, getErr := ctr.uSvc.GetUserByCompanyIdAndRole(foundUser.CompanyID, consts.RoleIDSales, listParams)
 
 	if getErr != nil {
 		return c.JSON(getErr.Status, getErr)
 	}
 
-	GeneratePagesPath(c, resp)
+	resp.GeneratePagesPath(c.Request().URL.Path)
 	return c.JSON(http.StatusOK, &resp)
 }
 
@@ -118,13 +122,15 @@ func (ctr *users) GetUserVisitedLocations(c echo.Context) error {
 		return c.JSON(restErr.Status, restErr)
 	}
 
-	pagination := GeneratePaginationRequest(c)
-	resp, getErr := ctr.lSvc.GetLocationsByUserID(uint(loggedInUser.ID), pagination)
+	listParams := &serializers.ListFilters{}
+	listParams.GenerateFilters(c.QueryParams())
+
+	resp, getErr := ctr.lSvc.GetLocationsByUserID(uint(loggedInUser.ID), listParams)
 	if getErr != nil {
 		return c.JSON(getErr.Status, getErr)
 	}
 
-	GeneratePagesPath(c, resp)
+	resp.GeneratePagesPath(c.Request().URL.Path)
 	return c.JSON(http.StatusOK, &resp)
 }
 

@@ -1,9 +1,9 @@
 package impl
 
 import (
-	"clean/app/repository"
-	"clean/app/serializers"
-	"clean/app/svc"
+	"ar5go/app/repository"
+	"ar5go/app/serializers"
+	"ar5go/app/svc"
 )
 
 type system struct {

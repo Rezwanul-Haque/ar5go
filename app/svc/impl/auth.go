@@ -1,16 +1,18 @@
 package impl
 
 import (
-	"clean/app/domain"
-	"clean/app/repository"
-	"clean/app/serializers"
-	"clean/app/svc"
-	"clean/app/utils/consts"
-	"clean/app/utils/methodsutil"
-	"clean/app/utils/msgutil"
-	"clean/infra/config"
-	"clean/infra/errors"
-	"clean/infra/logger"
+	"ar5go/app/domain"
+	"ar5go/app/repository"
+	"ar5go/app/serializers"
+	"ar5go/app/svc"
+	"ar5go/app/utils/consts"
+	"ar5go/app/utils/methodsutil"
+	"ar5go/app/utils/msgutil"
+	"ar5go/infra/config"
+	"ar5go/infra/conn/cache"
+	"ar5go/infra/errors"
+	"ar5go/infra/logger"
+	"context"
 	"fmt"
 	"strconv"
 
@@ -20,15 +22,15 @@ import (
 )
 
 type auth struct {
+	ctx   context.Context
 	urepo repository.IUsers
-	rSvc  svc.ICache
 	tSvc  svc.IToken
 }
 
-func NewAuthService(urepo repository.IUsers, rSvc svc.ICache, tokenSvc svc.IToken) svc.IAuth {
+func NewAuthService(ctx context.Context, urepo repository.IUsers, tokenSvc svc.IToken) svc.IAuth {
 	return &auth{
+		ctx:   ctx,
 		urepo: urepo,
-		rSvc:  rSvc,
 		tSvc:  tokenSvc,
 	}
 }
@@ -86,8 +88,8 @@ func (as *auth) Login(req *serializers.LoginReq) (*serializers.LoginResp, error)
 
 func (as *auth) Logout(user *serializers.LoggedInUser) error {
 	return as.tSvc.DeleteTokenUuid(
-		config.Redis().AccessUuidPrefix+user.AccessUuid,
-		config.Redis().RefreshUuidPrefix+user.RefreshUuid,
+		config.Cache().Redis.AccessUuidPrefix+user.AccessUuid,
+		config.Cache().Redis.RefreshUuidPrefix+user.RefreshUuid,
 	)
 }
 
@@ -109,8 +111,8 @@ func (as *auth) RefreshToken(refreshToken string) (*serializers.LoginResp, error
 	}
 
 	if err = as.tSvc.DeleteTokenUuid(
-		config.Redis().AccessUuidPrefix+oldToken.AccessUuid,
-		config.Redis().RefreshUuidPrefix+oldToken.RefreshUuid,
+		config.Cache().Redis.AccessUuidPrefix+oldToken.AccessUuid,
+		config.Cache().Redis.RefreshUuidPrefix+oldToken.RefreshUuid,
 	); err != nil {
 		logger.Error(err.Error(), err)
 		return nil, errors.ErrDeleteOldTokenUuid
@@ -159,11 +161,11 @@ func (as *auth) getUserInfoWithParam(userID, companyID uint, checkInCache bool) 
 	userResp := &serializers.UserResp{}
 	userWithParams := serializers.UserWithParamsResp{}
 
-	userCacheKey := config.Redis().UserPrefix + strconv.Itoa(int(userID)) + strconv.Itoa(int(companyID))
+	userCacheKey := config.Cache().Redis.UserPrefix + strconv.Itoa(int(userID)) + strconv.Itoa(int(companyID))
 	var err error
 
 	if checkInCache {
-		if err = as.rSvc.GetStruct(userCacheKey, &userResp); err == nil {
+		if err = cache.Client().GetStruct(as.ctx, userCacheKey, &userResp); err == nil {
 			logger.Info("User served from cache")
 			return nil, nil
 		}
@@ -182,7 +184,7 @@ func (as *auth) getUserInfoWithParam(userID, companyID uint, checkInCache bool) 
 		return nil, errors.NewError(errors.ErrSomethingWentWrong)
 	}
 
-	if err := as.rSvc.Set(userCacheKey, userWithParams, 0); err != nil {
+	if err := cache.Client().Set(as.ctx, userCacheKey, userWithParams, 0); err != nil {
 		logger.Error("setting user data on redis key", err)
 	}
 
@@ -238,9 +240,9 @@ func (as *auth) parseTokenClaim(token, tokenType string) (jwt.MapClaims, error) 
 func (as *auth) getTokenResponse(token *serializers.JwtToken) (*serializers.VerifyTokenResp, error) {
 	var resp *serializers.VerifyTokenResp
 	var err error
-	tokenCacheKey := config.Redis().TokenPrefix + strconv.Itoa(int(token.UserID))
+	tokenCacheKey := config.Cache().Redis.TokenPrefix + strconv.Itoa(int(token.UserID))
 
-	if err = as.rSvc.GetStruct(tokenCacheKey, &resp); err == nil {
+	if err = cache.Client().GetStruct(as.ctx, tokenCacheKey, &resp); err == nil {
 		logger.Info("Token user served from cache")
 		return resp, nil
 	}
@@ -258,7 +260,7 @@ func (as *auth) getTokenResponse(token *serializers.JwtToken) (*serializers.Veri
 		return nil, errors.NewError(errors.ErrSomethingWentWrong)
 	}
 
-	if err := as.rSvc.Set(tokenCacheKey, resp, 0); err != nil {
+	if err := cache.Client().Set(as.ctx, tokenCacheKey, resp, 0); err != nil {
 		logger.Error("setting user data on redis key", err)
 	}
 
@@ -266,15 +268,15 @@ func (as *auth) getTokenResponse(token *serializers.JwtToken) (*serializers.Veri
 }
 
 func (as *auth) userBelongsToTokenUuid(userID int, uuid, uuidType string) bool {
-	prefix := config.Redis().AccessUuidPrefix
+	prefix := config.Cache().Redis.AccessUuidPrefix
 
 	if uuidType == consts.RefreshTokenType {
-		prefix = config.Redis().RefreshUuidPrefix
+		prefix = config.Cache().Redis.RefreshUuidPrefix
 	}
 
 	redisKey := prefix + uuid
 
-	redisUserId, err := as.rSvc.GetInt(redisKey)
+	redisUserId, err := cache.Client().GetInt(as.ctx, redisKey)
 	if err != nil {
 		switch err {
 		case redis.Nil:

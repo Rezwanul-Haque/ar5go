@@ -1,29 +1,31 @@
 package impl
 
 import (
-	"clean/app/repository"
-	"clean/infra/logger"
+	"ar5go/app/repository"
+	"ar5go/infra/conn/cache"
+	"ar5go/infra/conn/db"
+	"ar5go/infra/logger"
+	"context"
 	"fmt"
-
-	"github.com/go-redis/redis"
-	"gorm.io/gorm"
 )
 
 type system struct {
-	*gorm.DB
-	*redis.Client
+	ctx   context.Context
+	DB    db.DatabaseClient
+	Cache cache.CacheClient
 }
 
 // NewSystemRepository will create an object that represent the System.Repository implementations
-func NewSystemRepository(db *gorm.DB, redis *redis.Client) repository.ISystem {
+func NewSystemRepository(ctx context.Context, dbc db.DatabaseClient, c cache.CacheClient) repository.ISystem {
 	return &system{
-		DB:     db,
-		Client: redis,
+		ctx:   ctx,
+		DB:    dbc,
+		Cache: c,
 	}
 }
 
-func (sys *system) DBCheck() (bool, error) {
-	dB, _ := sys.DB.DB()
+func (r *system) DBCheck() (bool, error) {
+	dB, _ := r.DB.DB.DB()
 	if err := dB.Ping(); err != nil {
 		return false, err
 	}
@@ -31,9 +33,8 @@ func (sys *system) DBCheck() (bool, error) {
 	return true, nil
 }
 
-func (sys *system) CacheCheck() bool {
-	client := sys.Client
-	pong, err := client.Ping().Result()
+func (r *system) CacheCheck() bool {
+	pong, err := r.Cache.Redis.Ping(r.ctx).Result()
 	if err != nil {
 		return false
 	}

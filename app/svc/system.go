@@ -1,6 +1,6 @@
 package svc
 
-import "clean/app/serializers"
+import "ar5go/app/serializers"
 
 type ISystem interface {
 	GetHealth() (*serializers.HealthResp, error)
