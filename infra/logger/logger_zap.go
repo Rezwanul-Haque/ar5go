@@ -9,8 +9,6 @@ type LogClient struct {
 	Logger *zap.Logger
 }
 
-//var client *zap.Logger
-
 func connectZap(level string) {
 	encoderConfig := zapcore.EncoderConfig{
 		TimeKey:        "time",
