@@ -13,13 +13,14 @@ import (
 )
 
 type DatabaseClient struct {
+	lc logger.LogClient
 	DB *gorm.DB
 }
 
-func connectMySQL() {
+func connectMySQL(lc logger.LogClient) {
 	conf := config.Db().MySQL
 
-	logger.Info("connecting to mysql at " + conf.Host + ":" + conf.Port + "...")
+	logger.Client().Info("connecting to mysql at " + conf.Host + ":" + conf.Port + "...")
 
 	logMode := gormlogger.Silent
 	if conf.Debug {
@@ -53,6 +54,7 @@ func connectMySQL() {
 	}
 
 	client.DB = dB
+	client.lc = lc
 
 	client.DB.AutoMigrate(
 		&models.Company{},
@@ -63,5 +65,5 @@ func connectMySQL() {
 		&models.RolePermission{},
 	)
 
-	logger.Info("mysql connection successful...")
+	logger.Client().Info("mysql connection successful...")
 }

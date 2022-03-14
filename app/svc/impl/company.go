@@ -15,12 +15,14 @@ import (
 )
 
 type company struct {
+	lc    logger.LogClient
 	crepo repository.ICompany
 	urepo repository.IUsers
 }
 
-func NewCompanyService(crepo repository.ICompany, urepo repository.IUsers) svc.ICompany {
+func NewCompanyService(lc logger.LogClient, crepo repository.ICompany, urepo repository.IUsers) svc.ICompany {
 	return &company{
+		lc:    lc,
 		crepo: crepo,
 		urepo: urepo,
 	}
@@ -31,7 +33,7 @@ func (c *company) CreateCompanyWithAdminUser(cp serializers.CompanyReq) (*serial
 
 	var companyObj domain.Company
 	if err := methodsutil.StructToStruct(cp, &companyObj); err != nil {
-		logger.Error(msgutil.EntityStructToStructFailedMsg("admin user"), err)
+		c.lc.Error(msgutil.EntityStructToStructFailedMsg("admin user"), err)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -60,12 +62,12 @@ func (c *company) CreateCompanyWithAdminUser(cp serializers.CompanyReq) (*serial
 	var resp serializers.CompanyResp
 
 	if err := methodsutil.StructToStruct(companyResult, &resp); err != nil {
-		logger.Error(msgutil.EntityStructToStructFailedMsg("company"), err)
+		c.lc.Error(msgutil.EntityStructToStructFailedMsg("company"), err)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
 	if err := methodsutil.StructToStruct(userResult, &resp.Admin); err != nil {
-		logger.Error(msgutil.EntityStructToStructFailedMsg("admin user"), err)
+		c.lc.Error(msgutil.EntityStructToStructFailedMsg("admin user"), err)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 

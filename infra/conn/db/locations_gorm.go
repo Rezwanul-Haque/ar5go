@@ -5,14 +5,13 @@ import (
 	"ar5go/app/serializers"
 	"ar5go/infra/conn/db/models"
 	"ar5go/infra/errors"
-	"ar5go/infra/logger"
 )
 
 func (dc DatabaseClient) SaveLocation(history *domain.LocationHistory) *errors.RestErr {
 	res := dc.DB.Model(&models.LocationHistory{}).Create(&history)
 
 	if res.Error != nil {
-		logger.Error("error occurred when saving location history", res.Error)
+		dc.lc.Error("error occurred when saving location history", res.Error)
 		return errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -25,7 +24,7 @@ func (dc DatabaseClient) UpdateLocation(history *domain.LocationHistory) (*domai
 		Update("check_out_time", history.CheckOutTime)
 
 	if res.Error != nil {
-		logger.Error("error occurred when saving location history", res.Error)
+		dc.lc.Error("error occurred when saving location history", res.Error)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -59,7 +58,7 @@ func (dc DatabaseClient) GetLocationsByUserID(userID uint, filters *serializers.
 	}
 
 	if res.Error != nil {
-		logger.Error("error occurred when getting location history by userID", res.Error)
+		dc.lc.Error("error occurred when getting location history by userID", res.Error)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -69,7 +68,7 @@ func (dc DatabaseClient) GetLocationsByUserID(userID uint, filters *serializers.
 	// count all data
 	errCount := dc.DB.Model(&models.LocationHistory{}).Where("location_histories.user_id = ?", userID).Count(&totalRows).Error
 	if errCount != nil {
-		logger.Error("error occurred when getting total location history count by userID", res.Error)
+		dc.lc.Error("error occurred when getting total location history count by userID", res.Error)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 

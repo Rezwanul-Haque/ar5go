@@ -6,18 +6,21 @@ import (
 	"ar5go/app/svc"
 	"ar5go/app/utils/consts"
 	"ar5go/infra/errors"
+	"ar5go/infra/logger"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
 type location struct {
+	lc   logger.LogClient
 	hSvc svc.ILocation
 }
 
 // NewLocationController will initialize the controllers
-func NewLocationController(grp interface{}, hSvc svc.ILocation) {
+func NewLocationController(grp interface{}, lc logger.LogClient, hSvc svc.ILocation) {
 	hc := &location{
+		lc:   lc,
 		hSvc: hSvc,
 	}
 

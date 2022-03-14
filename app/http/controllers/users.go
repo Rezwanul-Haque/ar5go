@@ -17,14 +17,16 @@ import (
 )
 
 type users struct {
+	lc   logger.LogClient
 	cSvc svc.ICompany
 	uSvc svc.IUsers
 	lSvc svc.ILocation
 }
 
 // NewUsersController will initialize the controllers
-func NewUsersController(grp interface{}, cSvc svc.ICompany, uSvc svc.IUsers, lSvc svc.ILocation) {
+func NewUsersController(grp interface{}, lc logger.LogClient, cSvc svc.ICompany, uSvc svc.IUsers, lSvc svc.ILocation) {
 	uc := &users{
+		lc:   lc,
 		cSvc: cSvc,
 		uSvc: uSvc,
 		lSvc: lSvc,
@@ -95,7 +97,7 @@ func (ctr *users) GetAll(c echo.Context) error {
 func (ctr *users) Update(c echo.Context) error {
 	loggedInUser, err := GetUserFromContext(c)
 	if err != nil {
-		logger.Error(err.Error(), err)
+		ctr.lc.Error(err.Error(), err)
 		restErr := errors.NewUnauthorizedError("no logged-in user found")
 		return c.JSON(restErr.Status, restErr)
 	}
@@ -117,7 +119,7 @@ func (ctr *users) Update(c echo.Context) error {
 func (ctr *users) GetUserVisitedLocations(c echo.Context) error {
 	loggedInUser, err := GetUserFromContext(c)
 	if err != nil {
-		logger.Error(err.Error(), err)
+		ctr.lc.Error(err.Error(), err)
 		restErr := errors.NewUnauthorizedError("no logged-in user found")
 		return c.JSON(restErr.Status, restErr)
 	}
@@ -137,7 +139,7 @@ func (ctr *users) GetUserVisitedLocations(c echo.Context) error {
 func (ctr *users) ChangePassword(c echo.Context) error {
 	loggedInUser, err := GetUserFromContext(c)
 	if err != nil {
-		logger.Error(err.Error(), err)
+		ctr.lc.Error(err.Error(), err)
 		restErr := errors.NewUnauthorizedError("no logged-in user found")
 		return c.JSON(restErr.Status, restErr)
 	}

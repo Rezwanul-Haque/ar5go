@@ -23,7 +23,8 @@ var seedCmd = &cobra.Command{
 
 func seed(cmd *cobra.Command, args []string) {
 	// seed roles, permissions, role_permissions
-	db.NewDbClient()
+	lc := logger.Client()
+	db.NewDbClient(lc)
 	dbc := db.Client()
 
 	truncate, _ = cmd.Flags().GetBool("truncate")
@@ -31,7 +32,7 @@ func seed(cmd *cobra.Command, args []string) {
 
 	for _, seed := range seeder.SeedAll() {
 		if err := seed.Run(dbc, truncate); err != nil {
-			logger.Error(fmt.Sprintf("Running seed '%s', failed with error:", seed.Name), err)
+			lc.Error(fmt.Sprintf("Running seed '%s', failed with error:", seed.Name), err)
 		}
 	}
 }

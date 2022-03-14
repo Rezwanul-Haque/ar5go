@@ -12,11 +12,13 @@ import (
 )
 
 type permissions struct {
+	lc    logger.LogClient
 	prepo repository.IPermissions
 }
 
-func NewPermissionsService(prepo repository.IPermissions) svc.IPermissions {
+func NewPermissionsService(lc logger.LogClient, prepo repository.IPermissions) svc.IPermissions {
 	return &permissions{
+		lc:    lc,
 		prepo: prepo,
 	}
 }
@@ -43,7 +45,7 @@ func (p *permissions) GetPermission(id uint) (*serializers.PermissionResp, *erro
 
 	err := methodsutil.StructToStruct(rule, resp)
 	if err != nil {
-		logger.Error(msgutil.EntityStructToStructFailedMsg("get permission"), err)
+		p.lc.Error(msgutil.EntityStructToStructFailedMsg("get permission"), err)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 	return nil, nil
@@ -83,7 +85,7 @@ func (p *permissions) ListPermission() ([]*serializers.PermissionResp, *errors.R
 
 	err := methodsutil.StructToStruct(permissions, &resp)
 	if err != nil {
-		logger.Error(msgutil.EntityStructToStructFailedMsg("get all permissions"), err)
+		p.lc.Error(msgutil.EntityStructToStructFailedMsg("get all permissions"), err)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 

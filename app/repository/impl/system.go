@@ -11,14 +11,16 @@ import (
 
 type system struct {
 	ctx   context.Context
+	lc    logger.LogClient
 	DB    db.DatabaseClient
 	Cache cache.CacheClient
 }
 
 // NewSystemRepository will create an object that represent the System.Repository implementations
-func NewSystemRepository(ctx context.Context, dbc db.DatabaseClient, c cache.CacheClient) repository.ISystem {
+func NewSystemRepository(ctx context.Context, lc logger.LogClient, dbc db.DatabaseClient, c cache.CacheClient) repository.ISystem {
 	return &system{
 		ctx:   ctx,
+		lc:    lc,
 		DB:    dbc,
 		Cache: c,
 	}
@@ -39,7 +41,7 @@ func (r *system) CacheCheck() bool {
 		return false
 	}
 
-	logger.Info(fmt.Sprintf("%v from cache", pong))
+	r.lc.Info(fmt.Sprintf("%v from cache", pong))
 
 	return true
 }

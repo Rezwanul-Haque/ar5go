@@ -11,13 +11,15 @@ import (
 )
 
 type auth struct {
+	lc      logger.LogClient
 	authSvc svc.IAuth
 	userSvc svc.IUsers
 }
 
 // NewAuthController will initialize the controllers
-func NewAuthController(grp interface{}, authSvc svc.IAuth, userSvc svc.IUsers) {
+func NewAuthController(grp interface{}, lc logger.LogClient, authSvc svc.IAuth, userSvc svc.IUsers) {
 	ac := &auth{
+		lc:      lc,
 		authSvc: authSvc,
 		userSvc: userSvc,
 	}
@@ -37,7 +39,7 @@ func (ctr *auth) Login(c echo.Context) error {
 
 	if err = c.Bind(&cred); err != nil {
 		bodyErr := errors.NewBadRequestError("failed to parse request body")
-		logger.Error("failed to parse request body", err)
+		ctr.lc.Error("failed to parse request body", err)
 		return c.JSON(bodyErr.Status, bodyErr)
 	}
 
@@ -66,13 +68,13 @@ func (ctr *auth) Logout(c echo.Context) error {
 	var err error
 
 	if user, err = GetUserFromContext(c); err != nil {
-		logger.Error(err.Error(), err)
+		ctr.lc.Error(err.Error(), err)
 		serverErr := errors.NewInternalServerError("no logged-in user found")
 		return c.JSON(serverErr.Status, serverErr)
 	}
 
 	if err := ctr.authSvc.Logout(user); err != nil {
-		logger.Error(err.Error(), err)
+		ctr.lc.Error(err.Error(), err)
 		serverErr := errors.NewInternalServerError("failed to logout")
 		return c.JSON(serverErr.Status, serverErr)
 	}
@@ -86,7 +88,7 @@ func (ctr *auth) RefreshToken(c echo.Context) error {
 	var err error
 
 	if err = c.Bind(&token); err != nil {
-		logger.Error("failed to parse request body", err)
+		ctr.lc.Error("failed to parse request body", err)
 		bodyErr := errors.NewBadRequestError("failed to parse request body")
 		return c.JSON(bodyErr.Status, bodyErr)
 	}

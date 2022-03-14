@@ -12,11 +12,13 @@ import (
 )
 
 type roles struct {
+	lc    logger.LogClient
 	rrepo repository.IRoles
 }
 
-func NewRolesService(rrepo repository.IRoles) svc.IRoles {
+func NewRolesService(lc logger.LogClient, rrepo repository.IRoles) svc.IRoles {
 	return &roles{
+		lc:    lc,
 		rrepo: rrepo,
 	}
 }
@@ -43,7 +45,7 @@ func (r *roles) GetRole(id uint) (*serializers.RoleResp, *errors.RestErr) {
 
 	err := methodsutil.StructToStruct(rule, &resp)
 	if err != nil {
-		logger.Error(msgutil.EntityStructToStructFailedMsg("get role"), err)
+		r.lc.Error(msgutil.EntityStructToStructFailedMsg("get role"), err)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 	return resp, nil
@@ -83,7 +85,7 @@ func (r *roles) ListRoles() ([]*serializers.RoleResp, *errors.RestErr) {
 
 	err := methodsutil.StructToStruct(rules, &resp)
 	if err != nil {
-		logger.Error(msgutil.EntityStructToStructFailedMsg("get role"), err)
+		r.lc.Error(msgutil.EntityStructToStructFailedMsg("get role"), err)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -95,7 +97,7 @@ func (r *roles) SetRolePermissions(req *serializers.RolePermissionsReq) *errors.
 
 	err := methodsutil.StructToStruct(req, &rolePerms)
 	if err != nil {
-		logger.Error(msgutil.EntityStructToStructFailedMsg("set role & permissions"), err)
+		r.lc.Error(msgutil.EntityStructToStructFailedMsg("set role & permissions"), err)
 		return errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 

@@ -20,12 +20,14 @@ import (
 
 type users struct {
 	ctx   context.Context
+	lc    logger.LogClient
 	urepo repository.IUsers
 }
 
-func NewUsersService(ctx context.Context, urepo repository.IUsers) svc.IUsers {
+func NewUsersService(ctx context.Context, lc logger.LogClient, urepo repository.IUsers) svc.IUsers {
 	return &users{
 		ctx:   ctx,
+		lc:    lc,
 		urepo: urepo,
 	}
 }
@@ -75,7 +77,7 @@ func (u *users) UpdateUser(userID uint, req serializers.UserReq) *errors.RestErr
 
 	err := methodsutil.StructToStruct(req, &user)
 	if err != nil {
-		logger.Error(msgutil.EntityStructToStructFailedMsg("update user"), err)
+		u.lc.Error(msgutil.EntityStructToStructFailedMsg("update user"), err)
 		return errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -108,7 +110,7 @@ func (u *users) GetUserByCompanyIdAndRole(companyID, roleID uint,
 	if users[0].ID > 0 {
 		err := methodsutil.StructToStruct(users, &resp.Subordinates)
 		if err != nil {
-			logger.Error(msgutil.EntityStructToStructFailedMsg("get users by company id"), err)
+			u.lc.Error(msgutil.EntityStructToStructFailedMsg("get users by company id"), err)
 			return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 		}
 	}
@@ -125,7 +127,7 @@ func (u *users) ChangePassword(id int, data *serializers.ChangePasswordReq) erro
 
 	currentPass := []byte(*user.Password)
 	if err := bcrypt.CompareHashAndPassword(currentPass, []byte(data.OldPassword)); err != nil {
-		logger.Error(msgutil.EntityGenericFailedMsg("comparing hash and old password"), err)
+		u.lc.Error(msgutil.EntityGenericFailedMsg("comparing hash and old password"), err)
 		return errors.ErrInvalidPassword
 	}
 
@@ -159,12 +161,12 @@ func (u *users) ForgotPassword(email string) error {
 	signedToken, err := token.SignedString([]byte(secret))
 
 	if err != nil {
-		logger.Error("error occur when getting complete signed token", err)
+		u.lc.Error("error occur when getting complete signed token", err)
 		return err
 	}
 
 	// TODO: Send Mail
-	logger.Info(signedToken)
+	u.lc.Info(signedToken)
 	// fpassReq := &serializers.ForgetPasswordMailReq{
 	// 	To:     user.Email,
 	// 	UserID: user.ID,
@@ -188,7 +190,7 @@ func (u *users) VerifyResetPassword(req *serializers.VerifyResetPasswordReq) err
 
 	parsedToken, err := methodsutil.ParseJwtToken(req.Token, secret)
 	if err != nil {
-		logger.Error("error occur when parse jwt token with secret", err)
+		u.lc.Error("error occur when parse jwt token with secret", err)
 		return errors.ErrParseJwt
 	}
 
@@ -225,7 +227,7 @@ func (u *users) deleteUserCache(userID int) error {
 		config.Cache().Redis.UserPrefix+strconv.Itoa(userID),
 		config.Cache().Redis.TokenPrefix+strconv.Itoa(userID),
 	); err != nil {
-		logger.Error("error occur when deleting cached user after user update", err)
+		u.lc.Error("error occur when deleting cached user after user update", err)
 		return err
 	}
 

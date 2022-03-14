@@ -5,18 +5,21 @@ import (
 	"ar5go/app/repository"
 	"ar5go/infra/conn/db"
 	"ar5go/infra/errors"
+	"ar5go/infra/logger"
 	"context"
 )
 
 type roles struct {
 	ctx context.Context
+	lc  logger.LogClient
 	DB  db.DatabaseClient
 }
 
 // NewRolesRepository will create an object that represent the Roles.Repository implementations
-func NewRolesRepository(ctx context.Context, dbc db.DatabaseClient) repository.IRoles {
+func NewRolesRepository(ctx context.Context, lc logger.LogClient, dbc db.DatabaseClient) repository.IRoles {
 	return &roles{
 		ctx: ctx,
+		lc:  lc,
 		DB:  dbc,
 	}
 }

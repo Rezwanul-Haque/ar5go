@@ -227,7 +227,7 @@ func JWTWithConfig(config JWTConfig) echo.MiddlewareFunc {
 
 			tokenDetails := &serializers.JwtToken{}
 			if err := methodsutil.MapToStruct(claims, tokenDetails); err != nil {
-				logger.Error(err.Error(), err)
+				logger.Client().Error(err.Error(), err)
 				return ErrJWTMissing
 			}
 
@@ -243,7 +243,7 @@ func JWTWithConfig(config JWTConfig) echo.MiddlewareFunc {
 				redisUserId, err = strconv.Atoi(redisUser)
 				cuID, _ := strconv.Atoi(strconv.Itoa(int(tokenDetails.UserID)) + strconv.Itoa(int(tokenDetails.CompanyID)))
 				if err != nil || redisUserId != cuID {
-					logger.Error(fmt.Sprintf("redis user: %v | token user: %v | error: ", redisUserId, tokenDetails.UserID), err)
+					logger.Client().Error(fmt.Sprintf("redis user: %v | token user: %v | error: ", redisUserId, tokenDetails.UserID), err)
 					return ErrJWTMissing
 				}
 			} else {
@@ -255,7 +255,7 @@ func JWTWithConfig(config JWTConfig) echo.MiddlewareFunc {
 				redisUserDetail, _ = cache.Client().Get(ctx, key)
 
 				if err = json.Unmarshal([]byte(redisUserDetail), &user); err != nil {
-					logger.Error(err.Error(), err)
+					logger.Client().Error(err.Error(), err)
 					return ErrJWTMissing
 				}
 			} else {

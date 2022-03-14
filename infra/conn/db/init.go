@@ -1,11 +1,14 @@
 package db
 
-import "ar5go/app/domain"
+import (
+	"ar5go/app/domain"
+	"ar5go/infra/logger"
+)
 
 var client DatabaseClient
 
-func NewDbClient() domain.IDb {
-	connectMySQL()
+func NewDbClient(lc logger.LogClient) domain.IDb {
+	connectMySQL(lc)
 
 	return &DatabaseClient{}
 }

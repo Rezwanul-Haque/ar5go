@@ -7,36 +7,70 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var client *zap.Logger
+//var client *zap.Logger
 
-func Init(level string) {
-	encoderConfig := zapcore.EncoderConfig{
-		TimeKey:        "time",
-		LevelKey:       "level",
-		NameKey:        "logger",
-		MessageKey:     "message",
-		CallerKey:      "caller",
-		StacktraceKey:  "stacktrace",
-		LineEnding:     "\n",
-		EncodeLevel:    zapcore.LowercaseLevelEncoder,
-		EncodeTime:     zapcore.ISO8601TimeEncoder,
-		EncodeDuration: zapcore.SecondsDurationEncoder,
-		EncodeCaller:   zapcore.FullCallerEncoder,
-	}
+//func Init(level string) {
+//	encoderConfig := zapcore.EncoderConfig{
+//		TimeKey:        "time",
+//		LevelKey:       "level",
+//		NameKey:        "logger",
+//		MessageKey:     "message",
+//		CallerKey:      "caller",
+//		StacktraceKey:  "stacktrace",
+//		LineEnding:     "\n",
+//		EncodeLevel:    zapcore.LowercaseLevelEncoder,
+//		EncodeTime:     zapcore.ISO8601TimeEncoder,
+//		EncodeDuration: zapcore.SecondsDurationEncoder,
+//		EncodeCaller:   zapcore.FullCallerEncoder,
+//	}
+//
+//	config := zap.Config{
+//		Level:            stringToLevel(level),
+//		Encoding:         "json",
+//		EncoderConfig:    encoderConfig,
+//		OutputPaths:      []string{"stdout"},
+//		ErrorOutputPaths: []string{"stdout"},
+//	}
+//	var err error
+//	client, err = config.Build()
+//	if err != nil {
+//		panic(err)
+//	}
+//	defer client.Sync()
+//}
 
-	config := zap.Config{
-		Level:            stringToLevel(level),
-		Encoding:         "json",
-		EncoderConfig:    encoderConfig,
-		OutputPaths:      []string{"stdout"},
-		ErrorOutputPaths: []string{"stdout"},
-	}
-	var err error
-	client, err = config.Build()
-	if err != nil {
-		panic(err)
-	}
-	defer client.Sync()
+func (lc LogClient) Debug(msg string, data interface{}) {
+	var tags []zap.Field
+	tags = append(tags, zap.Any("data", data))
+	lc.Logger.Debug(msg, tags...)
+	_ = lc.Logger.Sync()
+}
+
+func (lc LogClient) Error(msg string, err error) {
+	var tags []zap.Field
+	tags = append(tags, zap.NamedError("error", err))
+	lc.Logger.Error(msg, tags...)
+	_ = lc.Logger.Sync()
+}
+
+func (lc LogClient) Info(msg string) {
+	lc.Logger.Info(msg)
+	_ = lc.Logger.Sync()
+}
+
+func (lc LogClient) Warn(msg string) {
+	lc.Logger.Warn(msg)
+	_ = lc.Logger.Sync()
+}
+
+func (lc LogClient) Fatal(msg string) {
+	lc.Logger.Fatal(msg)
+	_ = lc.Logger.Sync()
+}
+
+func (lc LogClient) Panic(msg string) {
+	lc.Logger.Panic(msg)
+	_ = lc.Logger.Sync()
 }
 
 func stringToLevel(str string) zap.AtomicLevel {
@@ -55,35 +89,4 @@ func stringToLevel(str string) zap.AtomicLevel {
 	default:
 		return zap.NewAtomicLevelAt(zapcore.PanicLevel)
 	}
-}
-func Debug(msg string, data interface{}, tags ...zap.Field) {
-	tags = append(tags, zap.Any("data", data))
-	client.Debug(msg, tags...)
-	_ = client.Sync()
-}
-
-func Error(msg string, err error, tags ...zap.Field) {
-	tags = append(tags, zap.NamedError("error", err))
-	client.Error(msg, tags...)
-	_ = client.Sync()
-}
-
-func Info(msg string) {
-	client.Info(msg)
-	_ = client.Sync()
-}
-
-func Warn(msg string) {
-	client.Warn(msg)
-	_ = client.Sync()
-}
-
-func Fatal(msg string) {
-	client.Fatal(msg)
-	_ = client.Sync()
-}
-
-func Panic(msg string) {
-	client.Panic(msg)
-	_ = client.Sync()
 }

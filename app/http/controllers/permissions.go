@@ -17,12 +17,14 @@ import (
 )
 
 type permissions struct {
+	lc   logger.LogClient
 	psvc svc.IPermissions
 }
 
 // NewPermissionsController will initialize the controllers
-func NewPermissionsController(grp interface{}, psvc svc.IPermissions) {
+func NewPermissionsController(grp interface{}, lc logger.LogClient, psvc svc.IPermissions) {
 	rc := &permissions{
+		lc:   lc,
 		psvc: psvc,
 	}
 
@@ -39,7 +41,7 @@ func (ctr *permissions) CreatePermission(c echo.Context) error {
 	var err error
 
 	if err = c.Bind(&permissionToCreate); err != nil {
-		logger.Error(msgutil.EntityBindToStructFailedMsg("permission"), err)
+		ctr.lc.Error(msgutil.EntityBindToStructFailedMsg("permission"), err)
 		restErr := errors.NewBadRequestError(errors.ErrCheckParamBodyHeader)
 		return c.JSON(restErr.Status, restErr)
 	}
@@ -62,13 +64,13 @@ func (ctr *permissions) UpdatePermission(c echo.Context) error {
 
 	permissionID, err := strconv.Atoi(c.Param("permission_id"))
 	if err != nil {
-		logger.Error(msgutil.EntityGenericFailedMsg("permission id"), err)
+		ctr.lc.Error(msgutil.EntityGenericFailedMsg("permission id"), err)
 		restErr := errors.NewBadRequestError(err.Error())
 		return c.JSON(restErr.Status, restErr)
 	}
 
 	if err = c.Bind(&permissionToUpdate); err != nil {
-		logger.Error(msgutil.EntityBindToStructFailedMsg("update permission"), err)
+		ctr.lc.Error(msgutil.EntityBindToStructFailedMsg("update permission"), err)
 		restErr := errors.NewBadRequestError(errors.ErrCheckParamBodyHeader)
 		return c.JSON(restErr.Status, restErr)
 	}

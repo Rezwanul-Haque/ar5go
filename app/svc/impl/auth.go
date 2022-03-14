@@ -23,13 +23,15 @@ import (
 
 type auth struct {
 	ctx   context.Context
+	lc    logger.LogClient
 	urepo repository.IUsers
 	tSvc  svc.IToken
 }
 
-func NewAuthService(ctx context.Context, urepo repository.IUsers, tokenSvc svc.IToken) svc.IAuth {
+func NewAuthService(ctx context.Context, lc logger.LogClient, urepo repository.IUsers, tokenSvc svc.IToken) svc.IAuth {
 	return &auth{
 		ctx:   ctx,
+		lc:    lc,
 		urepo: urepo,
 		tSvc:  tokenSvc,
 	}
@@ -51,24 +53,24 @@ func (as *auth) Login(req *serializers.LoginReq) (*serializers.LoginResp, error)
 	hashedPass := []byte(*user.Password)
 
 	if err = bcrypt.CompareHashAndPassword(hashedPass, loginPass); err != nil {
-		logger.Error(err.Error(), err)
+		as.lc.Error(err.Error(), err)
 		return nil, errors.ErrInvalidPassword
 	}
 
 	var token *serializers.JwtToken
 
 	if token, err = as.tSvc.CreateToken(user.ID, user.CompanyID); err != nil {
-		logger.Error(err.Error(), err)
+		as.lc.Error(err.Error(), err)
 		return nil, errors.ErrCreateJwt
 	}
 
 	if err = as.tSvc.StoreTokenUuid(user.ID, user.CompanyID, token); err != nil {
-		logger.Error(err.Error(), err)
+		as.lc.Error(err.Error(), err)
 		return nil, errors.ErrStoreTokenUuid
 	}
 
 	if err = as.urepo.SetLastLoginAt(user); err != nil {
-		logger.Error("error occur when trying to set last login", err)
+		as.lc.Error("error occur when trying to set last login", err)
 		return nil, errors.ErrUpdateLastLogin
 	}
 
@@ -106,7 +108,7 @@ func (as *auth) RefreshToken(refreshToken string) (*serializers.LoginResp, error
 	var newToken *serializers.JwtToken
 
 	if newToken, err = as.tSvc.CreateToken(oldToken.UserID, oldToken.CompanyID); err != nil {
-		logger.Error(err.Error(), err)
+		as.lc.Error(err.Error(), err)
 		return nil, errors.ErrCreateJwt
 	}
 
@@ -114,12 +116,12 @@ func (as *auth) RefreshToken(refreshToken string) (*serializers.LoginResp, error
 		config.Cache().Redis.AccessUuidPrefix+oldToken.AccessUuid,
 		config.Cache().Redis.RefreshUuidPrefix+oldToken.RefreshUuid,
 	); err != nil {
-		logger.Error(err.Error(), err)
+		as.lc.Error(err.Error(), err)
 		return nil, errors.ErrDeleteOldTokenUuid
 	}
 
 	if err = as.tSvc.StoreTokenUuid(newToken.UserID, newToken.CompanyID, newToken); err != nil {
-		logger.Error(err.Error(), err)
+		as.lc.Error(err.Error(), err)
 		return nil, errors.ErrStoreTokenUuid
 	}
 
@@ -166,11 +168,11 @@ func (as *auth) getUserInfoWithParam(userID, companyID uint, checkInCache bool) 
 
 	if checkInCache {
 		if err = cache.Client().GetStruct(as.ctx, userCacheKey, &userResp); err == nil {
-			logger.Info("User served from cache")
+			as.lc.Info("User served from cache")
 			return nil, nil
 		}
 
-		logger.Error(err.Error(), err)
+		as.lc.Error(err.Error(), err)
 	}
 
 	user, getErr := as.urepo.GetUserWithPermissions(userID, true)
@@ -180,12 +182,12 @@ func (as *auth) getUserInfoWithParam(userID, companyID uint, checkInCache bool) 
 
 	err = methodsutil.StructToStruct(user, &userWithParams)
 	if err != nil {
-		logger.Error(msgutil.EntityStructToStructFailedMsg("set intermediate user & permissions"), err)
+		as.lc.Error(msgutil.EntityStructToStructFailedMsg("set intermediate user & permissions"), err)
 		return nil, errors.NewError(errors.ErrSomethingWentWrong)
 	}
 
 	if err := cache.Client().Set(as.ctx, userCacheKey, userWithParams, 0); err != nil {
-		logger.Error("setting user data on redis key", err)
+		as.lc.Error("setting user data on redis key", err)
 	}
 
 	return &userWithParams, nil
@@ -200,12 +202,12 @@ func (as *auth) parseToken(token, tokenType string) (*serializers.JwtToken, erro
 	tokenDetails := &serializers.JwtToken{}
 
 	if err := methodsutil.MapToStruct(claims, &tokenDetails); err != nil {
-		logger.Error(err.Error(), err)
+		as.lc.Error(err.Error(), err)
 		return nil, err
 	}
 
 	if tokenDetails.UserID == 0 || tokenDetails.AccessUuid == "" || tokenDetails.RefreshUuid == "" {
-		logger.Info(fmt.Sprintf("%v", claims))
+		as.lc.Info(fmt.Sprintf("%v", claims))
 		return nil, errors.ErrInvalidRefreshToken
 	}
 
@@ -221,7 +223,7 @@ func (as *auth) parseTokenClaim(token, tokenType string) (jwt.MapClaims, error) 
 
 	parsedToken, err := methodsutil.ParseJwtToken(token, secret)
 	if err != nil {
-		logger.Error(err.Error(), err)
+		as.lc.Error(err.Error(), err)
 		return nil, errors.ErrParseJwt
 	}
 
@@ -243,11 +245,11 @@ func (as *auth) getTokenResponse(token *serializers.JwtToken) (*serializers.Veri
 	tokenCacheKey := config.Cache().Redis.TokenPrefix + strconv.Itoa(int(token.UserID))
 
 	if err = cache.Client().GetStruct(as.ctx, tokenCacheKey, &resp); err == nil {
-		logger.Info("Token user served from cache")
+		as.lc.Info("Token user served from cache")
 		return resp, nil
 	}
 
-	logger.Error(err.Error(), err)
+	as.lc.Error(err.Error(), err)
 
 	user, getErr := as.urepo.GetTokenUser(token.UserID)
 	if getErr != nil {
@@ -256,12 +258,12 @@ func (as *auth) getTokenResponse(token *serializers.JwtToken) (*serializers.Veri
 
 	err = methodsutil.StructToStruct(user, &resp)
 	if err != nil {
-		logger.Error(msgutil.EntityStructToStructFailedMsg("set intermediate user to verify token response"), err)
+		as.lc.Error(msgutil.EntityStructToStructFailedMsg("set intermediate user to verify token response"), err)
 		return nil, errors.NewError(errors.ErrSomethingWentWrong)
 	}
 
 	if err := cache.Client().Set(as.ctx, tokenCacheKey, resp, 0); err != nil {
-		logger.Error("setting user data on redis key", err)
+		as.lc.Error("setting user data on redis key", err)
 	}
 
 	return resp, err
@@ -280,9 +282,9 @@ func (as *auth) userBelongsToTokenUuid(userID int, uuid, uuidType string) bool {
 	if err != nil {
 		switch err {
 		case redis.Nil:
-			logger.Error(redisKey, errors.NewError(" not found in redis"))
+			as.lc.Error(redisKey, errors.NewError(" not found in redis"))
 		default:
-			logger.Error(err.Error(), err)
+			as.lc.Error(err.Error(), err)
 		}
 		return false
 	}

@@ -11,6 +11,7 @@
 
 ### Changed
 - refactored project structure
+- log client now pass as parameter 
 
 ### Removed
 - None

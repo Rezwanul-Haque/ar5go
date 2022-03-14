@@ -7,7 +7,6 @@ import (
 	"ar5go/app/utils/msgutil"
 	"ar5go/infra/conn/db/models"
 	"ar5go/infra/errors"
-	"ar5go/infra/logger"
 	"gorm.io/gorm"
 	"strings"
 )
@@ -16,7 +15,7 @@ func (dc DatabaseClient) SaveUser(user *domain.User) (*domain.User, *errors.Rest
 	res := dc.DB.Model(&models.User{}).Create(&user)
 
 	if res.Error != nil {
-		logger.Error("error occurred when create user", res.Error)
+		dc.lc.Error("error occurred when create user", res.Error)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -52,13 +51,13 @@ func (dc DatabaseClient) GetUser(userID uint, withPermission bool) (*domain.User
 	res := query.Where("users.id = ?", userID).Find(&intUser)
 
 	if res.Error != nil {
-		logger.Error(msgutil.EntityGenericFailedMsg("getting user with permission"), res.Error)
+		dc.lc.Error(msgutil.EntityGenericFailedMsg("getting user with permission"), res.Error)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
 	err := methodsutil.StructToStruct(intUser, &userWithParams.User)
 	if err != nil {
-		logger.Error(msgutil.EntityStructToStructFailedMsg("set intermediate user & permissions"), err)
+		dc.lc.Error(msgutil.EntityStructToStructFailedMsg("set intermediate user & permissions"), err)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -77,12 +76,12 @@ func (dc DatabaseClient) GetUserByID(userID uint) (*domain.User, *errors.RestErr
 	res := dc.DB.Model(&models.User{}).Where("id = ?", userID).First(&resp)
 
 	if res.RowsAffected == 0 {
-		logger.Error("error occurred when getting user by user id", res.Error)
+		dc.lc.Error("error occurred when getting user by user id", res.Error)
 		return nil, errors.NewNotFoundError(errors.ErrRecordNotFound)
 	}
 
 	if res.Error != nil {
-		logger.Error("error occurred when getting user by user id", res.Error)
+		dc.lc.Error("error occurred when getting user by user id", res.Error)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -93,7 +92,7 @@ func (dc DatabaseClient) UpdateUser(user *domain.User) *errors.RestErr {
 	res := dc.DB.Model(&models.User{}).Omit("company_id", "password", "app_key").Where("id = ? AND company_id = ?", user.ID, user.CompanyID).Updates(&user)
 
 	if res.Error != nil {
-		logger.Error("error occurred when updating user by user id", res.Error)
+		dc.lc.Error("error occurred when updating user by user id", res.Error)
 		return errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -104,7 +103,7 @@ func (dc DatabaseClient) UpdatePassword(userID uint, companyID uint, updateValue
 	res := dc.DB.Model(&models.User{}).Where("id = ? AND company_id = ?", userID, companyID).Updates(&updateValues)
 
 	if res.Error != nil {
-		logger.Error(msgutil.EntityGenericFailedMsg("updating user by user id"), res.Error)
+		dc.lc.Error(msgutil.EntityGenericFailedMsg("updating user by user id"), res.Error)
 		return errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -121,7 +120,7 @@ func (dc DatabaseClient) GetUserByAppKey(appKey string) (*domain.User, *errors.R
 	}
 
 	if res.Error != nil {
-		logger.Error("error occurred when getting user by app key", res.Error)
+		dc.lc.Error("error occurred when getting user by app key", res.Error)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -133,11 +132,11 @@ func (dc DatabaseClient) GetUserByEmail(email string) (*domain.User, error) {
 
 	res := dc.DB.Model(&models.User{}).Where("email = ?", email).Find(&user)
 	if res.RowsAffected == 0 {
-		logger.Error("no user found by this email", res.Error)
+		dc.lc.Error("no user found by this email", res.Error)
 		return nil, errors.NewError(errors.ErrRecordNotFound)
 	}
 	if res.Error != nil {
-		logger.Error("error occurred when trying to get user by email", res.Error)
+		dc.lc.Error("error occurred when trying to get user by email", res.Error)
 		return nil, errors.NewError(errors.ErrSomethingWentWrong)
 	}
 
@@ -172,7 +171,7 @@ func (dc DatabaseClient) GetUsersByCompanyIdAndRole(companyID, roleID uint,
 	}
 
 	if res.Error != nil {
-		logger.Error("error occurred when getting users by company_id and role id", res.Error)
+		dc.lc.Error("error occurred when getting users by company_id and role id", res.Error)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -185,7 +184,7 @@ func (dc DatabaseClient) GetUsersByCompanyIdAndRole(companyID, roleID uint,
 		Count(&totalRows).Error
 
 	if errCount != nil {
-		logger.Error("error occurred when getting total users by company_id and role id", res.Error)
+		dc.lc.Error("error occurred when getting total users by company_id and role id", res.Error)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 	filters.TotalRows = totalRows
@@ -198,7 +197,7 @@ func (dc DatabaseClient) SetLastLoginAt(user *domain.User) error {
 	err := dc.DB.Model(&models.User{}).Update("last_login_at", user.LastLoginAt).Error
 
 	if err != nil {
-		logger.Error(err.Error(), err)
+		dc.lc.Error(err.Error(), err)
 		return err
 	}
 
@@ -223,7 +222,7 @@ func (dc DatabaseClient) ResetPassword(userID int, hashedPass []byte) error {
 		Error
 
 	if err != nil {
-		logger.Error("error occur when reset password", err)
+		dc.lc.Error("error occur when reset password", err)
 		return err
 	}
 
@@ -239,13 +238,13 @@ func (dc DatabaseClient) GetTokenUser(id uint) (*domain.VerifyTokenResp, *errors
 	res := query.Where("users.id = ?", id).Find(&tempUser)
 
 	if res.Error != nil {
-		logger.Error(msgutil.EntityGenericFailedMsg("get token user"), res.Error)
+		dc.lc.Error(msgutil.EntityGenericFailedMsg("get token user"), res.Error)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
 	err := methodsutil.StructToStruct(tempUser, &vtUser.BaseVerifyTokenResp)
 	if err != nil {
-		logger.Error(msgutil.EntityStructToStructFailedMsg("set intermediate user & permissions"), err)
+		dc.lc.Error(msgutil.EntityStructToStructFailedMsg("set intermediate user & permissions"), err)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -282,13 +281,13 @@ func (dc DatabaseClient) GetUserWithPermissions(userID uint, withPermission bool
 	res := query.Where("users.id = ?", userID).Find(&intUser)
 
 	if res.Error != nil {
-		logger.Error(msgutil.EntityGenericFailedMsg("getting user with permission"), res.Error)
+		dc.lc.Error(msgutil.EntityGenericFailedMsg("getting user with permission"), res.Error)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
 	err := methodsutil.StructToStruct(intUser, &userWithParams.User)
 	if err != nil {
-		logger.Error(msgutil.EntityStructToStructFailedMsg("set intermediate user & permissions"), err)
+		dc.lc.Error(msgutil.EntityStructToStructFailedMsg("set intermediate user & permissions"), err)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 

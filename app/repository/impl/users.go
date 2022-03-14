@@ -6,19 +6,22 @@ import (
 	"ar5go/app/serializers"
 	"ar5go/infra/conn/db"
 	"ar5go/infra/errors"
+	"ar5go/infra/logger"
 	"context"
 	"time"
 )
 
 type users struct {
 	ctx context.Context
+	lc  logger.LogClient
 	DB  db.DatabaseClient
 }
 
 // NewUsersRepository will create an object that represent the User.Repository implementations
-func NewUsersRepository(ctx context.Context, dbc db.DatabaseClient) repository.IUsers {
+func NewUsersRepository(ctx context.Context, lc logger.LogClient, dbc db.DatabaseClient) repository.IUsers {
 	return &users{
 		ctx: ctx,
+		lc:  lc,
 		DB:  dbc,
 	}
 }

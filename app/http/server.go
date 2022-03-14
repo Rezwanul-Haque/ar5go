@@ -17,7 +17,7 @@ func Start() {
 	e := echo.New()
 
 	if err := middlewares.Attach(e); err != nil {
-		logger.Error("error occur when attaching middlewares", err)
+		logger.Client().Error("error occur when attaching middlewares", err)
 		os.Exit(1)
 	}
 
@@ -33,7 +33,7 @@ func Start() {
 		GracefulShutdown(echoProm)
 	}()
 
-	container.Init(e.Group("api"))
+	container.Init(e.Group("api"), logger.Client())
 
 	port := config.App().Port
 
@@ -46,16 +46,16 @@ func Start() {
 	GracefulShutdown(e)
 }
 
-// server will gracefully shutdown within 5 sec
+// GracefulShutdown server will gracefully shut down within 5 sec
 func GracefulShutdown(e *echo.Echo) {
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, os.Interrupt)
 	<-ch
-	logger.Info("shutting down server...")
+	logger.Client().Info("shutting down server...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	_ = e.Shutdown(ctx)
-	logger.Info("server shutdowns gracefully")
+	logger.Client().Info("server shutdowns gracefully")
 }

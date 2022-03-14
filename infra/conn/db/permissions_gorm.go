@@ -5,7 +5,6 @@ import (
 	"ar5go/app/utils/msgutil"
 	"ar5go/infra/conn/db/models"
 	"ar5go/infra/errors"
-	"ar5go/infra/logger"
 	"gorm.io/gorm"
 )
 
@@ -13,7 +12,7 @@ func (dc DatabaseClient) CreatePermission(permission *domain.Permission) (*domai
 	res := dc.DB.Model(&models.Permission{}).Where("name = ?", permission.Name).FirstOrCreate(&permission)
 
 	if res.Error != nil {
-		logger.Error(msgutil.EntityGenericFailedMsg("create permission"), res.Error)
+		dc.lc.Error(msgutil.EntityGenericFailedMsg("create permission"), res.Error)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -30,7 +29,7 @@ func (dc DatabaseClient) GetPermission(permissionID uint) (*domain.Permission, *
 	}
 
 	if res.Error != nil {
-		logger.Error(msgutil.EntityGenericFailedMsg("getting permission by permission id"), res.Error)
+		dc.lc.Error(msgutil.EntityGenericFailedMsg("getting permission by permission id"), res.Error)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -41,7 +40,7 @@ func (dc DatabaseClient) UpdatePermission(permission *domain.Permission) *errors
 	res := dc.DB.Model(&models.Permission{}).Where("id = ?", permission.ID).Updates(&permission)
 
 	if res.Error != nil {
-		logger.Error(msgutil.EntityGenericFailedMsg("update permission"), res.Error)
+		dc.lc.Error(msgutil.EntityGenericFailedMsg("update permission"), res.Error)
 		return errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -56,7 +55,7 @@ func (dc DatabaseClient) RemovePermission(id uint) *errors.RestErr {
 	}
 
 	if res.Error != nil {
-		logger.Error(msgutil.EntityGenericFailedMsg("remove permission"), res.Error)
+		dc.lc.Error(msgutil.EntityGenericFailedMsg("remove permission"), res.Error)
 		return errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -73,7 +72,7 @@ func (dc DatabaseClient) ListPermissions() ([]*domain.Permission, *errors.RestEr
 	}
 
 	if res.Error != nil {
-		logger.Error(msgutil.EntityGenericFailedMsg("list permissions"), res.Error)
+		dc.lc.Error(msgutil.EntityGenericFailedMsg("list permissions"), res.Error)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 

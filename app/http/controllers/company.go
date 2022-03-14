@@ -4,18 +4,21 @@ import (
 	"ar5go/app/serializers"
 	"ar5go/app/svc"
 	"ar5go/infra/errors"
+	"ar5go/infra/logger"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
 type company struct {
+	lc   logger.LogClient
 	cSvc svc.ICompany
 }
 
 // NewCompanyController will initialize the controllers
-func NewCompanyController(grp interface{}, cSvc svc.ICompany) {
+func NewCompanyController(grp interface{}, lc logger.LogClient, cSvc svc.ICompany) {
 	cc := &company{
+		lc:   lc,
 		cSvc: cSvc,
 	}
 

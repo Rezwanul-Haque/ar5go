@@ -5,7 +5,6 @@ import (
 	"ar5go/app/utils/msgutil"
 	"ar5go/infra/conn/db/models"
 	"ar5go/infra/errors"
-	"ar5go/infra/logger"
 	"gorm.io/gorm"
 )
 
@@ -13,7 +12,7 @@ func (dc DatabaseClient) CreateRole(role *domain.Role) (*domain.Role, *errors.Re
 	res := dc.DB.Model(&models.Role{}).Where("name = ?", role.Name).FirstOrCreate(&role)
 
 	if res.Error != nil {
-		logger.Error(msgutil.EntityGenericFailedMsg("create role"), res.Error)
+		dc.lc.Error(msgutil.EntityGenericFailedMsg("create role"), res.Error)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -30,7 +29,7 @@ func (dc DatabaseClient) GetRole(roleID uint) (*domain.Role, *errors.RestErr) {
 	}
 
 	if res.Error != nil {
-		logger.Error(msgutil.EntityGenericFailedMsg("getting role by role id"), res.Error)
+		dc.lc.Error(msgutil.EntityGenericFailedMsg("getting role by role id"), res.Error)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -41,7 +40,7 @@ func (dc DatabaseClient) UpdateRole(role *domain.Role) *errors.RestErr {
 	res := dc.DB.Model(&models.Role{}).Where("id = ?", role.ID).Updates(&role)
 
 	if res.Error != nil {
-		logger.Error(msgutil.EntityGenericFailedMsg("update role"), res.Error)
+		dc.lc.Error(msgutil.EntityGenericFailedMsg("update role"), res.Error)
 		return errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -56,7 +55,7 @@ func (dc DatabaseClient) RemoveRole(id uint) *errors.RestErr {
 	}
 
 	if res.Error != nil {
-		logger.Error(msgutil.EntityGenericFailedMsg("remove role"), res.Error)
+		dc.lc.Error(msgutil.EntityGenericFailedMsg("remove role"), res.Error)
 		return errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -73,7 +72,7 @@ func (dc DatabaseClient) ListRoles() ([]*domain.Role, *errors.RestErr) {
 	}
 
 	if res.Error != nil {
-		logger.Error(msgutil.EntityGenericFailedMsg("list roles"), res.Error)
+		dc.lc.Error(msgutil.EntityGenericFailedMsg("list roles"), res.Error)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -85,7 +84,7 @@ func (dc DatabaseClient) SetRolePermissions(rolePerms *domain.RolePermissions) *
 
 	if err := tx.Where("role_id = ?", rolePerms.RoleID).Delete(&domain.RolePermission{}).Error; err != nil {
 		tx.Rollback()
-		logger.Error(msgutil.EntityGenericFailedMsg("deleting previous rule permissions"), err)
+		dc.lc.Error(msgutil.EntityGenericFailedMsg("deleting previous rule permissions"), err)
 		return errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -97,13 +96,13 @@ func (dc DatabaseClient) SetRolePermissions(rolePerms *domain.RolePermissions) *
 
 		if err := tx.Create(rp).Error; err != nil {
 			tx.Rollback()
-			logger.Error(msgutil.EntityGenericFailedMsg("creating new rule permissions"), err)
+			dc.lc.Error(msgutil.EntityGenericFailedMsg("creating new rule permissions"), err)
 			return errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 		}
 	}
 
 	if err := tx.Commit().Error; err != nil {
-		logger.Error(msgutil.EntityGenericFailedMsg("committing new rule permissions"), err)
+		dc.lc.Error(msgutil.EntityGenericFailedMsg("committing new rule permissions"), err)
 		return errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
@@ -119,7 +118,7 @@ func (dc DatabaseClient) GetRolePermissions(roleID int) ([]*domain.Permission, *
 		Find(&res).Error
 
 	if err != nil {
-		logger.Error(msgutil.EntityGenericFailedMsg("getting role permissions by role id"), err)
+		dc.lc.Error(msgutil.EntityGenericFailedMsg("getting role permissions by role id"), err)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 

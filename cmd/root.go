@@ -26,11 +26,12 @@ func init() {
 // Execute executes the root command
 func Execute() {
 	config.LoadConfig()
-	logger.Init(config.App().LogLevel)
-	db.NewDbClient()
-	cache.NewCacheClient()
+	logger.NewLogClient(config.App().LogLevel)
+	lc := logger.Client()
+	db.NewDbClient(lc)
+	cache.NewCacheClient(lc)
 
-	logger.Info("about to start the application")
+	lc.Info("about to start the application")
 
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)

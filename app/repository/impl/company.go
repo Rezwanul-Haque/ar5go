@@ -5,18 +5,21 @@ import (
 	"ar5go/app/repository"
 	"ar5go/infra/conn/db"
 	"ar5go/infra/errors"
+	"ar5go/infra/logger"
 	"context"
 )
 
 type company struct {
 	ctx context.Context
+	lc  logger.LogClient
 	DB  db.DatabaseClient
 }
 
 // NewCompanyRepository will create an object that represent the Company.Repository implementations
-func NewCompanyRepository(ctx context.Context, dbc db.DatabaseClient) repository.ICompany {
+func NewCompanyRepository(ctx context.Context, lc logger.LogClient, dbc db.DatabaseClient) repository.ICompany {
 	return &company{
 		ctx: ctx,
+		lc:  lc,
 		DB:  dbc,
 	}
 }

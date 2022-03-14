@@ -18,12 +18,14 @@ import (
 
 type token struct {
 	ctx   context.Context
+	lc    logger.LogClient
 	urepo repository.IUsers
 }
 
-func NewTokenService(ctx context.Context, urepo repository.IUsers) svc.IToken {
+func NewTokenService(ctx context.Context, lc logger.LogClient, urepo repository.IUsers) svc.IToken {
 	return &token{
 		ctx:   ctx,
+		lc:    lc,
 		urepo: urepo,
 	}
 }
@@ -56,7 +58,7 @@ func (t *token) CreateToken(userID, companyID uint) (*serializers.JwtToken, erro
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
 	token.AccessToken, err = at.SignedString([]byte(jwtConf.AccessTokenSecret))
 	if err != nil {
-		logger.Error(err.Error(), err)
+		t.lc.Error(err.Error(), err)
 		return nil, errors.ErrAccessTokenSign
 	}
 
@@ -70,7 +72,7 @@ func (t *token) CreateToken(userID, companyID uint) (*serializers.JwtToken, erro
 	rt := jwt.NewWithClaims(jwt.SigningMethodHS256, rtClaims)
 	token.RefreshToken, err = rt.SignedString([]byte(jwtConf.RefreshTokenSecret))
 	if err != nil {
-		logger.Error(err.Error(), err)
+		t.lc.Error(err.Error(), err)
 		return nil, errors.ErrRefreshTokenSign
 	}
 

@@ -17,12 +17,14 @@ import (
 )
 
 type roles struct {
+	lc   logger.LogClient
 	rsvc svc.IRoles
 }
 
 // NewRolesController will initialize the controllers
-func NewRolesController(grp interface{}, rsvc svc.IRoles) {
+func NewRolesController(grp interface{}, lc logger.LogClient, rsvc svc.IRoles) {
 	rc := &roles{
+		lc:   lc,
 		rsvc: rsvc,
 	}
 
@@ -42,7 +44,7 @@ func (ctr *roles) CreateRole(c echo.Context) error {
 	var err error
 
 	if err = c.Bind(&roleToCreate); err != nil {
-		logger.Error(msgutil.EntityGenericFailedMsg("bind role body to struct"), err)
+		ctr.lc.Error(msgutil.EntityGenericFailedMsg("bind role body to struct"), err)
 		restErr := errors.NewBadRequestError(errors.ErrCheckParamBodyHeader)
 		return c.JSON(restErr.Status, restErr)
 	}
@@ -70,7 +72,7 @@ func (ctr *roles) UpdateRole(c echo.Context) error {
 	}
 
 	if err = c.Bind(&roleToUpdate); err != nil {
-		logger.Error(msgutil.EntityBindToStructFailedMsg("update role"), err)
+		ctr.lc.Error(msgutil.EntityBindToStructFailedMsg("update role"), err)
 		restErr := errors.NewBadRequestError(errors.ErrCheckParamBodyHeader)
 		return c.JSON(restErr.Status, restErr)
 	}
@@ -120,7 +122,7 @@ func (ctr *roles) SetRolePermissions(c echo.Context) error {
 	var err error
 
 	if err = c.Bind(&rp); err != nil {
-		logger.Error(msgutil.EntityBindToStructFailedMsg("role & permission"), err)
+		ctr.lc.Error(msgutil.EntityBindToStructFailedMsg("role & permission"), err)
 		restErr := errors.NewBadRequestError(errors.ErrCheckParamBodyHeader)
 		return c.JSON(restErr.Status, restErr)
 	}

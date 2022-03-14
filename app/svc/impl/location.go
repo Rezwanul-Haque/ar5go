@@ -13,11 +13,13 @@ import (
 )
 
 type location struct {
+	lc    logger.LogClient
 	hrepo repository.ILocation
 }
 
-func NewLocationService(hrepo repository.ILocation) svc.ILocation {
+func NewLocationService(lc logger.LogClient, hrepo repository.ILocation) svc.ILocation {
 	return &location{
+		lc:    lc,
 		hrepo: hrepo,
 	}
 }
@@ -66,7 +68,7 @@ func (h location) GetLocationsByUserID(userID uint, filters *serializers.ListFil
 	if locations[0].LocationID > 0 {
 		err := methodsutil.StructToStruct(locations, &resp.Locations)
 		if err != nil {
-			logger.Error(msgutil.EntityStructToStructFailedMsg("get locations"), err)
+			h.lc.Error(msgutil.EntityStructToStructFailedMsg("get locations"), err)
 			return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 		}
 	}

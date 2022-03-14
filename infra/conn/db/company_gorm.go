@@ -4,14 +4,13 @@ import (
 	"ar5go/app/domain"
 	"ar5go/infra/conn/db/models"
 	"ar5go/infra/errors"
-	"ar5go/infra/logger"
 )
 
 func (dc DatabaseClient) SaveCompany(com *domain.Company) (*domain.Company, *errors.RestErr) {
 	res := dc.DB.Model(&models.Company{}).Create(&com)
 
 	if res.Error != nil {
-		logger.Error("error occurred when create company", res.Error)
+		dc.lc.Error("error occurred when create company", res.Error)
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
