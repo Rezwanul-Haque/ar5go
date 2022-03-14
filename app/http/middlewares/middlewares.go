@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"ar5go/infra/config"
+	"ar5go/infra/logger"
 	"net/http"
 
 	openMiddleware "github.com/go-openapi/runtime/middleware"
@@ -13,7 +14,7 @@ import (
 const EchoLogFormat = "time: ${time_rfc3339_nano} || ${method}: ${uri} || status: ${status} || latency: ${latency_human} \n"
 
 // Attach middlewares required for the application, eg: sentry, newrelic etc.
-func Attach(e *echo.Echo) error {
+func Attach(e *echo.Echo, lc logger.LogClient) error {
 	// remove trailing slashes from each requests
 	e.Pre(middleware.RemoveTrailingSlash())
 
@@ -49,7 +50,7 @@ func Attach(e *echo.Echo) error {
 		},
 		SigningKey: []byte(config.Jwt().AccessTokenSecret),
 		ContextKey: config.Jwt().ContextKey,
-	}))
+	}, &lc))
 
 	return nil
 }
