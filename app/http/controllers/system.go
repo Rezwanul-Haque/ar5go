@@ -33,6 +33,11 @@ func (ctr *system) Root(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{"message": "ar5go architecture backend! let's play!!"})
 }
 
+// swagger:route GET /v1/h34l7h Health will let you know the heart beats ❤️
+// Return a message
+// responses:
+//	200: genericSuccessResponse
+
 // Health will let you know the heart beats ❤️
 func (ctr *system) Health(c echo.Context) error {
 	resp, err := ctr.svc.GetHealth()

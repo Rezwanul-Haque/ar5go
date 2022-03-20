@@ -60,7 +60,8 @@ func (r *users) GetUsersByCompanyIdAndRole(companyID, roleID uint,
 }
 
 func (r *users) SetLastLoginAt(user *domain.User) error {
-	*user.LastLoginAt = time.Now().UTC()
+	utc := time.Now().UTC()
+	user.LastLoginAt = &utc
 
 	return r.DB.SetLastLoginAt(user)
 }

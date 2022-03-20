@@ -1,14 +1,13 @@
-// Package classification Loggit Service API.
+// Package classification ar5go system API.
 //
-// the purpose of this service is to provide & store all user action related infomation and their previous
-// and current state value
+// the purpose of this service is to provide & store all user of a company and their location histories
 //
 //     Schemes: http
 //     Host: localhost:8080
 //     BasePath: /api
 //     Version: 1.0.0
 //     License: None
-//     Contact: Rezwanul-Haque<rezwanul.haque@vivasoftltd.com>
+//     Contact: Rezwanul-Haque<rezwanul.cse@gmail.com>
 //
 //     Consumes:
 //     - application/json
@@ -50,16 +49,16 @@ type genericSuccessResponseWrapper struct {
 	genericSuccessResponse `json:"message"`
 }
 
-// Payload for activity log
-// swagger:parameters CreateActivities
-type activityPayloadWrapper struct {
+// Payload for company
+// swagger:parameters CreateCompany
+type companyPayloadWrapper struct {
 	// in:body
 	Body interface{}
 }
 
-// List all the activity logs
-// swagger:parameters ActivityQueryParameters
-type activityQueryParametersWrapper struct {
+// List all the users of a company
+// swagger:parameters UserQueryParameters
+type usersQueryParametersWrapper struct {
 	// in:query
 	//example: 10
 	Size int64 `json:"size"`
@@ -67,15 +66,15 @@ type activityQueryParametersWrapper struct {
 	Page int64 `json:"page"`
 	//example: created_at desc
 	Sort string `json:"sort"`
-	//example: rezwa
+	//example: rezwan
 	QS string `json:"qs"`
 	//example: user_id.(in, contains, equals, gt, gte, lt, lte)
 	ColumnOperation string `json:"column:operation"`
 }
 
-// List all the activity logs
-// swagger:response ActivityResponse
-type activityRespWrapper struct {
+// List all the users
+// swagger:response UserResponse
+type usersRespWrapper struct {
 	// in:body
 	Body interface{}
 }

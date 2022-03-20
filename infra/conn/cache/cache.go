@@ -9,8 +9,6 @@ import (
 	"time"
 )
 
-const KeyPrefix = "ar5go:"
-
 func (cc CacheClient) Set(ctx context.Context, key string, value interface{}, ttl int) error {
 	if methodsutil.IsEmpty(key) || methodsutil.IsEmpty(value) {
 		return errors.ErrEmptyRedisKeyValue
@@ -21,7 +19,7 @@ func (cc CacheClient) Set(ctx context.Context, key string, value interface{}, tt
 		return err
 	}
 
-	return cc.Redis.Set(ctx, KeyPrefix+key, string(serializedValue), time.Duration(ttl)*time.Second).Err()
+	return cc.Redis.Set(ctx, key, string(serializedValue), time.Duration(ttl)*time.Second).Err()
 }
 
 func (cc CacheClient) Get(ctx context.Context, key string) (string, error) {

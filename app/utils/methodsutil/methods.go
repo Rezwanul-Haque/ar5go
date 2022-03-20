@@ -17,7 +17,7 @@ func IsInvalid(value string) bool {
 }
 
 // Contains search a needle(value) in the haystack(array)
-func Contains(haystack interface{}, needle interface{}) bool {
+func Contains(needle interface{}, haystack interface{}) bool {
 	switch reflect.TypeOf(haystack).Kind() {
 	case reflect.Slice:
 		s := reflect.ValueOf(haystack)

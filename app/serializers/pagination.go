@@ -23,7 +23,7 @@ type ListFilters struct {
 	FromRow      int64  `json:"from_row"`
 	ToRow        int64  `json:"to_row"`
 
-	Rows interface{} `json:"results"`
+	Results interface{} `json:"results"`
 
 	QueryString string   `json:"qs"`
 	Searches    []Search `json:"search"`
@@ -39,7 +39,7 @@ func (lf *ListFilters) GenerateFilters(query url.Values) {
 	// default limit, page & sort parameter
 	lf.Size = config.App().DefaultPageSize
 	lf.Page = 1
-	lf.Sort = "activities.created_at desc"
+	lf.Sort = config.App().Sort
 	searchString := ""
 
 	var searches []Search

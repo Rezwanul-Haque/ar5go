@@ -151,19 +151,21 @@ func (dc DatabaseClient) GetUsersByCompanyIdAndRole(companyID, roleID uint,
 	tableName := "users"
 
 	stmt := applyFilteringCondition(dc.DB, tableName, filters, false)
+	countStmt := applyFilteringCondition(dc.DB, tableName, filters, true)
 
-	stmt = stmt.Model(&models.User{}).
-		Select("companies.id company_id, companies.name company_name,"+
-			"users.id, users.user_name, users.first_name, users.last_name, users.email, users.phone, users.profile_pic, "+
-			"users.role_id, users.created_at, users.updated_at, users.last_login_at, users.first_login").
-		Joins("LEFT JOIN companies ON users.company_id = companies.id").
-		Where("company_id = ? AND role_id = ?", companyID, roleID).
+	stmt = selectCompanyUsersJoinQuery(stmt)
+
+	stmt.Where("company_id = ? AND role_id = ?", companyID, roleID).
 		Find(&resp)
 
+	searchStmt := `users.user_name LIKE @st
+				OR users.first_name LIKE @st
+				OR users.last_name LIKE @st
+				OR users.email LIKE @st
+				OR users.phone LIKE @st`
+
 	if len(filters.QueryString) > 0 {
-		searchStmt := "users.user_name LIKE ? OR users.first_name LIKE ? OR users.last_name LIKE ? OR users.email LIKE ? OR users.phone LIKE ?"
-		searchTerm := "%" + filters.QueryString + "%"
-		stmt.Where(searchStmt, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm)
+		applyQueryStringSearch(stmt, searchStmt, filters.QueryString)
 	}
 	res := stmt.Find(&resp)
 	if res.RowsAffected == 0 {
@@ -175,12 +177,15 @@ func (dc DatabaseClient) GetUsersByCompanyIdAndRole(companyID, roleID uint,
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
-	filters.Rows = resp
+	filters.Results = resp
 
-	stmt = applyFilteringCondition(dc.DB, tableName, filters, true)
-	errCount := dc.DB.Model(&models.User{}).
-		Joins("LEFT JOIN companies ON users.company_id = companies.id").
-		Where("company_id = ? AND role_id = ?", companyID, roleID).
+	if len(filters.QueryString) > 0 {
+		applyQueryStringSearch(countStmt, searchStmt, filters.QueryString)
+	}
+
+	countStmt = selectCompanyUsersJoinQuery(countStmt)
+
+	errCount := countStmt.Where("company_id = ? AND role_id = ?", companyID, roleID).
 		Count(&totalRows).Error
 
 	if errCount != nil {
@@ -194,7 +199,13 @@ func (dc DatabaseClient) GetUsersByCompanyIdAndRole(companyID, roleID uint,
 }
 
 func (dc DatabaseClient) SetLastLoginAt(user *domain.User) error {
-	err := dc.DB.Model(&models.User{}).Update("last_login_at", user.LastLoginAt).Error
+	dbusr := models.User{
+		ID: user.ID,
+	}
+
+	err := dc.DB.Model(&dbusr).
+		Update("last_login_at", user.LastLoginAt).
+		Error
 
 	if err != nil {
 		dc.lc.Error(err.Error(), err)
@@ -334,4 +345,12 @@ func (dc DatabaseClient) tokenUserFetchQuery() *gorm.DB {
 		Joins("JOIN permissions ON role_permissions.permission_id = permissions.id").
 		Where("users.deleted_at IS NULL").
 		Group("users.id")
+}
+
+func selectCompanyUsersJoinQuery(stmt *gorm.DB) *gorm.DB {
+	return stmt.Model(models.User{}).
+		Select("companies.id company_id, companies.name company_name," +
+			"users.id, users.user_name, users.first_name, users.last_name, users.email, users.phone, users.profile_pic, " +
+			"users.role_id, users.created_at, users.updated_at, users.last_login_at, users.first_login").
+		Joins("LEFT JOIN companies ON users.company_id = companies.id")
 }

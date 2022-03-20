@@ -77,3 +77,10 @@ func applyFilteringCondition(stmt *gorm.DB, tableName string, filters *serialize
 
 	return find
 }
+
+func applyQueryStringSearch(stmt *gorm.DB, searchStmt, qs string) *gorm.DB {
+	searchTerm := "%" + qs + "%"
+	stmt.Where(searchStmt, map[string]interface{}{"st": searchTerm})
+
+	return stmt
+}

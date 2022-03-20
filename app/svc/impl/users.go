@@ -115,7 +115,7 @@ func (u *users) GetUserByCompanyIdAndRole(companyID, roleID uint,
 		}
 	}
 
-	filters.Rows = resp
+	filters.Results = resp
 	return filters, nil
 }
 

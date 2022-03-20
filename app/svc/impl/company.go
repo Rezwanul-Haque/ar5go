@@ -71,6 +71,8 @@ func (c *company) CreateCompanyWithAdminUser(cp serializers.CompanyReq) (*serial
 		return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
+	resp.Admin.Password = nil
+
 	return &resp, nil
 }
 

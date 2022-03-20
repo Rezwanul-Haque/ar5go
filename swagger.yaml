@@ -1,0 +1,54 @@
+basePath: /api
+consumes:
+- application/json
+definitions:
+  RestErr:
+    properties:
+      error:
+        type: string
+        x-go-name: Error
+      message:
+        type: string
+        x-go-name: Message
+      status:
+        format: int64
+        type: integer
+        x-go-name: Status
+    type: object
+    x-go-package: ar5go/infra/errors
+host: localhost:8080
+info:
+  contact:
+    email: rezwanul.cse@gmail.com
+    name: Rezwanul-Haque
+  description: the purpose of this service is to provide & store all user of a company
+    and their location histories
+  license:
+    name: None
+  title: ar5go system API.
+  version: 1.0.0
+paths: {}
+produces:
+- application/json
+responses:
+  UserResponse:
+    description: List all the users
+    schema:
+      type: object
+  errorResponse:
+    description: Generic error message
+    schema:
+      $ref: '#/definitions/RestErr'
+  genericSuccessResponse:
+    description: returns a message
+    headers:
+      message:
+        type: string
+schemes:
+- http
+securityDefinitions:
+  base64:
+    in: header
+    name: ar5go-app-key
+    type: apiKey
+swagger: "2.0"

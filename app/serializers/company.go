@@ -9,6 +9,7 @@ type CompanyReq struct {
 	Logo          string  `json:"logo"`
 	Address       string  `json:"address"`
 	BusinessID    uint    `json:"business_id"`
+	UserName      string  `json:"user_name"`
 	Password      *string `json:"password,omitempty"`
 	NumOfEmployee uint    `json:"num_of_employee"`
 	Email         string  `json:"email"`

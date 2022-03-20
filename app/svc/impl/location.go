@@ -73,6 +73,6 @@ func (h location) GetLocationsByUserID(userID uint, filters *serializers.ListFil
 		}
 	}
 
-	filters.Rows = resp
+	filters.Results = resp
 	return filters, nil
 }

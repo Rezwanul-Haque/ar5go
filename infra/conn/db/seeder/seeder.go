@@ -9,6 +9,8 @@ import (
 	"os"
 )
 
+const SeedFilesPath = "/_fixture/seed"
+
 type Seed struct {
 	Name string
 	Run  func(dbc db.DatabaseClient, truncate bool) error
@@ -19,7 +21,7 @@ func SeedAll() []Seed {
 		{
 			Name: "CreateRoles",
 			Run: func(dbc db.DatabaseClient, truncate bool) error {
-				if err := seedRoles(dbc, "/infra/seed/roles.json", truncate); err != nil {
+				if err := seedRoles(dbc, SeedFilesPath+"/roles.json", truncate); err != nil {
 					return err
 				}
 				return nil
@@ -28,7 +30,7 @@ func SeedAll() []Seed {
 		{
 			Name: "CreatePermissions",
 			Run: func(dbc db.DatabaseClient, truncate bool) error {
-				if err := seedPermissions(dbc, "/infra/seed/permissions.json", truncate); err != nil {
+				if err := seedPermissions(dbc, SeedFilesPath+"/permissions.json", truncate); err != nil {
 					return err
 				}
 				return nil
@@ -37,7 +39,7 @@ func SeedAll() []Seed {
 		{
 			Name: "CreateRolePermissions",
 			Run: func(dbc db.DatabaseClient, truncate bool) error {
-				if err := seedRolePermissions(dbc, "/infra/seed/role_permissions.json", truncate); err != nil {
+				if err := seedRolePermissions(dbc, SeedFilesPath+"/role_permissions.json", truncate); err != nil {
 					return err
 				}
 				return nil
