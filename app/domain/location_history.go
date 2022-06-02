@@ -1,6 +1,16 @@
 package domain
 
-import "time"
+import (
+	"ar5go/app/serializers"
+	"ar5go/infra/errors"
+	"time"
+)
+
+type ILocation interface {
+	SaveLocation(company *LocationHistory) *errors.RestErr
+	UpdateLocation(*LocationHistory) (*LocationHistory, *errors.RestErr)
+	GetLocationsByUserID(userID uint, filters *serializers.ListFilters) ([]*IntermediateLocationHistory, *errors.RestErr)
+}
 
 type LocationHistory struct {
 	ID           uint       `json:"id"`

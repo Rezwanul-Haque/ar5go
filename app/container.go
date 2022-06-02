@@ -1,41 +1,42 @@
 package container
 
 import (
-	"clean/app/http/controllers"
-	"clean/app/http/middlewares"
-	repoImpl "clean/app/repository/impl"
-	svcImpl "clean/app/svc/impl"
-	"clean/infra/conn"
+	"ar5go/app/http/controllers"
+	repoImpl "ar5go/app/repository/impl"
+	svcImpl "ar5go/app/svc/impl"
+	"ar5go/infra/conn/cache"
+	"ar5go/infra/conn/db"
+	"ar5go/infra/logger"
+	"context"
 )
 
-func Init(g interface{}) {
-	db := conn.Db()
-	redis := conn.Redis()
-	acl := middlewares.ACL
+func Init(g interface{}, lc logger.LogClient) {
+	basectx := context.Background()
+	dbc := db.Client()
+	cachec := cache.Client()
 
 	// register all repos impl, services impl, controllers
-	sysRepo := repoImpl.NewSystemRepository(db, redis)
-	companyRepo := repoImpl.NewMySqlCompanyRepository(db)
-	userRepo := repoImpl.NewMySqlUsersRepository(db)
-	locationRepo := repoImpl.NewMySqlLocationRepository(db)
-	roleRepo := repoImpl.NewMySqlRolesRepository(db)
-	permissionRepo := repoImpl.NewMySqlPermissionsRepository(db)
+	sysRepo := repoImpl.NewSystemRepository(basectx, lc, dbc, cachec)
+	companyRepo := repoImpl.NewCompanyRepository(basectx, lc, dbc)
+	userRepo := repoImpl.NewUsersRepository(basectx, lc, dbc)
+	locationRepo := repoImpl.NewLocationRepository(basectx, lc, dbc)
+	roleRepo := repoImpl.NewRolesRepository(basectx, lc, dbc)
+	permissionRepo := repoImpl.NewPermissionsRepository(basectx, lc, dbc)
 
-	cacheSvc := svcImpl.NewRedisService(redis)
 	sysSvc := svcImpl.NewSystemService(sysRepo)
-	companySvc := svcImpl.NewCompanyService(companyRepo, userRepo)
-	userSvc := svcImpl.NewUsersService(userRepo, cacheSvc)
-	tokenSvc := svcImpl.NewTokenService(userRepo, cacheSvc)
-	authSvc := svcImpl.NewAuthService(userRepo, cacheSvc, tokenSvc)
-	locationSvc := svcImpl.NewLocationService(locationRepo)
-	roleSvc := svcImpl.NewRolesService(roleRepo)
-	permissionSvc := svcImpl.NewPermissionsService(permissionRepo)
+	companySvc := svcImpl.NewCompanyService(lc, companyRepo, userRepo)
+	userSvc := svcImpl.NewUsersService(basectx, lc, userRepo)
+	tokenSvc := svcImpl.NewTokenService(basectx, lc, userRepo)
+	authSvc := svcImpl.NewAuthService(basectx, lc, userRepo, tokenSvc)
+	locationSvc := svcImpl.NewLocationService(lc, locationRepo)
+	roleSvc := svcImpl.NewRolesService(lc, roleRepo)
+	permissionSvc := svcImpl.NewPermissionsService(lc, permissionRepo)
 
-	controllers.NewSystemController(g, sysSvc)
-	controllers.NewAuthController(g, authSvc, userSvc)
-	controllers.NewCompanyController(g, acl, companySvc)
-	controllers.NewUsersController(g, acl, companySvc, userSvc, locationSvc)
-	controllers.NewLocationController(g, acl, locationSvc)
-	controllers.NewRolesController(g, acl, roleSvc)
-	controllers.NewPermissionsController(g, acl, permissionSvc)
+	controllers.NewSystemController(g, lc, sysSvc)
+	controllers.NewAuthController(g, lc, authSvc, userSvc)
+	controllers.NewCompanyController(g, lc, companySvc)
+	controllers.NewUsersController(g, lc, companySvc, userSvc, locationSvc)
+	controllers.NewLocationController(g, lc, locationSvc)
+	controllers.NewRolesController(g, lc, roleSvc)
+	controllers.NewPermissionsController(g, lc, permissionSvc)
 }

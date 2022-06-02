@@ -1,6 +1,6 @@
 package main
 
-import "clean/cmd"
+import "ar5go/cmd"
 
 func main() {
 	cmd.Execute()

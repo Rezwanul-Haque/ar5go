@@ -1,11 +1,31 @@
 package domain
 
 import (
+	"ar5go/app/serializers"
+	"ar5go/infra/errors"
 	"time"
 )
 
+type IUsers interface {
+	SaveUser(user *User) (*User, *errors.RestErr)
+	GetUser(userID uint, withPermission bool) (*UserWithPerms, *errors.RestErr)
+	GetUserByID(userID uint) (*User, *errors.RestErr)
+	GetUserByEmail(email string) (*User, error)
+	UpdateUser(user *User) *errors.RestErr
+	UpdatePassword(userID uint, companyID uint, updateValue map[string]interface{}) *errors.RestErr
+	GetUserByAppKey(appKey string) (*User, *errors.RestErr)
+	GetUsersByCompanyIdAndRole(companyID, roleID uint,
+		filters *serializers.ListFilters) ([]*IntermediateUserResp, *errors.RestErr)
+	SetLastLoginAt(user *User) error
+	HasRole(userID, roleID uint) bool
+	ResetPassword(userID int, hashedPass []byte) error
+	GetUserWithPermissions(userID uint, withPermission bool) (*UserWithPerms, *errors.RestErr)
+	GetTokenUser(id uint) (*VerifyTokenResp, *errors.RestErr)
+}
+
 type User struct {
 	ID          uint       `json:"id"`
+	UserName    string     `json:"user_name"`
 	FirstName   string     `json:"first_name"`
 	LastName    string     `json:"last_name"`
 	Email       string     `json:"email"`

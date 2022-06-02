@@ -1,6 +1,6 @@
 #! /bin/bash
 
-PROJECT="clean"
+PROJECT="ar5go"
 
 # run docker compose
 docker-compose up -d consul mysql

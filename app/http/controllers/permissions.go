@@ -1,12 +1,13 @@
 package controllers
 
 import (
-	"clean/app/serializers"
-	"clean/app/svc"
-	"clean/app/utils/consts"
-	"clean/app/utils/msgutil"
-	"clean/infra/errors"
-	"clean/infra/logger"
+	m "ar5go/app/http/middlewares"
+	"ar5go/app/serializers"
+	"ar5go/app/svc"
+	"ar5go/app/utils/consts"
+	"ar5go/app/utils/msgutil"
+	"ar5go/infra/errors"
+	"ar5go/infra/logger"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -16,21 +17,23 @@ import (
 )
 
 type permissions struct {
+	lc   logger.LogClient
 	psvc svc.IPermissions
 }
 
 // NewPermissionsController will initialize the controllers
-func NewPermissionsController(grp interface{}, ACL func(string) echo.MiddlewareFunc, psvc svc.IPermissions) {
+func NewPermissionsController(grp interface{}, lc logger.LogClient, psvc svc.IPermissions) {
 	rc := &permissions{
+		lc:   lc,
 		psvc: psvc,
 	}
 
 	g := grp.(*echo.Group)
 
-	g.POST("/v1/permission", rc.CreatePermission, ACL(consts.PermissionPermissionCrud))
-	g.PATCH("/v1/permission/:permission_id", rc.UpdatePermission, ACL(consts.PermissionPermissionCrud))
-	g.DELETE("/v1/permission/:permission_id", rc.DeletePermission, ACL(consts.PermissionPermissionCrud))
-	g.GET("/v1/permission", rc.ListPermission, ACL(consts.PermissionPermissionCrud))
+	g.POST("/v1/permission", rc.CreatePermission, m.ACL(consts.PermissionPermissionCrud))
+	g.PATCH("/v1/permission/:permission_id", rc.UpdatePermission, m.ACL(consts.PermissionPermissionCrud))
+	g.DELETE("/v1/permission/:permission_id", rc.DeletePermission, m.ACL(consts.PermissionPermissionCrud))
+	g.GET("/v1/permission", rc.ListPermission, m.ACL(consts.PermissionPermissionCrud))
 }
 
 func (ctr *permissions) CreatePermission(c echo.Context) error {
@@ -38,7 +41,7 @@ func (ctr *permissions) CreatePermission(c echo.Context) error {
 	var err error
 
 	if err = c.Bind(&permissionToCreate); err != nil {
-		logger.Error(msgutil.EntityBindToStructFailedMsg("permission"), err)
+		ctr.lc.Error(msgutil.EntityBindToStructFailedMsg("permission"), err)
 		restErr := errors.NewBadRequestError(errors.ErrCheckParamBodyHeader)
 		return c.JSON(restErr.Status, restErr)
 	}
@@ -61,13 +64,13 @@ func (ctr *permissions) UpdatePermission(c echo.Context) error {
 
 	permissionID, err := strconv.Atoi(c.Param("permission_id"))
 	if err != nil {
-		logger.Error(msgutil.EntityGenericFailedMsg("permission id"), err)
+		ctr.lc.Error(msgutil.EntityGenericFailedMsg("permission id"), err)
 		restErr := errors.NewBadRequestError(err.Error())
 		return c.JSON(restErr.Status, restErr)
 	}
 
 	if err = c.Bind(&permissionToUpdate); err != nil {
-		logger.Error(msgutil.EntityBindToStructFailedMsg("update permission"), err)
+		ctr.lc.Error(msgutil.EntityBindToStructFailedMsg("update permission"), err)
 		restErr := errors.NewBadRequestError(errors.ErrCheckParamBodyHeader)
 		return c.JSON(restErr.Status, restErr)
 	}

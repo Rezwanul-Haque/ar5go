@@ -1,12 +1,13 @@
 package controllers
 
 import (
-	"clean/app/serializers"
-	"clean/app/svc"
-	"clean/app/utils/consts"
-	"clean/app/utils/msgutil"
-	"clean/infra/errors"
-	"clean/infra/logger"
+	m "ar5go/app/http/middlewares"
+	"ar5go/app/serializers"
+	"ar5go/app/svc"
+	"ar5go/app/utils/consts"
+	"ar5go/app/utils/msgutil"
+	"ar5go/infra/errors"
+	"ar5go/infra/logger"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -16,24 +17,26 @@ import (
 )
 
 type roles struct {
+	lc   logger.LogClient
 	rsvc svc.IRoles
 }
 
 // NewRolesController will initialize the controllers
-func NewRolesController(grp interface{}, ACL func(string) echo.MiddlewareFunc, rsvc svc.IRoles) {
+func NewRolesController(grp interface{}, lc logger.LogClient, rsvc svc.IRoles) {
 	rc := &roles{
+		lc:   lc,
 		rsvc: rsvc,
 	}
 
 	g := grp.(*echo.Group)
 
-	g.POST("/v1/role", rc.CreateRole, ACL(consts.PermissionRoleCrud))
-	g.PATCH("/v1/role/:role_id", rc.UpdateRole, ACL(consts.PermissionRoleCrud))
-	g.DELETE("/v1/role/:role_id", rc.DeleteRole, ACL(consts.PermissionRoleCrud))
-	g.GET("/v1/role", rc.ListRoles, ACL(consts.PermissionRoleFetchAll))
+	g.POST("/v1/role", rc.CreateRole, m.ACL(consts.PermissionRoleCrud))
+	g.PATCH("/v1/role/:role_id", rc.UpdateRole, m.ACL(consts.PermissionRoleCrud))
+	g.DELETE("/v1/role/:role_id", rc.DeleteRole, m.ACL(consts.PermissionRoleCrud))
+	g.GET("/v1/role", rc.ListRoles, m.ACL(consts.PermissionRoleFetchAll))
 
-	g.POST("/v1/role/:role_id/permissions", rc.SetRolePermissions, ACL(consts.PermissionRoleCrud))
-	g.GET("/v1/role/:role_id/permissions", rc.GetRolePermissions, ACL(consts.PermissionRoleCrud))
+	g.POST("/v1/role/:role_id/permissions", rc.SetRolePermissions, m.ACL(consts.PermissionRoleCrud))
+	g.GET("/v1/role/:role_id/permissions", rc.GetRolePermissions, m.ACL(consts.PermissionRoleCrud))
 }
 
 func (ctr *roles) CreateRole(c echo.Context) error {
@@ -41,7 +44,7 @@ func (ctr *roles) CreateRole(c echo.Context) error {
 	var err error
 
 	if err = c.Bind(&roleToCreate); err != nil {
-		logger.Error(msgutil.EntityGenericFailedMsg("bind role body to struct"), err)
+		ctr.lc.Error(msgutil.EntityGenericFailedMsg("bind role body to struct"), err)
 		restErr := errors.NewBadRequestError(errors.ErrCheckParamBodyHeader)
 		return c.JSON(restErr.Status, restErr)
 	}
@@ -69,7 +72,7 @@ func (ctr *roles) UpdateRole(c echo.Context) error {
 	}
 
 	if err = c.Bind(&roleToUpdate); err != nil {
-		logger.Error(msgutil.EntityBindToStructFailedMsg("update role"), err)
+		ctr.lc.Error(msgutil.EntityBindToStructFailedMsg("update role"), err)
 		restErr := errors.NewBadRequestError(errors.ErrCheckParamBodyHeader)
 		return c.JSON(restErr.Status, restErr)
 	}
@@ -119,7 +122,7 @@ func (ctr *roles) SetRolePermissions(c echo.Context) error {
 	var err error
 
 	if err = c.Bind(&rp); err != nil {
-		logger.Error(msgutil.EntityBindToStructFailedMsg("role & permission"), err)
+		ctr.lc.Error(msgutil.EntityBindToStructFailedMsg("role & permission"), err)
 		restErr := errors.NewBadRequestError(errors.ErrCheckParamBodyHeader)
 		return c.JSON(restErr.Status, restErr)
 	}

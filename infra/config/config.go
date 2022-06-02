@@ -1,7 +1,6 @@
 package config
 
 import (
-	"clean/infra/logger"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -12,11 +11,28 @@ import (
 )
 
 type AppConfig struct {
-	Name  string
-	Port  string
-	Page  int64
-	Limit int64
-	Sort  string
+	Name            string
+	Port            string
+	MetricsPort     string
+	Sort            string
+	AppKey          string
+	DefaultPageSize int64
+	LogLevel        string
+}
+
+type DbClient struct {
+	MySQL *DbConfig
+}
+
+type CacheClient struct {
+	Redis *RedisConfig
+}
+
+type Config struct {
+	App   *AppConfig
+	Jwt   *JwtConfig
+	Db    DbClient
+	Cache CacheClient
 }
 
 type DbConfig struct {
@@ -51,29 +67,22 @@ type RedisConfig struct {
 	Ttl               int // seconds
 }
 
-type Config struct {
-	App   *AppConfig
-	Db    *DbConfig
-	Jwt   *JwtConfig
-	Redis *RedisConfig
-}
-
 var config Config
 
 func App() *AppConfig {
 	return config.App
 }
 
-func Db() *DbConfig {
-	return config.Db
-}
-
 func Jwt() *JwtConfig {
 	return config.Jwt
 }
 
-func Redis() *RedisConfig {
-	return config.Redis
+func Db() DbClient {
+	return config.Db
+}
+
+func Cache() CacheClient {
+	return config.Cache
 }
 
 func LoadConfig() {
@@ -105,29 +114,19 @@ func LoadConfig() {
 			fmt.Println(string(r))
 		}
 	} else {
-		logger.Info("CONSUL_URL or CONSUL_PATH missing! Serving with default config...")
+		log.Println("CONSUL_URL or CONSUL_PATH missing! Serving with default config...")
 	}
 }
 
 func setDefaultConfig() {
 	config.App = &AppConfig{
-		Name:  "CLEAN",
-		Port:  "8080",
-		Page:  1,
-		Limit: 10,
-		Sort:  "created_at desc",
-	}
-
-	config.Db = &DbConfig{
-		Host:            "127.0.0.1",
-		Port:            "3306",
-		User:            "root",
-		Pass:            "12345678",
-		Schema:          "clean_db",
-		MaxIdleConn:     1,
-		MaxOpenConn:     2,
-		MaxConnLifetime: 30,
-		Debug:           true,
+		Name:            "ar5go",
+		Port:            "8080",
+		MetricsPort:     "9080",
+		Sort:            "created_at desc",
+		AppKey:          "appKey",
+		DefaultPageSize: 10,
+		LogLevel:        "Info",
 	}
 
 	config.Jwt = &JwtConfig{
@@ -138,7 +137,19 @@ func setDefaultConfig() {
 		ContextKey:         "user",
 	}
 
-	config.Redis = &RedisConfig{
+	config.Db.MySQL = &DbConfig{
+		Host:            "127.0.0.1",
+		Port:            "3306",
+		User:            "root",
+		Pass:            "12345678",
+		Schema:          "ar5go",
+		MaxIdleConn:     1,
+		MaxOpenConn:     2,
+		MaxConnLifetime: 30,
+		Debug:           true,
+	}
+
+	config.Cache.Redis = &RedisConfig{
 		Host:              "127.0.0.1",
 		Port:              "6379",
 		Pass:              "",

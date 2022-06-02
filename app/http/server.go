@@ -1,10 +1,10 @@
 package http
 
 import (
-	container "clean/app"
-	"clean/app/http/middlewares"
-	"clean/infra/config"
-	"clean/infra/logger"
+	container "ar5go/app"
+	"ar5go/app/http/middlewares"
+	"ar5go/infra/config"
+	"ar5go/infra/logger"
 	"context"
 	"os"
 	"os/signal"
@@ -15,13 +15,26 @@ import (
 
 func Start() {
 	e := echo.New()
+	lc := logger.Client()
 
-	if err := middlewares.Attach(e); err != nil {
-		logger.Error("error occur when attaching middlewares", err)
+	if err := middlewares.Attach(e, lc); err != nil {
+		logger.Client().Error("error occur when attaching middlewares", err)
 		os.Exit(1)
 	}
 
-	container.Init(e.Group("api"))
+	// Create Prometheus server and Middleware
+	echoProm := echo.New()
+
+	middlewares.PrometheusMonitor(echoProm)
+
+	go func() {
+		echoProm.Logger.Fatal(echoProm.Start(":" + config.App().MetricsPort))
+
+		// gracefully shutdown metrics server
+		GracefulShutdown(echoProm, lc)
+	}()
+
+	container.Init(e.Group("api"), lc)
 
 	port := config.App().Port
 
@@ -31,19 +44,19 @@ func Start() {
 	}()
 
 	// graceful shutdown
-	GracefulShutdown(e)
+	GracefulShutdown(e, lc)
 }
 
-// server will gracefully shutdown within 5 sec
-func GracefulShutdown(e *echo.Echo) {
+// GracefulShutdown server will gracefully shut down within 5 sec
+func GracefulShutdown(e *echo.Echo, lc logger.LogClient) {
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, os.Interrupt)
 	<-ch
-	logger.Info("shutting down server...")
+	lc.Info("shutting down server...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	_ = e.Shutdown(ctx)
-	logger.Info("server shutdowns gracefully")
+	lc.Info("server shutdowns gracefully")
 }

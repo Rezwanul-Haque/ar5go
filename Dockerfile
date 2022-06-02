@@ -1,7 +1,7 @@
-# Default to Go 1.15.6
-ARG GO_VERSION=1.15.6
+# Default to Go 1.17.1
+ARG GO_VERSION=1.17.1
 
-# Start from golang v1.15,6 base image
+# Start from golang v1.17.1 base image
 FROM golang:${GO_VERSION}-alpine AS builder
 
 # Create the user and group files that will be used in the running container to
@@ -32,10 +32,12 @@ FROM scratch AS final
 COPY --from=builder /user/group /user/passwd /etc/
 # Import the Certificate-Authority certificates for enabling HTTPS.
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+# Import the open api documentation file from builder stage
+COPY --chown=nobody:nobody --from=builder /src/swagger.yaml swagger.yaml
 # Import the compiled executable from the first stage.
 COPY --from=builder /app /app
 # importing seeder files from the first stage
-COPY --from=builder /src/infra/seed/* /infra/seed/
+COPY --from=builder /src/_fixture/seed/* /infra/seed/
 
 # Perform any further action as an unprivileged user.
 USER nobody:nobody

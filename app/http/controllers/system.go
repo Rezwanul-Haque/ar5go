@@ -1,9 +1,9 @@
 package controllers
 
 import (
-	"clean/app/svc"
-	"clean/infra/errors"
-	"clean/infra/logger"
+	"ar5go/app/svc"
+	"ar5go/infra/errors"
+	"ar5go/infra/logger"
 	"fmt"
 	"net/http"
 
@@ -11,12 +11,14 @@ import (
 )
 
 type system struct {
+	lc  logger.LogClient
 	svc svc.ISystem
 }
 
 // NewSystemController will initialize the controllers
-func NewSystemController(grp interface{}, sysSvc svc.ISystem) {
+func NewSystemController(grp interface{}, lc logger.LogClient, sysSvc svc.ISystem) {
 	pc := &system{
+		lc:  lc,
 		svc: sysSvc,
 	}
 
@@ -27,15 +29,20 @@ func NewSystemController(grp interface{}, sysSvc svc.ISystem) {
 }
 
 // Root will let you see what you can slash 🐲
-func (sh *system) Root(c echo.Context) error {
-	return c.JSON(http.StatusOK, map[string]interface{}{"message": "clean architecture backend! let's play!!"})
+func (ctr *system) Root(c echo.Context) error {
+	return c.JSON(http.StatusOK, map[string]interface{}{"message": "ar5go architecture backend! let's play!!"})
 }
 
+// swagger:route GET /v1/h34l7h Health will let you know the heart beats ❤️
+// Return a message
+// responses:
+//	200: genericSuccessResponse
+
 // Health will let you know the heart beats ❤️
-func (sys *system) Health(c echo.Context) error {
-	resp, err := sys.svc.GetHealth()
+func (ctr *system) Health(c echo.Context) error {
+	resp, err := ctr.svc.GetHealth()
 	if err != nil {
-		logger.Error(fmt.Sprintf("%+v", resp), err)
+		ctr.lc.Error(fmt.Sprintf("%+v", resp), err)
 		return c.JSON(http.StatusInternalServerError, errors.ErrSomethingWentWrong)
 	}
 	return c.JSON(http.StatusOK, resp)

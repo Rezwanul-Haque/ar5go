@@ -1,9 +1,9 @@
 package svc
 
 import (
-	"clean/app/domain"
-	"clean/app/serializers"
-	"clean/infra/errors"
+	"ar5go/app/domain"
+	"ar5go/app/serializers"
+	"ar5go/infra/errors"
 )
 
 type IPermissions interface {

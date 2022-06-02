@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	server "clean/app/http"
+	server "ar5go/app/http"
 
 	"github.com/spf13/cobra"
 )

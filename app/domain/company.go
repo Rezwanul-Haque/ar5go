@@ -1,11 +1,17 @@
 package domain
 
 import (
+	"ar5go/infra/errors"
 	"time"
 )
 
+type ICompany interface {
+	SaveCompany(company *Company) (*Company, *errors.RestErr)
+	GetCompany(companyID uint) (*Company, *errors.RestErr)
+}
+
 type Company struct {
-	ID            uint       `json:"-"`
+	ID            uint       `json:"id"`
 	Name          string     `json:"name"`
 	Logo          string     `json:"logo"`
 	Address       string     `json:"address"`

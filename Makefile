@@ -1,8 +1,8 @@
-PROJECT_NAME := clean
+PROJECT_NAME := ar5go
 PKG_LIST := $(shell go list ${PROJECT_NAME}/... | grep -v /vendor/)
 
 
-.PHONY: all dep build clean test
+.PHONY: all dep build ar5go test
 
 all: build
 
@@ -13,7 +13,13 @@ help: ## Display this help screen
 ########################
 ### DEVELOP and TEST ###
 ########################
-development:
+install-swagger:
+	which swagger || go install github.com/go-swagger/go-swagger/cmd/swagger
+
+swagger: install-swagger
+	swagger generate spec -o ./swagger.yaml --scan-models
+
+development: swagger
 	# booting up dependency containers
 	@docker-compose up -d consul db redis
 
@@ -23,7 +29,7 @@ development:
 	# setting KV, dependency of app
 	@curl --request PUT --data-binary @config.local.json http://localhost:8500/v1/kv/${PROJECT_NAME}
 
-	# building clean
+	# building ar5go
 	@docker-compose up --build ${PROJECT_NAME}
 
 test: ## Run unittests
@@ -32,7 +38,7 @@ test: ## Run unittests
 coverage: ## Generate global code coverage report
 	@go tool cover -func=cov.out
 
-clean: ## Remove previous build
+ar5go: ## Remove previous build
 	@rm -f $(PROJECT_NAME)
 	@docker-compose down
 

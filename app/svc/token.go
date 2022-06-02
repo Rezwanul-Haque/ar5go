@@ -1,7 +1,7 @@
 package svc
 
 import (
-	"clean/app/serializers"
+	"ar5go/app/serializers"
 )
 
 type IToken interface {

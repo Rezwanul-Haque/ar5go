@@ -1,15 +1,17 @@
 package impl
 
 import (
-	"clean/app/domain"
-	"clean/app/repository"
-	"clean/app/serializers"
-	"clean/app/svc"
-	"clean/app/utils/methodsutil"
-	"clean/app/utils/msgutil"
-	"clean/infra/config"
-	"clean/infra/errors"
-	"clean/infra/logger"
+	"ar5go/app/domain"
+	"ar5go/app/repository"
+	"ar5go/app/serializers"
+	"ar5go/app/svc"
+	"ar5go/app/utils/methodsutil"
+	"ar5go/app/utils/msgutil"
+	"ar5go/infra/config"
+	"ar5go/infra/conn/cache"
+	"ar5go/infra/errors"
+	"ar5go/infra/logger"
+	"context"
 	"strconv"
 
 	"github.com/dgrijalva/jwt-go"
@@ -17,19 +19,21 @@ import (
 )
 
 type users struct {
+	ctx   context.Context
+	lc    logger.LogClient
 	urepo repository.IUsers
-	rSvc  svc.ICache
 }
 
-func NewUsersService(urepo repository.IUsers, rSvc svc.ICache) svc.IUsers {
+func NewUsersService(ctx context.Context, lc logger.LogClient, urepo repository.IUsers) svc.IUsers {
 	return &users{
+		ctx:   ctx,
+		lc:    lc,
 		urepo: urepo,
-		rSvc:  rSvc,
 	}
 }
 
 func (u *users) CreateAdminUser(user domain.User) (*domain.User, *errors.RestErr) {
-	resp, saveErr := u.urepo.Save(&user)
+	resp, saveErr := u.urepo.SaveUser(&user)
 	if saveErr != nil {
 		return nil, saveErr
 	}
@@ -37,7 +41,7 @@ func (u *users) CreateAdminUser(user domain.User) (*domain.User, *errors.RestErr
 }
 
 func (u *users) CreateUser(user domain.User) (*domain.User, *errors.RestErr) {
-	resp, saveErr := u.urepo.Save(&user)
+	resp, saveErr := u.urepo.SaveUser(&user)
 	if saveErr != nil {
 		return nil, saveErr
 	}
@@ -73,13 +77,13 @@ func (u *users) UpdateUser(userID uint, req serializers.UserReq) *errors.RestErr
 
 	err := methodsutil.StructToStruct(req, &user)
 	if err != nil {
-		logger.Error(msgutil.EntityStructToStructFailedMsg("update user"), err)
+		u.lc.Error(msgutil.EntityStructToStructFailedMsg("update user"), err)
 		return errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 	}
 
 	user.ID = userID
 
-	if updateErr := u.urepo.Update(&user); updateErr != nil {
+	if updateErr := u.urepo.UpdateUser(&user); updateErr != nil {
 		return updateErr
 	}
 
@@ -91,12 +95,12 @@ func (u *users) UpdateUser(userID uint, req serializers.UserReq) *errors.RestErr
 }
 
 func (u *users) GetUserByCompanyIdAndRole(companyID, roleID uint,
-	pagination *serializers.Pagination) (*serializers.Pagination, int64, *errors.RestErr) {
+	filters *serializers.ListFilters) (*serializers.ListFilters, *errors.RestErr) {
 
 	var resp serializers.ResolveUserResponse
-	users, totalPages, err := u.urepo.GetUsersByCompanyIdAndRole(companyID, roleID, pagination)
+	users, err := u.urepo.GetUsersByCompanyIdAndRole(companyID, roleID, filters)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 
 	resp.CompanyID = users[0].CompanyID
@@ -106,13 +110,13 @@ func (u *users) GetUserByCompanyIdAndRole(companyID, roleID uint,
 	if users[0].ID > 0 {
 		err := methodsutil.StructToStruct(users, &resp.Subordinates)
 		if err != nil {
-			logger.Error(msgutil.EntityStructToStructFailedMsg("get users by company id"), err)
-			return nil, 0, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
+			u.lc.Error(msgutil.EntityStructToStructFailedMsg("get users by company id"), err)
+			return nil, errors.NewInternalServerError(errors.ErrSomethingWentWrong)
 		}
 	}
 
-	pagination.Rows = resp
-	return pagination, totalPages, nil
+	filters.Results = resp
+	return filters, nil
 }
 
 func (u *users) ChangePassword(id int, data *serializers.ChangePasswordReq) error {
@@ -123,7 +127,7 @@ func (u *users) ChangePassword(id int, data *serializers.ChangePasswordReq) erro
 
 	currentPass := []byte(*user.Password)
 	if err := bcrypt.CompareHashAndPassword(currentPass, []byte(data.OldPassword)); err != nil {
-		logger.Error(msgutil.EntityGenericFailedMsg("comparing hash and old password"), err)
+		u.lc.Error(msgutil.EntityGenericFailedMsg("comparing hash and old password"), err)
 		return errors.ErrInvalidPassword
 	}
 
@@ -157,12 +161,12 @@ func (u *users) ForgotPassword(email string) error {
 	signedToken, err := token.SignedString([]byte(secret))
 
 	if err != nil {
-		logger.Error("error occur when getting complete signed token", err)
+		u.lc.Error("error occur when getting complete signed token", err)
 		return err
 	}
 
 	// TODO: Send Mail
-	logger.Info(signedToken)
+	u.lc.Info(signedToken)
 	// fpassReq := &serializers.ForgetPasswordMailReq{
 	// 	To:     user.Email,
 	// 	UserID: user.ID,
@@ -186,7 +190,7 @@ func (u *users) VerifyResetPassword(req *serializers.VerifyResetPasswordReq) err
 
 	parsedToken, err := methodsutil.ParseJwtToken(req.Token, secret)
 	if err != nil {
-		logger.Error("error occur when parse jwt token with secret", err)
+		u.lc.Error("error occur when parse jwt token with secret", err)
 		return errors.ErrParseJwt
 	}
 
@@ -218,11 +222,12 @@ func (u *users) ResetPassword(req *serializers.ResetPasswordReq) error {
 }
 
 func (u *users) deleteUserCache(userID int) error {
-	if err := u.rSvc.Del(
-		config.Redis().UserPrefix+strconv.Itoa(userID),
-		config.Redis().TokenPrefix+strconv.Itoa(userID),
+	if err := cache.Client().Del(
+		u.ctx,
+		config.Cache().Redis.UserPrefix+strconv.Itoa(userID),
+		config.Cache().Redis.TokenPrefix+strconv.Itoa(userID),
 	); err != nil {
-		logger.Error("error occur when deleting cached user after user update", err)
+		u.lc.Error("error occur when deleting cached user after user update", err)
 		return err
 	}
 

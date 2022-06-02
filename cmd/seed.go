@@ -1,8 +1,12 @@
 package cmd
 
 import (
-	"clean/infra/conn"
-	"clean/infra/logger"
+	"ar5go/infra/conn/db"
+	"ar5go/infra/conn/db/seeder"
+	"ar5go/infra/logger"
+
+	//"ar5go/infra/conn/db/seeder"
+	//"ar5go/infra/logger"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -12,22 +16,23 @@ var truncate bool
 
 var seedCmd = &cobra.Command{
 	Use:   "seed",
-	Short: "Prepopulate data",
-	Long:  `prepopulate roles, permissions, role_premissions data into mysql`,
+	Short: "Pre populate data",
+	Long:  `Pre populate roles, permissions, role_permissions data into mysql`,
 	Run:   seed,
 }
 
 func seed(cmd *cobra.Command, args []string) {
 	// seed roles, permissions, role_permissions
-	conn.ConnectDb()
+	lc := logger.Client()
+	db.NewDbClient(lc)
+	dbc := db.Client()
 
-	db := conn.Db()
 	truncate, _ = cmd.Flags().GetBool("truncate")
 	fmt.Println("truncate=", truncate)
 
-	for _, seed := range conn.SeedAll() {
-		if err := seed.Run(db, truncate); err != nil {
-			logger.Error(fmt.Sprintf("Running seed '%s', failed with error:", seed.Name), err)
+	for _, seed := range seeder.SeedAll() {
+		if err := seed.Run(dbc, truncate); err != nil {
+			lc.Error(fmt.Sprintf("Running seed '%s', failed with error:", seed.Name), err)
 		}
 	}
 }

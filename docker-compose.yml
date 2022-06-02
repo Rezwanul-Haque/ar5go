@@ -6,70 +6,75 @@ services:
     container_name: consul_dev
     restart: always
     ports:
-      - 8500:8500
+      - "8500:8500"
     networks:
-      - clean_networks
+      - ar5go_networks
 
   db:
-    container_name: clean_mysql
+    container_name: ar5go_mysql
     build:
       context: .
       dockerfile: Dockerfile.db
     ports:
-      - 3309:3306
+      - "3309:3306"
     volumes:
-      - clean_db:/var/lib/mysql:rw
+      - ar5go_db:/var/lib/mysql:rw
     environment:
-      - MYSQL_USER=clean_user
+      - MYSQL_USER=ar5go_user
       - MYSQL_PASSWORD=12345678
-      - MYSQL_DATABASE=clean_db
+      - MYSQL_DATABASE=ar5go_db
       - MYSQL_ROOT_PASSWORD=12345678
     tty: true
     networks:
-      - clean_networks
+      - ar5go_networks
 
   redis:
     image: 'bitnami/redis:6.0.9'
     container_name: redis_dev
     restart: always
     ports:
-      - 6390:6379
+      - "6390:6379"
     environment:
       - DISABLE_COMMANDS=FLUSHDB,FLUSHALL,CONFIG
       - REDIS_PASSWORD=password123
     volumes:
-      - clean_cache:/bitnami/redis/data:rw
+      - ar5go_cache:/bitnami/redis/data:rw
     networks:
-      - clean_networks
+      - ar5go_networks
 
-  clean:
-    container_name: clean
+  ar5go:
+    container_name: ar5go
     build:
       context: .
     ports:
-      - 8080:8080
+      - "8080:8080"
     command: serve  # make `serve` into `seed` or `seed --truncate=true` if anyone want to run the seeder
     volumes:
       - ./:/project
     environment:
       - CONSUL_URL=consul_dev:8500
-      - CONSUL_PATH=clean
+      - CONSUL_PATH=ar5go
     tty: true
     depends_on:
       - consul
       - db
       - redis
     networks:
-      - clean_networks
-    restart: on-failure:3
+      - ar5go_networks
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
 networks:
-  clean_networks:
-    name: clean_networks
+  ar5go_networks:
+    name: ar5go_networks
     driver: bridge
 
 volumes:
-  clean_db:
-    name: db-data
-  clean_cache:
-    name: redis-persistence
+  ar5go_db:
+    name: ar5godb-data
+  ar5go_cache:
+    name: ar5gocache-data

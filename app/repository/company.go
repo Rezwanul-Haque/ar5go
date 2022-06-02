@@ -1,11 +1,9 @@
 package repository
 
 import (
-	"clean/app/domain"
-	"clean/infra/errors"
+	"ar5go/app/domain"
 )
 
 type ICompany interface {
-	Save(company *domain.Company) (*domain.Company, *errors.RestErr)
-	Get(companyID uint) (*domain.Company, *errors.RestErr)
+	domain.ICompany
 }

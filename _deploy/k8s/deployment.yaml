@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ar5go
+  name: ar5go
+  namespace: ar5go
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ar5go
+  template:
+    metadata:
+      labels:
+        app: ar5go
+    spec:
+      containers:
+      - env:
+        - name: CONSUL_URL
+          value: consul.consul:8500
+        - name: CONSUL_PATH
+          value: ar5go
+        image: <docker-registry-path>/ar5go:qa1.0.0
+        imagePullPolicy: Always
+        name: ar5go
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        args:
+          - "serve"
+      imagePullSecrets:
+      - name: <ns-specific-k8s-secret>

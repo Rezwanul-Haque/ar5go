@@ -1,42 +1,60 @@
 package logger
 
 import (
+	"strings"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-var (
-	log *zap.Logger
-)
-
-func init() {
-	logConfig := zap.Config{
-		OutputPaths: []string{"stdout"},
-		Level:       zap.NewAtomicLevelAt(zap.InfoLevel),
-		Encoding:    "json",
-		EncoderConfig: zapcore.EncoderConfig{
-			LevelKey:     "level",
-			TimeKey:      "time",
-			MessageKey:   "msg",
-			EncodeTime:   zapcore.ISO8601TimeEncoder,
-			EncodeLevel:  zapcore.LowercaseLevelEncoder,
-			EncodeCaller: zapcore.ShortCallerEncoder,
-		},
-	}
-
-	var err error
-	if log, err = logConfig.Build(); err != nil {
-		panic(err)
-	}
+func (lc LogClient) Debug(msg string, data interface{}) {
+	var tags []zap.Field
+	tags = append(tags, zap.Any("data", data))
+	lc.Logger.Debug(msg, tags...)
+	_ = lc.Logger.Sync()
 }
 
-func Info(msg string, tags ...zap.Field) {
-	log.Info(msg, tags...)
-	_ = log.Sync()
-}
-
-func Error(msg string, err error, tags ...zap.Field) {
+func (lc LogClient) Error(msg string, err error) {
+	var tags []zap.Field
 	tags = append(tags, zap.NamedError("error", err))
-	log.Error(msg, tags...)
-	_ = log.Sync()
+	lc.Logger.Error(msg, tags...)
+	_ = lc.Logger.Sync()
+}
+
+func (lc LogClient) Info(msg string) {
+	lc.Logger.Info(msg)
+	_ = lc.Logger.Sync()
+}
+
+func (lc LogClient) Warn(msg string) {
+	lc.Logger.Warn(msg)
+	_ = lc.Logger.Sync()
+}
+
+func (lc LogClient) Fatal(msg string) {
+	lc.Logger.Fatal(msg)
+	_ = lc.Logger.Sync()
+}
+
+func (lc LogClient) Panic(msg string) {
+	lc.Logger.Panic(msg)
+	_ = lc.Logger.Sync()
+}
+
+func stringToLevel(str string) zap.AtomicLevel {
+	str = strings.ToLower(str)
+	switch str {
+	case "debug":
+		return zap.NewAtomicLevelAt(zapcore.DebugLevel)
+	case "error":
+		return zap.NewAtomicLevelAt(zapcore.ErrorLevel)
+	case "fatal":
+		return zap.NewAtomicLevelAt(zapcore.FatalLevel)
+	case "warn":
+		return zap.NewAtomicLevelAt(zapcore.WarnLevel)
+	case "info":
+		return zap.NewAtomicLevel()
+	default:
+		return zap.NewAtomicLevelAt(zapcore.PanicLevel)
+	}
 }

@@ -1,12 +1,13 @@
 package middlewares
 
 import (
-	"clean/app/serializers"
-	"clean/app/utils/methodsutil"
-	conf "clean/infra/config"
-	"clean/infra/conn"
-	"clean/infra/errors"
-	"clean/infra/logger"
+	"ar5go/app/serializers"
+	"ar5go/app/utils/methodsutil"
+	conf "ar5go/infra/config"
+	"ar5go/infra/conn/cache"
+	"ar5go/infra/errors"
+	"ar5go/infra/logger"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -131,12 +132,12 @@ func DefaultSkipper(echo.Context) bool {
 func JWT(key interface{}) echo.MiddlewareFunc {
 	c := DefaultJWTConfig
 	c.SigningKey = key
-	return JWTWithConfig(c)
+	return JWTWithConfig(c, nil)
 }
 
 // JWTWithConfig returns a JWT auth middleware with config.
 // See: `JWT()`.
-func JWTWithConfig(config JWTConfig) echo.MiddlewareFunc {
+func JWTWithConfig(config JWTConfig, lc *logger.LogClient) echo.MiddlewareFunc {
 	// Defaults
 	if config.Skipper == nil {
 		config.Skipper = DefaultJWTConfig.Skipper
@@ -226,7 +227,7 @@ func JWTWithConfig(config JWTConfig) echo.MiddlewareFunc {
 
 			tokenDetails := &serializers.JwtToken{}
 			if err := methodsutil.MapToStruct(claims, tokenDetails); err != nil {
-				logger.Error(err.Error(), err)
+				lc.Error(err.Error(), err)
 				return ErrJWTMissing
 			}
 
@@ -234,26 +235,27 @@ func JWTWithConfig(config JWTConfig) echo.MiddlewareFunc {
 			var redisUser string
 			var redisUserDetail string
 			user := &serializers.UserWithParamsResp{}
+			ctx := context.Background()
 
 			// Check if access_uuid corresponds to user_id in Redis
-			if !methodsutil.IsEmpty(conf.Redis().AccessUuidPrefix + tokenDetails.AccessUuid) {
-				redisUser, _ = conn.Redis().Get(conf.Redis().AccessUuidPrefix + tokenDetails.AccessUuid).Result()
+			if !methodsutil.IsEmpty(conf.Cache().Redis.AccessUuidPrefix + tokenDetails.AccessUuid) {
+				redisUser, _ = cache.Client().Get(ctx, conf.Cache().Redis.AccessUuidPrefix+tokenDetails.AccessUuid)
 				redisUserId, err = strconv.Atoi(redisUser)
-				cuID, _ := strconv.Atoi((strconv.Itoa(int(tokenDetails.UserID)) + strconv.Itoa(int(tokenDetails.CompanyID))))
+				cuID, _ := strconv.Atoi(strconv.Itoa(int(tokenDetails.UserID)) + strconv.Itoa(int(tokenDetails.CompanyID)))
 				if err != nil || redisUserId != cuID {
-					logger.Error(fmt.Sprintf("redis user: %v | token user: %v | error: ", redisUserId, tokenDetails.UserID), err)
+					lc.Error(fmt.Sprintf("redis user: %v | token user: %v | error: ", redisUserId, tokenDetails.UserID), err)
 					return ErrJWTMissing
 				}
 			} else {
 				return errors.ErrEmptyRedisKeyValue
 			}
 
-			if !methodsutil.IsEmpty(conf.Redis().UserPrefix + strconv.Itoa(int(tokenDetails.UserID)) + strconv.Itoa(int(tokenDetails.CompanyID))) {
-				key := conf.Redis().UserPrefix + strconv.Itoa(int(tokenDetails.UserID)) + strconv.Itoa(int(tokenDetails.CompanyID))
-				redisUserDetail, _ = conn.Redis().Get(key).Result()
+			if !methodsutil.IsEmpty(conf.Cache().Redis.UserPrefix + strconv.Itoa(int(tokenDetails.UserID)) + strconv.Itoa(int(tokenDetails.CompanyID))) {
+				key := conf.Cache().Redis.UserPrefix + strconv.Itoa(int(tokenDetails.UserID)) + strconv.Itoa(int(tokenDetails.CompanyID))
+				redisUserDetail, _ = cache.Client().Get(ctx, key)
 
 				if err = json.Unmarshal([]byte(redisUserDetail), &user); err != nil {
-					logger.Error(err.Error(), err)
+					lc.Error(err.Error(), err)
 					return ErrJWTMissing
 				}
 			} else {

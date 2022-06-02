@@ -1,58 +1,38 @@
-package impl
+package db
 
 import (
-	"clean/app/serializers"
-	"clean/app/utils/methodsutil"
+	"ar5go/app/serializers"
+	"ar5go/app/utils/methodsutil"
 	"fmt"
-	"math"
-	"strings"
-
 	"gorm.io/gorm"
+	"strings"
 )
 
-func CalculateTotalPageAndRows(pagination *serializers.Pagination, totalRows int64) int64 {
-	var totalPages, fromRow, toRow int64 = 0, 0, 0
-
-	// calculate total pages
-	totalPages = int64(math.Ceil(float64(totalRows)/float64(pagination.Limit))) - 1
-
-	if pagination.Page == 1 {
-		// set from & to row on first page
-		fromRow = 1
-		toRow = pagination.Limit
-	} else {
-		if pagination.Page <= totalPages {
-			// calculate from & to row
-			fromRow = pagination.Page*pagination.Limit + 1
-			toRow = (pagination.Page + 1) * pagination.Limit
-		}
-	}
-
-	if toRow > totalRows {
-		// set to row with total rows
-		toRow = totalRows
-	}
-
-	pagination.FromRow = fromRow
-	pagination.ToRow = toRow
-
-	return totalPages
+func TransactionStart() *gorm.DB {
+	return Client().DB.Begin()
 }
 
-func GenerateFilteringCondition(r *gorm.DB, tableName string, pagination *serializers.Pagination) *gorm.DB {
-	offset := (pagination.Page - 1) * pagination.Limit
-	var sort string
+func TransactionComplete(tx interface{}) {
+	tx.(*gorm.DB).Commit()
+}
 
-	sort = pagination.Sort
+func applyFilteringCondition(stmt *gorm.DB, tableName string, filters *serializers.ListFilters, forCount bool) *gorm.DB {
+	offset := (filters.Page - 1) * filters.Size
+	sort := filters.Sort
 
 	if !methodsutil.IsEmpty(tableName) {
-		sort = tableName + "." + pagination.Sort
+		sort = tableName + "." + filters.Sort
 	}
+
+	find := stmt
+
 	// get data with limit, offset & order
-	find := r.Limit(int(pagination.Limit)).Offset(int(offset)).Order(sort)
+	if !forCount {
+		find = stmt.Limit(int(filters.Size)).Offset(int(offset)).Order(sort)
+	}
 
 	// generate where query
-	searches := pagination.Searches
+	searches := filters.Searches
 
 	if searches != nil {
 		for _, value := range searches {
@@ -73,7 +53,7 @@ func GenerateFilteringCondition(r *gorm.DB, tableName string, pagination *serial
 				find = find.Where(whereQuery, "%"+query+"%")
 			case "in":
 				whereQuery := fmt.Sprintf("%s IN (?)", column)
-				queryArray := strings.Split(query, ",")
+				queryArray := methodsutil.StringToIntArray(strings.Split(query, ","))
 				find = find.Where(whereQuery, queryArray)
 			case "gt":
 				whereQuery := fmt.Sprintf("%s > (?)", column)
@@ -96,4 +76,11 @@ func GenerateFilteringCondition(r *gorm.DB, tableName string, pagination *serial
 	}
 
 	return find
+}
+
+func applyQueryStringSearch(stmt *gorm.DB, searchStmt, qs string) *gorm.DB {
+	searchTerm := "%" + qs + "%"
+	stmt.Where(searchStmt, map[string]interface{}{"st": searchTerm})
+
+	return stmt
 }

@@ -1,8 +1,12 @@
 package middlewares
 
 import (
-	"clean/infra/config"
+	"ar5go/infra/config"
+	"ar5go/infra/logger"
+	"net/http"
 
+	openMiddleware "github.com/go-openapi/runtime/middleware"
+	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -10,7 +14,7 @@ import (
 const EchoLogFormat = "time: ${time_rfc3339_nano} || ${method}: ${uri} || status: ${status} || latency: ${latency_human} \n"
 
 // Attach middlewares required for the application, eg: sentry, newrelic etc.
-func Attach(e *echo.Echo) error {
+func Attach(e *echo.Echo, lc logger.LogClient) error {
 	// remove trailing slashes from each requests
 	e.Pre(middleware.RemoveTrailingSlash())
 
@@ -46,7 +50,43 @@ func Attach(e *echo.Echo) error {
 		},
 		SigningKey: []byte(config.Jwt().AccessTokenSecret),
 		ContextKey: config.Jwt().ContextKey,
-	}))
+	}, &lc))
 
 	return nil
+}
+
+// PrometheusMonitor will start a middleware which will be
+// exposed /metrics handler to be used by prometheus
+func PrometheusMonitor(e *echo.Echo) {
+	e.HideBanner = true
+	prom := prometheus.NewPrometheus("ar5go", nil)
+
+	// Scrape metrics from Main Server
+	e.Use(prom.HandlerFunc)
+	// Setup metrics endpoint at application server
+	prom.SetMetricsPath(e)
+}
+
+func SwaggerDocs() http.Handler {
+	opts := openMiddleware.SwaggerUIOpts{
+		Path:    "docs/swagger",
+		SpecURL: "/swagger.yaml",
+	}
+	return openMiddleware.SwaggerUI(opts, nil)
+}
+
+func ReDocDocs() http.Handler {
+	opts := openMiddleware.RedocOpts{
+		Path:    "docs/redoc",
+		SpecURL: "/swagger.yaml",
+	}
+	return openMiddleware.Redoc(opts, nil)
+}
+
+func RapiDocs() http.Handler {
+	opts := openMiddleware.RapiDocOpts{
+		Path:    "docs/rapidoc",
+		SpecURL: "/swagger.yaml",
+	}
+	return openMiddleware.RapiDoc(opts, nil)
 }
