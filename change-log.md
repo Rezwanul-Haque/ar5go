@@ -2,6 +2,12 @@
 - None
 
 ***
+## [1.1.1] - 03-06-2022
+### Changed
+- dependent packages update to latest versions
+- swagger doc updated
+
+***
 ## [1.1.0] - 12-03-2022
 ### Added
 - k8s deployment & service file added

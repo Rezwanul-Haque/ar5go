@@ -33,7 +33,11 @@ func Attach(e *echo.Echo, lc logger.LogClient) error {
 	e.Use(JWTWithConfig(JWTConfig{
 		Skipper: func(context echo.Context) bool {
 			switch context.Request().URL.Path {
-			case "/api/metrics",
+			case "/swagger.yaml",
+				"/docs/rapidoc",
+				"/docs/redoc",
+				"/docs/swagger",
+				"/api/metrics",
 				"/api/v1",
 				"/api/v1/h34l7h",
 				"/api/v1/login",
