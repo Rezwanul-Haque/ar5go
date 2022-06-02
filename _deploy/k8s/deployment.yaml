@@ -21,7 +21,7 @@ spec:
           value: consul.consul:8500
         - name: CONSUL_PATH
           value: ar5go
-        image: <docker-registry-path>/ar5go:qa1.0.0
+        image: <docker-registry-path>/ar5go:1.1.0
         imagePullPolicy: Always
         name: ar5go
         ports:

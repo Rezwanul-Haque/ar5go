@@ -5,7 +5,7 @@
 //     Schemes: http
 //     Host: localhost:8080
 //     BasePath: /api
-//     Version: 1.0.0
+//     Version: v1.0.0
 //     License: None
 //     Contact: Rezwanul-Haque<rezwanul.cse@gmail.com>
 //
@@ -27,6 +27,7 @@
 package openapi
 
 import (
+	"ar5go/app/serializers"
 	"ar5go/infra/errors"
 )
 
@@ -39,6 +40,7 @@ type errorResponseWrapper struct {
 }
 
 type genericSuccessResponse struct {
+	// example: resource created
 	Message string `json:"message"`
 }
 
@@ -49,14 +51,7 @@ type genericSuccessResponseWrapper struct {
 	genericSuccessResponse `json:"message"`
 }
 
-// Payload for company
-// swagger:parameters CreateCompany
-type companyPayloadWrapper struct {
-	// in:body
-	Body interface{}
-}
-
-// List all the users of a company
+// Fetch users request query params
 // swagger:parameters UserQueryParameters
 type usersQueryParametersWrapper struct {
 	// in:query
@@ -72,9 +67,30 @@ type usersQueryParametersWrapper struct {
 	ColumnOperation string `json:"column:operation"`
 }
 
-// List all the users
+// Payload for create a user
+// swagger:parameters CreateUser
+type userPayloadWrapper struct {
+	// in:body
+	Body serializers.UserReq
+}
+
+// response after a user created
+// swagger:response UserCreatedResponse
+type userCreateRespWrapper struct {
+	// in:body
+	Body serializers.UserResp
+}
+
+// List all the users of a company
 // swagger:response UserResponse
 type usersRespWrapper struct {
 	// in:body
-	Body interface{}
+	Body serializers.ListFilters
+}
+
+// Payload for create a company
+// swagger:parameters CreateCompany
+type companyPayloadWrapper struct {
+	// in:body
+	Body serializers.CompanyReq
 }

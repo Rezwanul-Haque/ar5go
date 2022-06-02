@@ -44,6 +44,23 @@ func NewUsersController(grp interface{}, lc logger.LogClient, cSvc svc.ICompany,
 	g.POST("/v1/password/reset", uc.ResetPassword)
 }
 
+// swagger:route POST /v1/user/signup User CreateUser
+// Create a new user
+// responses:
+//	201: UserCreatedResponse
+//	400: errorResponse
+//	404: errorResponse
+//	500: errorResponse
+//     Security:
+//     - base64
+//
+//     SecurityDefinitions:
+//     base64:
+//          type: apiKey
+//          name: appKey
+//          in: header
+
+// Create handles POST requests and create a new sales user
 func (ctr *users) Create(c echo.Context) error {
 	foundUser, getErr := GetUserByAppKey(c, ctr.uSvc)
 	if getErr != nil {
@@ -75,6 +92,23 @@ func (ctr *users) Create(c echo.Context) error {
 	return c.JSON(http.StatusCreated, resp)
 }
 
+// swagger:route POST /v1/user/resolve User UserQueryParameters
+// Fetch all the user of a company
+// responses:
+//	200: UserResponse
+//	400: errorResponse
+//	404: errorResponse
+//	500: errorResponse
+//     Security:
+//     - base64
+//
+//     SecurityDefinitions:
+//     base64:
+//          type: apiKey
+//          name: appKey
+//          in: header
+
+// GetAll handles GET requests and fetch all the which belong in a company using appKey
 func (ctr *users) GetAll(c echo.Context) error {
 	foundUser, getErr := GetUserByAppKey(c, ctr.uSvc)
 	if getErr != nil {

@@ -18,11 +18,18 @@ func Start() {
 	lc := logger.Client()
 
 	if err := middlewares.Attach(e, lc); err != nil {
-		logger.Client().Error("error occur when attaching middlewares", err)
+		logger.Client().Error("error occurred when attaching middlewares", err)
 		os.Exit(1)
 	}
 
-	// Create Prometheus server and Middleware
+	// routes for documentation
+	dg := e.Group("docs")
+	dg.GET("/swagger", echo.WrapHandler(middlewares.SwaggerDocs()))
+	dg.GET("/redoc", echo.WrapHandler(middlewares.ReDocDocs()))
+	dg.GET("/rapidoc", echo.WrapHandler(middlewares.RapiDocs()))
+	e.File("/swagger.yaml", "./swagger.yaml")
+
+	// Create a new Prometheus server for metrics using Prometheus Middleware
 	echoProm := echo.New()
 
 	middlewares.PrometheusMonitor(echoProm)

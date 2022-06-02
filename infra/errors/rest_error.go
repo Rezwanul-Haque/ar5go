@@ -33,9 +33,12 @@ var (
 )
 
 type RestErr struct {
+	// example: error message
 	Message string `json:"message"`
-	Status  int    `json:"status"`
-	Error   string `json:"error"`
+	// example: 400
+	Status int `json:"status"`
+	// example: bad_request
+	Error string `json:"error"`
 }
 
 func NewError(msg string) error {

@@ -2,20 +2,199 @@ basePath: /api
 consumes:
 - application/json
 definitions:
+  CompanyReq:
+    properties:
+      address:
+        type: string
+        x-go-name: Address
+      business_id:
+        format: uint64
+        type: integer
+        x-go-name: BusinessID
+      email:
+        type: string
+        x-go-name: Email
+      logo:
+        type: string
+        x-go-name: Logo
+      name:
+        type: string
+        x-go-name: Name
+      num_of_employee:
+        format: uint64
+        type: integer
+        x-go-name: NumOfEmployee
+      password:
+        type: string
+        x-go-name: Password
+      phone:
+        type: string
+        x-go-name: Phone
+      sns_link:
+        type: string
+        x-go-name: SnsLink
+      user_name:
+        type: string
+        x-go-name: UserName
+    type: object
+    x-go-package: ar5go/app/serializers
+  ListFilters:
+    properties:
+      first_page:
+        type: string
+        x-go-name: FirstPage
+      from_row:
+        format: int64
+        type: integer
+        x-go-name: FromRow
+      last_page:
+        type: string
+        x-go-name: LastPage
+      next_page:
+        type: string
+        x-go-name: NextPage
+      page:
+        format: int64
+        type: integer
+        x-go-name: Page
+      previous_page:
+        type: string
+        x-go-name: PreviousPage
+      qs:
+        type: string
+        x-go-name: QueryString
+      results:
+        type: object
+        x-go-name: Results
+      search:
+        items:
+          $ref: '#/definitions/Search'
+        type: array
+        x-go-name: Searches
+      size:
+        format: int64
+        type: integer
+        x-go-name: Size
+      sort:
+        type: string
+        x-go-name: Sort
+      to_row:
+        format: int64
+        type: integer
+        x-go-name: ToRow
+      total_pages:
+        format: int64
+        type: integer
+        x-go-name: TotalPages
+      total_rows:
+        format: int64
+        type: integer
+        x-go-name: TotalRows
+    type: object
+    x-go-package: ar5go/app/serializers
   RestErr:
     properties:
       error:
+        example: bad_request
         type: string
         x-go-name: Error
       message:
+        example: error message
         type: string
         x-go-name: Message
       status:
+        example: 400
         format: int64
         type: integer
         x-go-name: Status
     type: object
     x-go-package: ar5go/infra/errors
+  Search:
+    properties:
+      action:
+        type: string
+        x-go-name: Action
+      column:
+        type: string
+        x-go-name: Column
+      query:
+        type: string
+        x-go-name: Query
+    type: object
+    x-go-package: ar5go/app/serializers
+  UserReq:
+    properties:
+      company_id:
+        format: uint64
+        type: integer
+        x-go-name: CompanyID
+      email:
+        type: string
+        x-go-name: Email
+      first_name:
+        type: string
+        x-go-name: FirstName
+      last_name:
+        type: string
+        x-go-name: LastName
+      password:
+        type: string
+        x-go-name: Password
+      phone:
+        type: string
+        x-go-name: Phone
+      profile_pic:
+        type: string
+        x-go-name: ProfilePic
+      user_name:
+        type: string
+        x-go-name: UserName
+    type: object
+    x-go-package: ar5go/app/serializers
+  UserResp:
+    properties:
+      app_key:
+        type: string
+        x-go-name: AppKey
+      company_id:
+        format: uint64
+        type: integer
+        x-go-name: CompanyID
+      email:
+        type: string
+        x-go-name: Email
+      first_login:
+        type: boolean
+        x-go-name: FirstLogin
+      first_name:
+        type: string
+        x-go-name: FirstName
+      id:
+        format: int64
+        type: integer
+        x-go-name: ID
+      last_login_at:
+        format: date-time
+        type: string
+        x-go-name: LastLoginAt
+      last_name:
+        type: string
+        x-go-name: LastName
+      phone:
+        type: string
+        x-go-name: Phone
+      profile_pic:
+        type: string
+        x-go-name: ProfilePic
+      role_id:
+        format: uint64
+        type: integer
+        x-go-name: RoleID
+      user_name:
+        type: string
+        x-go-name: UserName
+    type: object
+    x-go-package: ar5go/app/serializers
 host: localhost:8080
 info:
   contact:
@@ -26,15 +205,120 @@ info:
   license:
     name: None
   title: ar5go system API.
-  version: 1.0.0
-paths: {}
+  version: v1.0.0
+paths:
+  /v1/company/signup:
+    post:
+      description: Create a new company
+      operationId: CreateCompany
+      parameters:
+      - in: body
+        name: Body
+        schema:
+          $ref: '#/definitions/CompanyReq'
+      responses:
+        "201":
+          $ref: '#/responses/genericSuccessResponse'
+        "400":
+          $ref: '#/responses/errorResponse'
+        "404":
+          $ref: '#/responses/errorResponse'
+        "500":
+          $ref: '#/responses/errorResponse'
+      tags:
+      - Company
+  /v1/user/resolve:
+    post:
+      description: Fetch all the user of a company
+      operationId: UserQueryParameters
+      parameters:
+      - example: 10
+        format: int64
+        in: query
+        name: size
+        type: integer
+        x-go-name: Size
+      - example: 2
+        format: int64
+        in: query
+        name: page
+        type: integer
+        x-go-name: Page
+      - example: created_at desc
+        in: query
+        name: sort
+        type: string
+        x-go-name: Sort
+      - example: rezwan
+        in: query
+        name: qs
+        type: string
+        x-go-name: QS
+      - example: user_id.(in, contains, equals, gt, gte, lt, lte)
+        in: query
+        name: column:operation
+        type: string
+        x-go-name: ColumnOperation
+      responses:
+        "200":
+          $ref: '#/responses/UserResponse'
+        "400":
+          $ref: '#/responses/errorResponse'
+        "404":
+          $ref: '#/responses/errorResponse'
+        "500":
+          $ref: '#/responses/errorResponse'
+      security:
+      - SecurityDefinitions: []
+      - base64: []
+      - type:
+        - apiKey
+      - name:
+        - appKey
+      - in:
+        - header
+      tags:
+      - User
+  /v1/user/signup:
+    post:
+      description: Create a new user
+      operationId: CreateUser
+      parameters:
+      - in: body
+        name: Body
+        schema:
+          $ref: '#/definitions/UserReq'
+      responses:
+        "201":
+          $ref: '#/responses/UserCreatedResponse'
+        "400":
+          $ref: '#/responses/errorResponse'
+        "404":
+          $ref: '#/responses/errorResponse'
+        "500":
+          $ref: '#/responses/errorResponse'
+      security:
+      - SecurityDefinitions: []
+      - base64: []
+      - type:
+        - apiKey
+      - name:
+        - appKey
+      - in:
+        - header
+      tags:
+      - User
 produces:
 - application/json
 responses:
-  UserResponse:
-    description: List all the users
+  UserCreatedResponse:
+    description: response after a user created
     schema:
-      type: object
+      $ref: '#/definitions/UserResp'
+  UserResponse:
+    description: List all the users of a company
+    schema:
+      $ref: '#/definitions/ListFilters'
   errorResponse:
     description: Generic error message
     schema:
@@ -43,6 +327,7 @@ responses:
     description: returns a message
     headers:
       message:
+        example: resource created
         type: string
 schemes:
 - http
