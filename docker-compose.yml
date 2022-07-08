@@ -68,6 +68,33 @@ services:
         max_attempts: 3
         window: 120s
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: ar5go_prom
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    depends_on:
+      - ar5go
+    networks:
+      - ar5go_networks
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: ar5go_grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
+    networks:
+      - ar5go_networks
+
 networks:
   ar5go_networks:
     name: ar5go_networks
@@ -78,3 +105,7 @@ volumes:
     name: ar5godb-data
   ar5go_cache:
     name: ar5gocache-data
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
